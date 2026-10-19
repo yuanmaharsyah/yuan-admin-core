@@ -80,7 +80,7 @@ final readonly class ModuleDefinition
             name: $name,
             slug: self::string($config, 'slug', $file, self::KEBAB, 'must be lowercase kebab-case'),
             label: self::string($config, 'label', $file, '/\S/', 'must not be empty'),
-            icon: self::string($config, 'icon', $file, self::KEBAB, 'must be a lowercase kebab-case lucide icon name'),
+            icon: self::icon($config['icon'], $file),
             group: $group,
             order: self::int($config, 'order', $file),
             enabled: $enabled,
@@ -125,6 +125,23 @@ final readonly class ModuleDefinition
         }
 
         return $value;
+    }
+
+    /**
+     * A name from resources/icons/lucide.json, generated from the installed
+     * lucide-react (`npm run icons`).
+     */
+    private static function icon(mixed $icon, string $file): string
+    {
+        /** @var list<string>|null $names */
+        static $names = null;
+        $names ??= json_decode((string) file_get_contents(dirname(__DIR__, 2).'/resources/icons/lucide.json'), true, flags: JSON_THROW_ON_ERROR);
+
+        if (! is_string($icon) || ! in_array($icon, $names, true)) {
+            throw InvalidModuleDefinition::rule($file, 'icon', 'must be a lucide icon name (resources/icons/lucide.json)');
+        }
+
+        return $icon;
     }
 
     /**

@@ -74,6 +74,14 @@ return [
         // Page name => replacement page name, for example Users::Index to
         // App::Users/Index (resources/js/pages/Users/Index.tsx in the project).
         'overrides' => [],
+
+        // Folder of the package's own `Core::` pages (auth, errors), as seen
+        // from the project, so Vite entries are relative to the project root.
+        'core_path' => base_path('vendor/yuan/admin-core/resources/js/pages'),
     ],
+
+    // A full-width notice under the topbar for every signed-in user; null hides
+    // it. Settings overrides it from Phase 07.
+    'maintenance_banner' => env('ADMIN_MAINTENANCE_BANNER'),
 
 ];

@@ -33,7 +33,7 @@ it('shares guest props', function (): void {
     AssertableInertia::fromTestResponse(get('/probe'))
         ->where('auth', ['user' => null, 'level' => null, 'is_super_admin' => false, 'permissions' => []])
         ->where('menu', [])
-        ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true]);
+        ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true, 'maintenance_banner' => null]);
 });
 
 it('shares only id, name and email of the user, and their menu', function (): void {
@@ -58,6 +58,16 @@ it('flags Super Admin', function (): void {
 it('reads the panel state from the admin_panel cookie', function (): void {
     AssertableInertia::fromTestResponse(withCookie('admin_panel', 'false')->get('/probe'))->where('app.panel_open', false);
 });
+
+it('shares the maintenance banner from config, and none when it is empty', function (?string $banner, ?string $shared): void {
+    config(['admin-core.maintenance_banner' => $banner]);
+
+    AssertableInertia::fromTestResponse(get('/probe'))->where('app.maintenance_banner', $shared);
+})->with([
+    'set' => ['Pemeliharaan sistem Sabtu 22.00–23.00 WIB.', 'Pemeliharaan sistem Sabtu 22.00–23.00 WIB.'],
+    'null' => [null, null],
+    'empty env value' => ['', null],
+]);
 
 it('shares only Data objects', function (): void {
     Gate::define('demo.view', fn (): bool => true);

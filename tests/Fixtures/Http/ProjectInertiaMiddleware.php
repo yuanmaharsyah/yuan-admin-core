@@ -15,7 +15,7 @@ final class ProjectInertiaMiddleware extends HandleInertiaRequests
     {
         return [
             ...parent::share($request),
-            'project' => fn (): AppData => new AppData(name: 'Project', locale: 'id', timezone: 'UTC', panel_open: true),
+            'project' => fn (): AppData => new AppData(name: 'Project', locale: 'id', timezone: 'UTC', panel_open: true, maintenance_banner: null),
         ];
     }
 }

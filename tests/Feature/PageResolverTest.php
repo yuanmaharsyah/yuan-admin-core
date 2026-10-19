@@ -25,6 +25,14 @@ it('gives the page file relative to the project root for Vite', function (): voi
     expect(app(PageResolver::class)->viteEntry('Demo::Index'))->toBe('Fixtures/Modules/Demo/resources/js/pages/Index.tsx');
 });
 
+it('resolves Core::Page to the package pages folder, case-exact and overridable', function (): void {
+    expect(app('inertia.view-finder')->find('Core::Errors/Probe'))->toBe(TestCase::FIXTURES.'/CorePages/Errors/Probe.tsx')
+        ->and(fn () => app('inertia.view-finder')->find('Core::errors/Probe'))->toThrow(InvalidArgumentException::class);
+
+    app()->setBasePath(dirname(TestCase::FIXTURES));
+    expect(app(PageResolver::class)->viteEntry('Core::Errors/Probe'))->toBe('Fixtures/CorePages/Errors/Probe.tsx');
+});
+
 it('renders a module page that exists', function (): void {
     AssertableInertia::fromTestResponse(actingAs(new GenericUser(['id' => 1]))->get('/admin/demo'))
         ->component('Demo::Index');

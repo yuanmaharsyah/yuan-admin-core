@@ -12,7 +12,8 @@ use Inertia\Inertia;
 /**
  * Server side of `{Name}::{Page}` (spec §3.2): each enabled module's
  * `resources/js/pages` becomes a namespace of Inertia's page finder, `App::`
- * points to the project's `resources/js/pages`, and `admin-core.pages.overrides`
+ * points to the project's `resources/js/pages`, `Core::` to the package's own
+ * pages (auth, errors), and `admin-core.pages.overrides`
  * renames pages before they are rendered.
  */
 final readonly class PageResolver
@@ -40,6 +41,7 @@ final readonly class PageResolver
 
         $finder = new CaseSensitiveViewFinder($app->make(Filesystem::class), $paths, $extensions);
         $finder->addNamespace('App', $app->resourcePath('js/pages'));
+        $finder->addNamespace('Core', config()->string('admin-core.pages.core_path'));
 
         foreach ($this->registry->enabled() as $module) {
             $finder->addNamespace($module->name, $module->path('resources/js/pages'));

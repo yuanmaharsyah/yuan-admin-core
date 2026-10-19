@@ -39,6 +39,7 @@ abstract class TestCase extends Orchestra
                 'cache_path' => sys_get_temp_dir().'/admin-core-test-modules-'.getmypid().'.php',
             ]);
             $config->set('view.paths', [self::FIXTURES.'/views']);
+            $config->set('admin-core.pages', ['overrides' => [], 'core_path' => self::FIXTURES.'/CorePages']);
             $config->set('auth.providers.users.model', User::class);
         });
     }

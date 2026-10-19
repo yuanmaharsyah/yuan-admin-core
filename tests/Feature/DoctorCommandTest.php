@@ -22,16 +22,27 @@ function nodeModules(array $versions): void
     app()->setBasePath($base);
 }
 
-const HEALTHY = ['@inertiajs/react' => '3.9.1', 'react' => '19.3.1', 'react-dom' => '19.3.1', 'tailwindcss' => '4.3.3'];
+/**
+ * Every package in admin-core.npm.json at the lowest version its range allows.
+ *
+ * @return array<string, string>
+ */
+function healthyVersions(): array
+{
+    /** @var array{dependencies: array<string, string>} $manifest */
+    $manifest = json_decode((string) file_get_contents(dirname(__DIR__, 2).'/admin-core.npm.json'), true);
+
+    return array_map(fn (string $range): string => ltrim($range, '^~'), $manifest['dependencies']);
+}
 
 it('passes on a healthy setup', function (): void {
-    nodeModules(HEALTHY);
+    nodeModules(healthyVersions());
 
     expect(Artisan::call('admin:doctor'))->toBe(0);
 });
 
 it('fails on a missing or outdated npm package', function (): void {
-    nodeModules([...HEALTHY, 'react' => '18.3.1', 'tailwindcss' => '']);
+    nodeModules([...healthyVersions(), 'react' => '18.3.1', 'tailwindcss' => '']);
     unlink(base_path('node_modules/tailwindcss/package.json'));
 
     expect(Artisan::call('admin:doctor'))->toBe(1)
@@ -41,7 +52,7 @@ it('fails on a missing or outdated npm package', function (): void {
 });
 
 it('fails on a stale module cache', function (): void {
-    nodeModules(HEALTHY);
+    nodeModules(healthyVersions());
     file_put_contents(config()->string('admin-core.modules.cache_path'), '<?php return [];');
 
     expect(app(ModuleRegistry::class)->isCached())->toBeTrue();
@@ -51,7 +62,7 @@ it('fails on a stale module cache', function (): void {
 });
 
 it('fails on an empty APP_KEY', function (): void {
-    nodeModules(HEALTHY);
+    nodeModules(healthyVersions());
     config(['app.key' => '']);
 
     expect(Artisan::call('admin:doctor'))->toBe(1)
@@ -59,7 +70,7 @@ it('fails on an empty APP_KEY', function (): void {
 });
 
 it('fails on debug mode or a sync queue in production', function (): void {
-    nodeModules(HEALTHY);
+    nodeModules(healthyVersions());
     app()['env'] = 'production';
     config(['app.debug' => true, 'queue.default' => 'sync']);
 

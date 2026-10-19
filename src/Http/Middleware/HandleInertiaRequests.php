@@ -31,6 +31,7 @@ class HandleInertiaRequests extends Middleware
                 locale: app()->getLocale(),
                 timezone: config()->string('app.timezone'),
                 panel_open: $request->cookie('admin_panel') !== 'false',
+                maintenance_banner: is_string($banner = config('admin-core.maintenance_banner')) && $banner !== '' ? $banner : null,
             ),
         ];
     }

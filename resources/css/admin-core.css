@@ -1,0 +1,215 @@
+/*
+ * Theme of yuan/admin-core (ui-design §1, reconciled with the design source).
+ * Projects import this file from resources/css/app.css after Tailwind and
+ * override only --highlight (branding). Components use the token utilities
+ * (bg-card, shadow-dialog, text-title, h-control…), never raw values.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans: 'Geist Variable', Inter, system-ui, sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-rule: var(--rule);
+    --color-highlight: var(--highlight);
+    --color-highlight-foreground: var(--highlight-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-rail: var(--rail);
+    --color-rail-foreground: var(--rail-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-active: var(--sidebar-active);
+    --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-overlay: var(--overlay);
+
+    --radius-sm: var(--radius);
+    --radius-md: var(--radius);
+    --radius-lg: var(--radius);
+
+    --shadow-popover: var(--shadow-popover);
+    --shadow-dialog: var(--shadow-dialog);
+    --shadow-sheet: var(--shadow-sheet);
+    --shadow-drawer: var(--shadow-drawer);
+
+    /* Type steps (ui-design §1 "Scale"): size, line-height, weight, tracking. */
+    --text-title: 1.75rem;
+    --text-title--line-height: 1.15;
+    --text-title--font-weight: 700;
+    --text-section: 1.25rem;
+    --text-section--line-height: 1.3;
+    --text-section--font-weight: 700;
+    --text-kpi: 1.375rem;
+    --text-kpi--line-height: 1.2;
+    --text-kpi--font-weight: 700;
+    --text-card-title: 1.125rem;
+    --text-card-title--line-height: 1.35;
+    --text-card-title--font-weight: 600;
+    --text-brand: 1.125rem;
+    --text-brand--line-height: 1.2;
+    --text-brand--font-weight: 700;
+    --text-body: 0.875rem;
+    --text-body--line-height: 1.5;
+    --text-table: 0.8125rem;
+    --text-table--line-height: 1.4;
+    --text-label: 0.75rem;
+    --text-label--line-height: 1.35;
+    --text-label--font-weight: 500;
+    --text-label--letter-spacing: 0.04em;
+
+    /* Control heights (ui-design §1 "Control heights"): h-control, h-row… */
+    --spacing-control: 2.25rem;
+    --spacing-control-sm: 2rem;
+    --spacing-control-compact: 1.875rem;
+    --spacing-control-auth: 2.5rem;
+    --spacing-row: 2.75rem;
+    --spacing-topbar: 3rem;
+    --spacing-rail: 3.5rem;
+    --spacing-panel: 13.75rem;
+}
+
+:root {
+    --background: oklch(0.955 0 0);
+    --foreground: oklch(0.205 0 0);
+    --card: oklch(0.99 0.004 106);
+    --card-foreground: oklch(0.205 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.922 0 0);
+    --muted-foreground: oklch(0.439 0 0);
+    --secondary: oklch(0.922 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --accent: oklch(0.922 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --border: oklch(0.87 0 0);
+    --input: oklch(0.87 0 0);
+    --rule: oklch(0.205 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --ring: oklch(0.205 0 0);
+    --highlight: oklch(0.905 0.182 98.111);
+    --highlight-foreground: oklch(0.205 0 0);
+    --success: oklch(0.508 0.118 165.612);
+    --success-foreground: oklch(1 0 0);
+    --warning: oklch(0.553 0.195 38.402);
+    --warning-foreground: oklch(1 0 0);
+    --info: oklch(0.5 0.134 242.749);
+    --info-foreground: oklch(1 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(1 0 0);
+    --rail: oklch(0.87 0 0);
+    --rail-foreground: oklch(0.205 0 0);
+    --sidebar: oklch(0.922 0 0);
+    --sidebar-foreground: oklch(0.371 0 0);
+    --sidebar-active: oklch(0.97 0 0);
+    --sidebar-active-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.87 0 0);
+    --chart-1: oklch(0.905 0.182 98.111);
+    --chart-2: oklch(0.205 0 0);
+    --chart-3: oklch(0.556 0 0);
+    --chart-4: oklch(0.708 0 0);
+    --chart-5: oklch(0.87 0 0);
+    --radius: 0.25rem;
+    --overlay: oklch(0.145 0 0 / 0.45);
+    --shadow-popover: 0 8px 24px oklch(0 0 0 / 0.12);
+    --shadow-dialog: 0 16px 48px oklch(0 0 0 / 0.2);
+    --shadow-sheet: 0 16px 48px oklch(0 0 0 / 0.25);
+    --shadow-drawer: -12px 0 32px oklch(0 0 0 / 0.12);
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.97 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.97 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.97 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.97 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.97 0 0);
+    --border: oklch(0.32 0 0);
+    --input: oklch(0.371 0 0);
+    --rule: oklch(0.97 0 0);
+    --primary: oklch(0.97 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --ring: oklch(0.87 0 0);
+    --highlight: oklch(0.905 0.182 98.111);
+    --highlight-foreground: oklch(0.205 0 0);
+    --success: oklch(0.765 0.177 163.223);
+    --success-foreground: oklch(0.145 0 0);
+    --warning: oklch(0.75 0.183 55.934);
+    --warning-foreground: oklch(0.145 0 0);
+    --info: oklch(0.746 0.16 232.661);
+    --info-foreground: oklch(0.145 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.145 0 0);
+    --rail: oklch(0.12 0 0);
+    --rail-foreground: oklch(0.97 0 0);
+    --sidebar: oklch(0.175 0 0);
+    --sidebar-foreground: oklch(0.708 0 0);
+    --sidebar-active: oklch(0.269 0 0);
+    --sidebar-active-foreground: oklch(0.97 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --chart-1: oklch(0.905 0.182 98.111);
+    --chart-2: oklch(0.97 0 0);
+    --chart-3: oklch(0.708 0 0);
+    --chart-4: oklch(0.556 0 0);
+    --chart-5: oklch(0.371 0 0);
+    /* A shadow alone vanishes on a near-black page: a 1px light ring plus a deeper shadow. */
+    --overlay: oklch(0 0 0 / 0.65);
+    --shadow-popover: 0 0 0 1px oklch(1 0 0 / 0.1), 0 8px 24px oklch(0 0 0 / 0.5);
+    --shadow-dialog: 0 0 0 1px oklch(1 0 0 / 0.1), 0 16px 48px oklch(0 0 0 / 0.6);
+    --shadow-sheet: 0 0 0 1px oklch(1 0 0 / 0.1), 0 16px 48px oklch(0 0 0 / 0.7);
+    --shadow-drawer: -1px 0 0 oklch(1 0 0 / 0.1), -12px 0 32px oklch(0 0 0 / 0.5);
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background font-sans text-body text-foreground antialiased;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-ring;
+    }
+
+    input::placeholder {
+        @apply text-muted-foreground;
+    }
+}

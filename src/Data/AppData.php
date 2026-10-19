@@ -16,5 +16,6 @@ final class AppData extends Data
         public string $timezone,
         // Item panel state from the `admin_panel` cookie, so the first paint is correct.
         public bool $panel_open,
+        public ?string $maintenance_banner,
     ) {}
 }
