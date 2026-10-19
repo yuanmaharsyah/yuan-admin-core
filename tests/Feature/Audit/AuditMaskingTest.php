@@ -36,6 +36,15 @@ it('masks model changes in attribute_changes: omit absent, partial and full mask
     ])->and(storedColumns())->not->toMatch('/3201234567890|kunci|081234567890/');
 });
 
+it('never stores an encrypted-cast attribute, which the model would read decrypted', function (): void {
+    $item = new DemoItem;
+    $item->mergeCasts(['name' => 'encrypted']);
+    $item->fill(['name' => 'Rahasia Negara', 'nik' => '3201234567890001'])->save();
+
+    expect(latestActivity()->attribute_changes?->get('attributes'))->not->toHaveKey('name')
+        ->and(storedColumns())->not->toContain('Rahasia Negara');
+});
+
 it('masks meta in properties, nested keys and wildcard patterns included', function (): void {
     Audit::record(AuditEvent::SettingsUpdated, meta: [
         'password' => 'Rahasia123',

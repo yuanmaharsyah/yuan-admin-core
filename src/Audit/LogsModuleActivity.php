@@ -12,7 +12,8 @@ use Yuan\AdminCore\Registry\ModuleRegistry;
 /**
  * Logs created / updated / deleted / restored / force_deleted for a module
  * model (spec §7.1): dirty fillable attributes only, `log_name` = module slug,
- * `$hidden` and `omit` fields never stored, `partial` / `full` fields masked.
+ * `$hidden`, `omit` and encrypted-cast fields never stored (the trait would
+ * read them decrypted), `partial` / `full` fields masked.
  *
  * @mixin Model
  */
@@ -31,6 +32,7 @@ trait LogsModuleActivity
             ->logExcept([
                 ...$this->getHidden(),
                 ...array_filter($this->getFillable(), fn (string $field): bool => $masker->rule($field) === 'omit'),
+                ...array_keys(array_filter($this->getCasts(), fn (string $cast): bool => str_starts_with($cast, 'encrypted') || str_contains($cast, 'AsEncrypted'))),
             ])
             ->useLogName(app(ModuleRegistry::class)->forClass(static::class)?->slug);
     }

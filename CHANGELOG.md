@@ -21,3 +21,6 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Core migration `create_activity_log_table` (spatie v5 columns + `batch_uuid` + indexes); projects don't publish the spatie stub.
 - `ModuleRegistry::forClass()` and `ModuleDefinition::customActions()` / `STANDARD_ACTIONS`.
 - Dependency: `spatie/laravel-activitylog ^5.1`. The package forces its activitylog settings (activity model, write action, no buffering, default log name `system`).
+
+### Fixed
+- `LogsModuleActivity` no longer stores attributes with an `encrypted` cast; the trait read them decrypted, so they reached `attribute_changes` in plain text.
