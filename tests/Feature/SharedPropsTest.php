@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Testing\AssertableInertia;
 use Spatie\LaravelData\Data;
+use Yuan\AdminCore\Data\BreadcrumbData;
+use Yuan\AdminCore\Data\BreadcrumbsData;
 use Yuan\AdminCore\Http\Middleware\HandleInertiaRequests;
 use Yuan\AdminCore\Tests\Fixtures\Http\ProjectInertiaMiddleware;
 use Yuan\AdminCore\Tests\Fixtures\Models\User;
@@ -20,7 +22,7 @@ use function Pest\Laravel\withCookie;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    Route::middleware(['web', HandleInertiaRequests::class])->get('/probe', fn () => Inertia::render('Demo::Index'));
+    Route::middleware(['web', HandleInertiaRequests::class])->get('/probe', fn () => Inertia::render('Demo::Index'))->name('probe');
     Route::middleware(['web', ProjectInertiaMiddleware::class])->get('/project-probe', fn () => Inertia::render('Demo::Index'));
 });
 
@@ -33,7 +35,7 @@ it('shares guest props', function (): void {
     AssertableInertia::fromTestResponse(get('/probe'))
         ->where('auth', ['user' => null, 'level' => null, 'is_super_admin' => false, 'permissions' => []])
         ->where('menu', [])
-        ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true, 'maintenance_banner' => null]);
+        ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true, 'maintenance_banner' => null, 'route' => 'probe']);
 });
 
 it('shares only id, name and email of the user, and their menu', function (): void {
@@ -68,6 +70,17 @@ it('shares the maintenance banner from config, and none when it is empty', funct
     'null' => [null, null],
     'empty env value' => ['', null],
 ]);
+
+it('renders the breadcrumbs page prop as a list of label and optional link', function (): void {
+    Route::middleware(['web', HandleInertiaRequests::class])->get('/crumbs', fn () => Inertia::render('Demo::Index', [
+        'breadcrumbs' => BreadcrumbsData::of(new BreadcrumbData('Master', '/admin/demo'), new BreadcrumbData('Demo')),
+    ]));
+
+    AssertableInertia::fromTestResponse(get('/crumbs'))->where('breadcrumbs.items', [
+        ['label' => 'Master', 'href' => '/admin/demo'],
+        ['label' => 'Demo', 'href' => null],
+    ]);
+});
 
 it('shares only Data objects', function (): void {
     Gate::define('demo.view', fn (): bool => true);

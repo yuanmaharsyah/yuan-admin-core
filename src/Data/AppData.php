@@ -17,5 +17,7 @@ final class AppData extends Data
         // Item panel state from the `admin_panel` cookie, so the first paint is correct.
         public bool $panel_open,
         public ?string $maintenance_banner,
+        // Current route name; the shell derives the active menu item from its `{slug}.` prefix.
+        public ?string $route = null,
     ) {}
 }

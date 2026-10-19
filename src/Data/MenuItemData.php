@@ -15,5 +15,7 @@ final class MenuItemData extends Data
         public string $label,
         public string $icon,
         public string $href,
+        // The `{slug}.create` URL when that route exists and the user may create.
+        public ?string $create_href = null,
     ) {}
 }

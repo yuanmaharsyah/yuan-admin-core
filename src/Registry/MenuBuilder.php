@@ -8,12 +8,14 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Routing\Router;
 use Yuan\AdminCore\Data\MenuGroupData;
 use Yuan\AdminCore\Data\MenuItemData;
 
 /**
  * The menu a user may see: groups in config order, items by `order` then label,
  * filtered by `{slug}.view` (or `admin-core.superadmin` for superadmin_only modules).
+ * `create_href` feeds the command palette's "Aksi" section.
  */
 final readonly class MenuBuilder
 {
@@ -22,6 +24,7 @@ final readonly class MenuBuilder
         private Repository $config,
         private Gate $gate,
         private UrlGenerator $url,
+        private Router $router,
     ) {}
 
     /**
@@ -63,6 +66,9 @@ final readonly class MenuBuilder
                     label: __($module->label),
                     icon: $module->icon,
                     href: $this->url->route("{$module->slug}.index"),
+                    create_href: $this->router->has("{$module->slug}.create") && $gate->allows("{$module->slug}.create")
+                        ? $this->url->route("{$module->slug}.create")
+                        : null,
                 ), $modules),
             );
         }
