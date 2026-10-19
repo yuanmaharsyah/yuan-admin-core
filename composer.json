@@ -1,0 +1,40 @@
+{
+    "name": "yuan/admin-core",
+    "description": "Reusable Laravel admin core: modules, RBAC, audit, type bridge.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.13",
+        "laravel/pint": "^1.32",
+        "orchestra/testbench": "^11.3",
+        "pestphp/pest": "^5.3",
+        "pestphp/pest-plugin-laravel": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Yuan\\AdminCore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Yuan\\AdminCore\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "lint:check": "pint --test",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "test": "pest"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
