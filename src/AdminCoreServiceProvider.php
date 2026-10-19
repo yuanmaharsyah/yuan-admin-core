@@ -129,13 +129,15 @@ final class AdminCoreServiceProvider extends ServiceProvider
         $router->aliasMiddleware('permission', PermissionMiddleware::class);
 
         Event::listen(Login::class, function (Login $event): void {
-            if (request()->hasSession()) {
-                request()->session()->put(EnsureUserIsActive::LOGIN_TIME, now()->getTimestamp());
+            if (! $event->user instanceof Model) {
+                return;
             }
 
-            if ($event->user instanceof Model) {
-                $event->user->forceFill(['last_login_at' => now()])->saveQuietly();
+            if (request()->hasSession()) {
+                request()->session()->put(EnsureUserIsActive::SESSION_VERSION, (int) $event->user->getAttribute('session_version'));
             }
+
+            $event->user->forceFill(['last_login_at' => now()])->saveQuietly();
         });
     }
 

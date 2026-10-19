@@ -47,7 +47,7 @@ it('finds the account of a failed login when the guard did not', function (): vo
     expect(latestActivity()->subject_id)->toBe($user->id);
 });
 
-it('stamps last_login_at and the session login time on login', function (): void {
+it('stamps last_login_at and the session version on login', function (): void {
     $user = makeUser();
     session()->start();
     request()->setLaravelSession(session()->driver());
@@ -55,7 +55,7 @@ it('stamps last_login_at and the session login time on login', function (): void
     event(new Login('web', $user, false));
 
     expect($user->fresh()?->getAttribute('last_login_at'))->not->toBeNull()
-        ->and(session(EnsureUserIsActive::LOGIN_TIME))->toBe(now()->getTimestamp());
+        ->and(session(EnsureUserIsActive::SESSION_VERSION))->toBe(0);
 });
 
 it('logs a failed login for an unknown identifier without a subject', function (): void {

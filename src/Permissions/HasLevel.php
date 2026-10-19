@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yuan\AdminCore\Permissions;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,10 +17,10 @@ use Yuan\AdminCore\Http\Middleware\EnsureUserIsActive;
  * Exactly one Level per user and no direct permissions (spec §6.2, D5), plus
  * the user guard rails of spec §6.3: there is always an active Super Admin,
  * and deactivating, changing the level or changing the password revokes the
- * user's other sessions.
+ * user's other sessions by raising `session_version`.
  *
  * @property bool $is_active
- * @property Carbon|null $sessions_invalidated_at
+ * @property int $session_version
  *
  * @mixin Model
  */
@@ -37,15 +36,11 @@ trait HasLevel
             if ($deactivated && $user->isLastActiveSuperAdmin()) {
                 throw GuardRailViolation::lastSuperAdmin();
             }
-
-            if ($deactivated || $user->isDirty('password')) {
-                $user->forceFill(['sessions_invalidated_at' => now(), 'remember_token' => Str::random(60)]);
-            }
         });
 
         static::updated(function (self $user): void {
-            if ($user->wasChanged('sessions_invalidated_at')) {
-                $user->afterSessionsRevoked();
+            if ($user->wasChanged('password') || ($user->wasChanged('is_active') && ! $user->is_active)) {
+                $user->revokeSessions();
             }
         });
     }
@@ -103,8 +98,7 @@ trait HasLevel
             Audit::record(AuditEvent::LevelChanged, $this, ['from' => $previous?->name, 'to' => $level->name], 'users');
 
             if ($previous !== null) {
-                $this->forceFill(['sessions_invalidated_at' => now(), 'remember_token' => Str::random(60)])->saveQuietly();
-                $this->afterSessionsRevoked();
+                $this->revokeSessions();
             }
         }));
     }
@@ -149,16 +143,25 @@ trait HasLevel
     }
 
     /**
-     * Keeps the current session when the user revoked their own sessions, and
-     * deletes the stored sessions when the driver is `database` (cleanup only:
-     * EnsureUserIsActive enforces revocation on any driver).
+     * Revokes every session of this user: raises `session_version` atomically
+     * (a stale in-memory copy can't write an old number back) and rotates the
+     * remember token so a remember-me cookie can't sign back in. The current
+     * session moves to the new version when the user revoked their own
+     * sessions; stored rows are deleted on the `database` driver (cleanup
+     * only, EnsureUserIsActive enforces revocation on any driver).
      */
-    private function afterSessionsRevoked(): void
+    private function revokeSessions(): void
     {
+        $query = static::query()->withoutGlobalScopes()->whereKey($this->getKey());
+        $query->clone()->increment('session_version', 1, ['remember_token' => Str::random(60)]);
+
+        $this->forceFill($query->clone()->firstOrFail(['session_version', 'remember_token', 'updated_at'])->only(['session_version', 'remember_token', 'updated_at']))
+            ->syncOriginalAttributes(['session_version', 'remember_token', 'updated_at']);
+
         $session = request()->hasSession() ? request()->session() : null;
 
         if ($session !== null && Auth::id() === $this->getKey()) {
-            $session->put(EnsureUserIsActive::LOGIN_TIME, $this->sessions_invalidated_at?->getTimestamp());
+            $session->put(EnsureUserIsActive::SESSION_VERSION, $this->session_version);
         }
 
         if (config('session.driver') === 'database') {

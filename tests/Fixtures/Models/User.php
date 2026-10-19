@@ -23,6 +23,6 @@ final class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_active' => 'boolean', 'last_login_at' => 'datetime', 'sessions_invalidated_at' => 'datetime'];
+        return ['password' => 'hashed', 'is_active' => 'boolean', 'last_login_at' => 'datetime', 'session_version' => 'integer'];
     }
 }

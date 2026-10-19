@@ -23,13 +23,13 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Dependency: `spatie/laravel-activitylog ^5.1`. The package forces its activitylog settings (activity model, write action, no buffering, default log name `system`).
 - RBAC core (`Yuan\AdminCore\Permissions`, spec §6): `Level` (spatie Role with `label`, `description`, `is_protected`; `Level::superAdmin()`), `HasLevel` user trait (`assignLevel()` with a batched `level_changed`, `level()`, `isSuperAdmin()`; `assignRole` / `removeRole` / `syncRoles` / `givePermissionTo` / `syncPermissions` throw), `PermissionSynchronizer` + `permissions:sync`, `PermissionMatrix` (build, save with the dependency rule, one batched `permissions_updated`, `LevelPermissionsUpdated` event), `GuardRailViolation`.
 - Guard rails: always ≥1 active Super Admin; the protected level is immutable; a level with users can't be deleted (checked before spatie detaches anything).
-- Session revocation on deactivate, level change and password change through `users.sessions_invalidated_at` (any session driver) plus a rotated remember token; stored `sessions` rows are deleted on the database driver.
-- Middleware aliases `active` (`EnsureUserIsActive`), `superadmin` (`EnsureSuperAdmin`) and `permission` (spatie); `Gate::before` passes Super Admin.
+- Session revocation on deactivate, level change and password change through `users.session_version` (raised atomically; a session is valid only while the version it stored at login matches, on any session driver) plus a rotated remember token; stored `sessions` rows are deleted on the database driver. Core migration `replace_sessions_invalidated_at_with_session_version` replaces the earlier timestamp column, which let a session signed in during the same second as a revocation survive it.
+- Middleware aliases `active` (`EnsureUserIsActive`; projects also append it to the `web` group, guests and `logout` pass through), `superadmin` (`EnsureSuperAdmin`) and `permission` (spatie); `Gate::before` passes Super Admin.
 - `Auth\AuthenticateUser` for `Fortify::authenticateUsing()`: inactive accounts are refused at login with `login_failed` (reason `inactive`).
 - `ImmutableActivity::visibleTo($viewer)` (SA visibility rule) and the `HasActivityHistory` model trait.
 - `AuthData` gains `level` (`LevelData`) and `permissions` (Super Admin: every synced permission); `PermissionMatrixData` / `PermissionMatrixRowData`.
 - `AdminCoreSeeder` (idempotent; `admin-core.seed.password` / `ADMIN_SEED_PASSWORD`, required in production) and `admin:create-superadmin`.
-- Core migrations `create_permission_tables` and `add_admin_columns_to_users_table` (`username`, `is_active`, `last_login_at`, `sessions_invalidated_at`, soft deletes). Login stamps `last_login_at`.
+- Core migrations `create_permission_tables` and `add_admin_columns_to_users_table` (`username`, `is_active`, `last_login_at`, soft deletes). Login stamps `last_login_at`.
 - Failed and locked logins resolve the account from the identifier, so the SA visibility rule can hide attempts on Super Admin accounts.
 - Dependency: `spatie/laravel-permission ^8.3`.
 
