@@ -6,17 +6,21 @@ namespace Yuan\AdminCore\Tests;
 
 use Illuminate\Contracts\Config\Repository;
 use Inertia\ServiceProvider as InertiaServiceProvider;
+use Orchestra\Testbench\Attributes\WithMigration;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\LaravelData\LaravelDataServiceProvider;
 use Yuan\AdminCore\AdminCoreServiceProvider;
+use Yuan\AdminCore\Tests\Fixtures\Models\User;
 
+#[WithMigration]
 abstract class TestCase extends Orchestra
 {
     public const string FIXTURES = __DIR__.'/Fixtures';
 
     protected function getPackageProviders($app): array
     {
-        return [InertiaServiceProvider::class, LaravelDataServiceProvider::class, AdminCoreServiceProvider::class];
+        return [InertiaServiceProvider::class, LaravelDataServiceProvider::class, ActivitylogServiceProvider::class, AdminCoreServiceProvider::class];
     }
 
     /**
@@ -34,6 +38,7 @@ abstract class TestCase extends Orchestra
                 'cache_path' => sys_get_temp_dir().'/admin-core-test-modules-'.getmypid().'.php',
             ]);
             $config->set('view.paths', [self::FIXTURES.'/views']);
+            $config->set('auth.providers.users.model', User::class);
         });
     }
 

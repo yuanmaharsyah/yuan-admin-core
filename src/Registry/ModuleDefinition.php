@@ -14,6 +14,9 @@ final readonly class ModuleDefinition
         'core', 'superadmin_only', 'menu', 'actions', 'widgets',
     ];
 
+    /** Actions with a fixed meaning and policy method (spec §6.2); any other declared action is custom. */
+    public const array STANDARD_ACTIONS = ['view', 'create', 'edit', 'delete', 'download'];
+
     private const string KEBAB = '/^[a-z0-9]+(?:-[a-z0-9]+)*$/';
 
     /**
@@ -95,6 +98,14 @@ final readonly class ModuleDefinition
     public function providerClass(): string
     {
         return "{$this->namespace}{$this->name}\\Providers\\{$this->name}ServiceProvider";
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function customActions(): array
+    {
+        return array_values(array_diff($this->actions, self::STANDARD_ACTIONS));
     }
 
     public function path(string $relative): string

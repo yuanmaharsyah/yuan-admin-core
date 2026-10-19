@@ -77,6 +77,20 @@ final class ModuleRegistry
     }
 
     /**
+     * The module a class belongs to, from its namespace (`{root namespace}{Name}\\`).
+     */
+    public function forClass(string $class): ?ModuleDefinition
+    {
+        foreach ($this->all() as $module) {
+            if (str_starts_with($class, $module->namespace.$module->name.'\\')) {
+                return $module;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Raw `module.php` contents of every root, read from disk.
      *
      * @return list<array{file: string, root: string, namespace: string, config: mixed}>

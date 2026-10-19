@@ -43,6 +43,26 @@ return [
         ],
     ],
 
+    'audit' => [
+        // Personal data in audit rows (spec §7.1, UU PDP), checked against every
+        // key of the logged changes and meta. Patterns may use `*`; the first
+        // match wins. omit = never stored, partial = first 4 and last 4
+        // characters kept, full = stored as ••••. Add project fields here.
+        'masked_fields' => [
+            'password' => 'omit',
+            'password_confirmation' => 'omit',
+            'remember_token' => 'omit',
+            '*_token' => 'omit',
+            'secret' => 'omit',
+            'nik' => 'partial',
+            'no_kk' => 'partial',
+            'npwp' => 'partial',
+            'no_rekening' => 'partial',
+            'no_hp' => 'full',
+            'alamat' => 'full',
+        ],
+    ],
+
     'pages' => [
         // Page name => replacement page name, for example Users::Index to
         // App::Users/Index (resources/js/pages/Users/Index.tsx in the project).

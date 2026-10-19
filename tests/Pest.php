@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Str;
+use Yuan\AdminCore\Audit\ImmutableActivity;
+use Yuan\AdminCore\Tests\Fixtures\Models\User;
 use Yuan\AdminCore\Tests\TestCase;
 
 pest()->extend(TestCase::class)->in('Feature');
@@ -66,4 +68,17 @@ function writeModule(string $root, string $name, array $overrides = []): string
     file_put_contents($file, '<?php return '.var_export(moduleConfig(['name' => $name, ...$overrides]), true).';');
 
     return $file;
+}
+
+/**
+ * A persisted fixture user (audit causer / subject).
+ */
+function makeUser(string $name = 'Budi'): User
+{
+    return User::query()->create(['name' => $name, 'email' => Str::lower($name).'-'.Str::random(6).'@example.test', 'password' => 'Rahasia123']);
+}
+
+function latestActivity(): ImmutableActivity
+{
+    return ImmutableActivity::query()->latest('id')->firstOrFail();
 }

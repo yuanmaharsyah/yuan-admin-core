@@ -12,7 +12,13 @@ return new class extends Migration
     {
         Schema::create('demo_items', function (Blueprint $table): void {
             $table->id();
+            $table->string('name')->nullable();
+            $table->string('nik')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('secret')->nullable();
+            $table->string('pin')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
