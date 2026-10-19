@@ -35,6 +35,8 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `Testing\ContractAssertions`: the runtime contract checks of spec §9.1, run over the current app's modules (projects call them from `tests/Feature/ContractTest.php`).
 - `Testing\ModuleAssertions`: module test helpers `actingAsLevelWith()`, `actingAsSuperAdmin()`, `assertGuestRedirected()`, `assertForbiddenWithout()`, `assertAudited()` (with masked-field checks) and `assertNotVisibleToNonSuperAdmin()`.
 - `Audit\NotAudited` attribute: the opt-out from `LogsModuleActivity`, with a required reason.
+- PHPStan rules for controllers, registered by `extension.neon` (projects include `vendor/yuan/admin-core/extension.neon`): `InertiaPropsRule` (Inertia props must be Data objects, scalars or Inertia prop wrappers of those; identifier `adminCore.inertiaProps`) and `RequestInputRule` (no `all()`, `validated()` or key-less `input()`; identifier `adminCore.requestInput`).
+- `Testing\ArchRules`: filesystem helpers for the arch tests of spec §9.1 (module namespaces, isolation map, source scans).
 
 ### Changed
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.

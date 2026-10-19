@@ -1,0 +1,5 @@
+# Contract rules for PHPStan (spec §9.1). Projects include
+# vendor/yuan/admin-core/extension.neon from their phpstan.neon.
+rules:
+    - Yuan\AdminCore\PHPStan\InertiaPropsRule
+    - Yuan\AdminCore\PHPStan\RequestInputRule

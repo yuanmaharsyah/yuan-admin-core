@@ -1,9 +1,13 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/pestphp/pest/extension.neon
+    - extension.neon
 
 parameters:
     level: 8
     paths:
         - src
         - tests
+    excludePaths:
+        # Deliberate violations for the rule tests in tests/PHPStan.
+        - tests/PHPStan/Fixtures
