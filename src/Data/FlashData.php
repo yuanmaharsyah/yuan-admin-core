@@ -12,6 +12,8 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
  * One-time messages, sent with Inertia's native flash so they are never
  * replayed from browser history: `Inertia::flash(new FlashData(success: ...)->toArray())`.
  * Unset keys are left out, so several flashes in one request merge.
+ * `description` is the toast's second line; `undo` adds the Urungkan action
+ * (Super Admin only, frontend-behavior §7).
  */
 #[TypeScript]
 final class FlashData extends Data
@@ -20,5 +22,7 @@ final class FlashData extends Data
         public string|Optional $success = new Optional,
         public string|Optional $error = new Optional,
         public string|Optional $info = new Optional,
+        public string|Optional $description = new Optional,
+        public UndoData|Optional $undo = new Optional,
     ) {}
 }

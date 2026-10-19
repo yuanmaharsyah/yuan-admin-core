@@ -11,6 +11,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\LaravelData\LaravelDataServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
+use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Yuan\AdminCore\AdminCoreServiceProvider;
 use Yuan\AdminCore\Tests\Fixtures\Models\User;
 
@@ -21,7 +22,7 @@ abstract class TestCase extends Orchestra
 
     protected function getPackageProviders($app): array
     {
-        return [InertiaServiceProvider::class, LaravelDataServiceProvider::class, ActivitylogServiceProvider::class, PermissionServiceProvider::class, AdminCoreServiceProvider::class];
+        return [InertiaServiceProvider::class, LaravelDataServiceProvider::class, ActivitylogServiceProvider::class, PermissionServiceProvider::class, QueryBuilderServiceProvider::class, AdminCoreServiceProvider::class];
     }
 
     /**

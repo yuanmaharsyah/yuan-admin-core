@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('no_hp')->nullable();
             $table->string('secret')->nullable();
             $table->string('pin')->nullable();
+            $table->string('status')->nullable()->index();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -8,14 +8,46 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Yuan\AdminCore\Audit\HasActivityHistory;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
+use Yuan\AdminCore\Data\DataTableFilterData;
+use Yuan\AdminCore\Data\OptionData;
+use Yuan\AdminCore\DataTable\DataTableModel;
+use Yuan\AdminCore\DataTable\HasDataTable;
+use Yuan\AdminCore\DataTable\HasVisibilityScope;
 
-final class DemoItem extends Model
+/**
+ * @property string|null $name
+ */
+final class DemoItem extends Model implements DataTableModel
 {
-    use HasActivityHistory, LogsModuleActivity, SoftDeletes;
+    use HasActivityHistory, HasDataTable, HasVisibilityScope, LogsModuleActivity, SoftDeletes;
 
     protected $table = 'demo_items';
 
     protected $fillable = ['name', 'nik', 'no_hp', 'secret', 'pin'];
 
     protected $hidden = ['pin'];
+
+    /**
+     * @return list<string>
+     */
+    public function dataTableSearch(): array
+    {
+        return ['name', 'nik'];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function dataTableSorts(): array
+    {
+        return ['name', 'created_at'];
+    }
+
+    /**
+     * @return list<DataTableFilterData>
+     */
+    public function dataTableFilters(): array
+    {
+        return [new DataTableFilterData('status', 'Status', [new OptionData('draft', 'Draf'), new OptionData('paid', 'Lunas')])];
+    }
 }

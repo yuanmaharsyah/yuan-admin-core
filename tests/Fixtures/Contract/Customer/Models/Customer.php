@@ -7,6 +7,7 @@ namespace Yuan\AdminCore\Tests\Fixtures\Contract\Customer\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
+use Yuan\AdminCore\DataTable\HasVisibilityScope;
 
 /**
  * @property int $id
@@ -15,7 +16,7 @@ use Yuan\AdminCore\Audit\LogsModuleActivity;
  */
 final class Customer extends Model
 {
-    use LogsModuleActivity, SoftDeletes;
+    use HasVisibilityScope, LogsModuleActivity, SoftDeletes;
 
     protected $table = 'contract_customers';
 

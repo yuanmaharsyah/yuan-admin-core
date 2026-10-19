@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
+use Yuan\AdminCore\DataTable\HasVisibilityScope;
 use Yuan\AdminCore\Tests\Fixtures\Contract\Customer\Models\Customer;
 
 /**
@@ -20,7 +21,7 @@ use Yuan\AdminCore\Tests\Fixtures\Contract\Customer\Models\Customer;
  */
 final class Invoice extends Model
 {
-    use LogsModuleActivity, SoftDeletes;
+    use HasVisibilityScope, LogsModuleActivity, SoftDeletes;
 
     protected $table = 'contract_invoices';
 

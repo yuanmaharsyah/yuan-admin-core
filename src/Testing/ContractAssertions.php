@@ -22,6 +22,7 @@ use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
 use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\NotAudited;
+use Yuan\AdminCore\DataTable\HasVisibilityScope;
 use Yuan\AdminCore\Registry\InvalidModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleRegistry;
@@ -221,23 +222,32 @@ final class ContractAssertions
     {
         $violations = [];
 
-        foreach (self::contractModules() as $module) {
-            foreach (glob($module->path('Models/*.php')) ?: [] as $file) {
-                $class = "{$module->namespace}{$module->name}\\Models\\".basename($file, '.php');
+        foreach (self::moduleModels() as $class) {
+            $violation = self::auditCoverageViolation(new $class);
 
-                if (! class_exists($class) || ! is_subclass_of($class, Model::class) || (new ReflectionClass($class))->isAbstract()) {
-                    continue;
-                }
-
-                $violation = self::auditCoverageViolation(new $class);
-
-                if ($violation !== null) {
-                    $violations[] = "{$class}: {$violation}";
-                }
+            if ($violation !== null) {
+                $violations[] = "{$class}: {$violation}";
             }
         }
 
         self::failOnViolations('Audit coverage (spec §9.1)', $violations);
+    }
+
+    /**
+     * Every module model uses `HasVisibilityScope`, so every list and show
+     * query can call `->visibleTo($user)` (spec §7, data scope hook).
+     */
+    public static function assertVisibilityScope(): void
+    {
+        $violations = [];
+
+        foreach (self::moduleModels() as $class) {
+            if (! in_array(HasVisibilityScope::class, class_uses_recursive($class), true)) {
+                $violations[] = "{$class}: does not use HasVisibilityScope";
+            }
+        }
+
+        self::failOnViolations('Data scope hook (spec §7)', $violations);
     }
 
     /**
@@ -338,6 +348,28 @@ final class ContractAssertions
         }
 
         return $files;
+    }
+
+    /**
+     * The concrete Eloquent models in every module's `Models/` folder.
+     *
+     * @return list<class-string<Model>>
+     */
+    private static function moduleModels(): array
+    {
+        $models = [];
+
+        foreach (self::contractModules() as $module) {
+            foreach (glob($module->path('Models/*.php')) ?: [] as $file) {
+                $class = "{$module->namespace}{$module->name}\\Models\\".basename($file, '.php');
+
+                if (class_exists($class) && is_subclass_of($class, Model::class) && ! (new ReflectionClass($class))->isAbstract()) {
+                    $models[] = $class;
+                }
+            }
+        }
+
+        return $models;
     }
 
     private static function auditCoverageViolation(Model $model): ?string
