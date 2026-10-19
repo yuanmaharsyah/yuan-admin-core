@@ -17,6 +17,8 @@ export const id = {
     'shell.navigation': 'Navigasi',
     'shell.breadcrumb': 'Breadcrumb',
     'shell.theme': 'Ganti tema',
+    'shell.theme_dark': 'Mode gelap',
+    'shell.theme_light': 'Mode terang',
     'shell.user_menu': 'Menu pengguna: {name}',
     'shell.profile': 'Profil',
     'shell.search': 'Cari…',

@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, UserRound } from 'lucide-react';
+import { LogOut, Moon, Sun, UserRound } from 'lucide-react';
+import { useAppearance } from '../../hooks/useAppearance';
 import { useT } from '../../lib/i18n';
 import type { ShellLinks } from '../../lib/shell';
 import { initials } from '../../lib/shell';
@@ -20,6 +21,8 @@ export function UserMenu({
     links: ShellLinks;
 }) {
     const t = useT();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const dark = resolvedAppearance === 'dark';
 
     return (
         <DropdownMenu>
@@ -44,6 +47,12 @@ export function UserMenu({
                         <UserRound />
                         {t('shell.profile')}
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onSelect={() => updateAppearance(dark ? 'light' : 'dark')}
+                >
+                    {dark ? <Sun /> : <Moon />}
+                    {t(dark ? 'shell.theme_light' : 'shell.theme_dark')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

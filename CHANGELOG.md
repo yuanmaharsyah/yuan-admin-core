@@ -42,7 +42,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `Core::Page` page namespace for the package's own pages (`admin-core.pages.core_path`), server and client.
 - `AppData.maintenance_banner` from `admin-core.maintenance_banner` (`ADMIN_MAINTENANCE_BANNER`).
 - Generated `resources/icons/lucide.json` (`bin/lucide-icons.mjs`).
-- Layout shell: `AdminLayout` (rail, item panel, mobile sheet, topbar, breadcrumbs, user menu, theme toggle, maintenance banner), `PageHeader`, `CommandPalette` (`cmdk`), flash `Toaster`; `BreadcrumbData` / `BreadcrumbsData`; `AppData.route`; `MenuItemData.create_href`.
+- Layout shell: `AdminLayout` (rail, item panel, mobile sheet, topbar, breadcrumbs, user menu, theme toggle, maintenance banner), `PageHeader`, `CommandPalette` (`cmdk`), flash `Toaster`, theme switch in the user menu; `BreadcrumbData` / `BreadcrumbsData`; `AppData.route`; `MenuItemData.create_href`.
 
 ### Changed
 - `module.php` `icon` must be a lucide icon name from `resources/icons/lucide.json` (was: any kebab-case string).

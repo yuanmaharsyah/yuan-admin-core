@@ -15,6 +15,8 @@ export const en: Messages = {
     'shell.navigation': 'Navigation',
     'shell.breadcrumb': 'Breadcrumb',
     'shell.theme': 'Toggle theme',
+    'shell.theme_dark': 'Dark mode',
+    'shell.theme_light': 'Light mode',
     'shell.user_menu': 'User menu: {name}',
     'shell.profile': 'Profile',
     'shell.search': 'Search…',
