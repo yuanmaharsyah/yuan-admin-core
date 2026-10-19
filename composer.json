@@ -7,7 +7,9 @@
         "php": "^8.4",
         "composer/semver": "^3.4",
         "inertiajs/inertia-laravel": "^3.0",
-        "laravel/framework": "^13.0"
+        "laravel/framework": "^13.0",
+        "spatie/laravel-data": "^4.23",
+        "spatie/laravel-typescript-transformer": "^3.3"
     },
     "require-dev": {
         "larastan/larastan": "^3.13",

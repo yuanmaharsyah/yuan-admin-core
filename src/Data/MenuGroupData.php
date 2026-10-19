@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Yuan\AdminCore\Registry;
+namespace Yuan\AdminCore\Data;
 
-final readonly class MenuGroup
+use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
+final class MenuGroupData extends Data
 {
     /**
-     * @param  list<MenuItem>  $items
+     * @param  list<MenuItemData>  $items
      */
     public function __construct(
         public string $key,

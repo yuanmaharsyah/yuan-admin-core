@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Auth\GenericUser;
 use Illuminate\Support\Facades\Gate;
+use Yuan\AdminCore\Data\MenuGroupData;
+use Yuan\AdminCore\Data\MenuItemData;
 use Yuan\AdminCore\Registry\MenuBuilder;
-use Yuan\AdminCore\Registry\MenuGroup;
-use Yuan\AdminCore\Registry\MenuItem;
 
 /**
  * @return array<string, list<string>>
@@ -16,7 +16,7 @@ function menuFor(GenericUser $user): array
     $menu = [];
 
     foreach (app(MenuBuilder::class)->build($user) as $group) {
-        $menu[$group->key] = array_map(fn (MenuItem $item): string => $item->slug, $group->items);
+        $menu[$group->key] = array_map(fn (MenuItemData $item): string => $item->slug, $group->items);
     }
 
     return $menu;
@@ -50,8 +50,8 @@ it('builds groups and items with label, icon and link', function (): void {
     Gate::define('demo.view', fn (): bool => true);
 
     expect(app(MenuBuilder::class)->build(new GenericUser(['id' => 1])))->toEqual([
-        new MenuGroup('master', 'Master Data', 'database', [
-            new MenuItem('demo', 'Demo', 'receipt', url('/admin/demo')),
+        new MenuGroupData('master', 'Master Data', 'database', [
+            new MenuItemData('demo', 'Demo', 'receipt', url('/admin/demo')),
         ]),
     ]);
 });

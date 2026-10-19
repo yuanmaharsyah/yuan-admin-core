@@ -8,6 +8,8 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Yuan\AdminCore\Data\MenuGroupData;
+use Yuan\AdminCore\Data\MenuItemData;
 
 /**
  * The menu a user may see: groups in config order, items by `order` then label,
@@ -23,7 +25,7 @@ final readonly class MenuBuilder
     ) {}
 
     /**
-     * @return list<MenuGroup>
+     * @return list<MenuGroupData>
      */
     public function build(Authenticatable $user): array
     {
@@ -52,11 +54,11 @@ final readonly class MenuBuilder
             $modules = $byGroup[$key];
             usort($modules, fn (ModuleDefinition $a, ModuleDefinition $b): int => [$a->order, $a->label] <=> [$b->order, $b->label]);
 
-            $menu[] = new MenuGroup(
+            $menu[] = new MenuGroupData(
                 key: $key,
                 label: __($group['label']),
                 icon: $group['icon'],
-                items: array_map(fn (ModuleDefinition $module): MenuItem => new MenuItem(
+                items: array_map(fn (ModuleDefinition $module): MenuItemData => new MenuItemData(
                     slug: $module->slug,
                     label: __($module->label),
                     icon: $module->icon,

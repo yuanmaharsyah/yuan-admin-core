@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yuan\AdminCore\Registry;
+namespace Yuan\AdminCore\Data;
 
-final readonly class MenuItem
+use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
+final class MenuItemData extends Data
 {
     public function __construct(
         public string $slug,

@@ -7,6 +7,7 @@ namespace Yuan\AdminCore\Tests;
 use Illuminate\Contracts\Config\Repository;
 use Inertia\ServiceProvider as InertiaServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Spatie\LaravelData\LaravelDataServiceProvider;
 use Yuan\AdminCore\AdminCoreServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -15,7 +16,7 @@ abstract class TestCase extends Orchestra
 
     protected function getPackageProviders($app): array
     {
-        return [InertiaServiceProvider::class, AdminCoreServiceProvider::class];
+        return [InertiaServiceProvider::class, LaravelDataServiceProvider::class, AdminCoreServiceProvider::class];
     }
 
     /**
