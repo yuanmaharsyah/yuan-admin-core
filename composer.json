@@ -5,7 +5,9 @@
     "license": "proprietary",
     "require": {
         "php": "^8.4",
-        "illuminate/support": "^13.0"
+        "composer/semver": "^3.4",
+        "inertiajs/inertia-laravel": "^3.0",
+        "laravel/framework": "^13.0"
     },
     "require-dev": {
         "larastan/larastan": "^3.13",
@@ -16,7 +18,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Yuan\\AdminCore\\": "src/"
+            "Yuan\\AdminCore\\": "src/",
+            "Yuan\\AdminCore\\Modules\\": "modules/"
         }
     },
     "autoload-dev": {
@@ -36,5 +39,12 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Yuan\\AdminCore\\AdminCoreServiceProvider"
+            ]
+        }
+    }
 }
