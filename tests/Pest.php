@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Str;
+use Illuminate\Testing\PendingCommand;
 use Yuan\AdminCore\Audit\ImmutableActivity;
+use Yuan\AdminCore\Permissions\Level;
+use Yuan\AdminCore\Permissions\PermissionSynchronizer;
 use Yuan\AdminCore\Tests\Fixtures\Models\User;
 use Yuan\AdminCore\Tests\TestCase;
 
@@ -75,10 +78,52 @@ function writeModule(string $root, string $name, array $overrides = []): string
  */
 function makeUser(string $name = 'Budi'): User
 {
-    return User::query()->create(['name' => $name, 'email' => Str::lower($name).'-'.Str::random(6).'@example.test', 'password' => 'Rahasia123']);
+    return User::query()->create(['name' => $name, 'email' => Str::lower($name).'-'.Str::random(6).'@example.test', 'password' => 'Rahasia123', 'is_active' => true]);
 }
 
 function latestActivity(): ImmutableActivity
 {
     return ImmutableActivity::query()->latest('id')->firstOrFail();
+}
+
+function syncPermissions(): void
+{
+    app(PermissionSynchronizer::class)->sync();
+}
+
+/**
+ * A non-protected level holding exactly these (already synced) permissions.
+ *
+ * @param  list<string>  $permissions
+ */
+function levelWith(array $permissions, string $name = 'staf'): Level
+{
+    $level = Level::query()->create(['name' => $name, 'label' => Str::title($name)]);
+    $level->syncPermissions($permissions);
+
+    return $level;
+}
+
+function superAdminUser(string $name = 'Root'): User
+{
+    $user = makeUser($name);
+    $user->assignLevel(Level::superAdmin());
+
+    return $user;
+}
+
+/**
+ * An artisan call with mocked console output.
+ *
+ * @param  array<string, mixed>  $parameters
+ */
+function command(string $name, array $parameters = []): PendingCommand
+{
+    $command = Pest\Laravel\artisan($name, $parameters);
+
+    if (! $command instanceof PendingCommand) {
+        throw new LogicException('Console output is not mocked.');
+    }
+
+    return $command;
 }

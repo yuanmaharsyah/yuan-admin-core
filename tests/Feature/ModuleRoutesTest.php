@@ -2,30 +2,32 @@
 
 declare(strict_types=1);
 
-use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\actingAs;
 
+uses(RefreshDatabase::class);
+
 it('prefixes, names and protects module routes', function (): void {
     $route = Route::getRoutes()->getByName('demo.index');
 
     expect($route)->toBeInstanceOf(RouteDefinition::class)
         ->and($route?->uri())->toBe('admin/demo')
-        ->and($route?->gatherMiddleware())->toBe(['web', 'auth'])
+        ->and($route?->gatherMiddleware())->toBe(['web', 'auth', 'active'])
         ->and(route('notes.index'))->toBe(url('/admin/notes'));
 });
 
-it('adds the Super Admin ability to superadmin_only routes', function (): void {
+it('adds the superadmin middleware to superadmin_only routes', function (): void {
     expect(Route::getRoutes()->getByName('admin-only.index')?->gatherMiddleware())
-        ->toBe(['web', 'auth', 'can:admin-core.superadmin']);
+        ->toBe(['web', 'auth', 'active', 'superadmin']);
 });
 
-it('denies superadmin_only routes to every user until RBAC exists', function (): void {
-    actingAs(new GenericUser(['id' => 1]))
+it('denies superadmin_only routes to a user without a level', function (): void {
+    actingAs(makeUser())
         ->get('/admin/admin-only')
         ->assertForbidden();
 });

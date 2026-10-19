@@ -4,23 +4,32 @@ declare(strict_types=1);
 
 namespace Yuan\AdminCore;
 
+use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 use Yuan\AdminCore\Audit\AuditContext;
 use Yuan\AdminCore\Audit\AuthAuditSubscriber;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\WriteActivity;
+use Yuan\AdminCore\Console\CreateSuperAdminCommand;
 use Yuan\AdminCore\Console\DoctorCommand;
 use Yuan\AdminCore\Console\ModulesCacheCommand;
 use Yuan\AdminCore\Console\ModulesClearCommand;
 use Yuan\AdminCore\Console\ModulesListCommand;
+use Yuan\AdminCore\Console\PermissionsSyncCommand;
+use Yuan\AdminCore\Http\Middleware\EnsureSuperAdmin;
+use Yuan\AdminCore\Http\Middleware\EnsureUserIsActive;
+use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Registry\ModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleRegistry;
 use Yuan\AdminCore\Registry\PageResolver;
@@ -34,6 +43,7 @@ final class AdminCoreServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleRegistry::class, fn (): ModuleRegistry => ModuleRegistry::fromConfig(config()));
         $this->app->singleton(PageResolver::class);
         $this->registerAudit();
+        config(['permission.models.role' => Level::class]);
 
         foreach ($this->app->make(ModuleRegistry::class)->enabled() as $module) {
             if (class_exists($module->providerClass())) {
@@ -59,14 +69,17 @@ final class AdminCoreServiceProvider extends ServiceProvider
         // Denies everyone until RBAC's Gate::before lets Super Admin through.
         $this->bootAudit();
 
-        Gate::define('admin-core.superadmin', fn (): bool => false);
+        $this->bootRbac();
 
         $this->app->make(PageResolver::class)->register($this->app);
 
         $this->publishes([__DIR__.'/../config/admin-core.php' => $this->app->configPath('admin-core.php')], 'admin-core-config');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ModulesCacheCommand::class, ModulesClearCommand::class, ModulesListCommand::class, DoctorCommand::class]);
+            $this->commands([
+                ModulesCacheCommand::class, ModulesClearCommand::class, ModulesListCommand::class, DoctorCommand::class,
+                PermissionsSyncCommand::class, CreateSuperAdminCommand::class,
+            ]);
             $this->optimizes(optimize: 'modules:cache', clear: 'modules:clear', key: 'modules');
         }
     }
@@ -101,6 +114,31 @@ final class AdminCoreServiceProvider extends ServiceProvider
         Event::listen(CommandStarting::class, fn (CommandStarting $event) => $this->app->make(AuditContext::class)->startCommand((string) $event->command));
     }
 
+    /**
+     * Super Admin passes every gate; this is the only SA special case outside
+     * the guard rails (spec §6.2.5).
+     */
+    private function bootRbac(): void
+    {
+        Gate::before(fn (mixed $user): ?bool => is_object($user) && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin() ? true : null);
+        Gate::define('admin-core.superadmin', fn (): bool => false);
+
+        $router = $this->app->make(Router::class);
+        $router->aliasMiddleware('active', EnsureUserIsActive::class);
+        $router->aliasMiddleware('superadmin', EnsureSuperAdmin::class);
+        $router->aliasMiddleware('permission', PermissionMiddleware::class);
+
+        Event::listen(Login::class, function (Login $event): void {
+            if (request()->hasSession()) {
+                request()->session()->put(EnsureUserIsActive::LOGIN_TIME, now()->getTimestamp());
+            }
+
+            if ($event->user instanceof Model) {
+                $event->user->forceFill(['last_login_at' => now()])->saveQuietly();
+            }
+        });
+    }
+
     private function registerRoutes(ModuleDefinition $module): void
     {
         $routes = $module->path('Routes/web.php');
@@ -113,7 +151,7 @@ final class AdminCoreServiceProvider extends ServiceProvider
         $middleware = config()->array('admin-core.routes.middleware');
 
         if ($module->superadminOnly) {
-            $middleware[] = 'can:admin-core.superadmin';
+            $middleware[] = 'superadmin';
         }
 
         Route::middleware($middleware)

@@ -6,11 +6,12 @@ namespace Yuan\AdminCore\Tests\Fixtures\Modules\Demo\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Yuan\AdminCore\Audit\HasActivityHistory;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
 
 final class DemoItem extends Model
 {
-    use LogsModuleActivity, SoftDeletes;
+    use HasActivityHistory, LogsModuleActivity, SoftDeletes;
 
     protected $table = 'demo_items';
 

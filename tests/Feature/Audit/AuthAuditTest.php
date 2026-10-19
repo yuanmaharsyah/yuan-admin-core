@@ -10,6 +10,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yuan\AdminCore\Http\Middleware\EnsureUserIsActive;
 
 uses(RefreshDatabase::class);
 
@@ -36,6 +37,25 @@ it('logs a failed login with the identifier only, on the matched user', function
         ->toBe(['event' => 'login_failed', 'log_name' => 'auth', 'causer_id' => null, 'subject_id' => $user->id])
         ->and($row->getProperty('meta'))->toBe(['username' => $user->email, 'subject_label' => '#'.$user->id])
         ->and(json_encode(DB::table('activity_log')->first()))->not->toContain('SalahSekali9');
+});
+
+it('finds the account of a failed login when the guard did not', function (): void {
+    $user = makeUser();
+
+    event(new Failed('web', null, ['email' => $user->email, 'password' => 'x']));
+
+    expect(latestActivity()->subject_id)->toBe($user->id);
+});
+
+it('stamps last_login_at and the session login time on login', function (): void {
+    $user = makeUser();
+    session()->start();
+    request()->setLaravelSession(session()->driver());
+
+    event(new Login('web', $user, false));
+
+    expect($user->fresh()?->getAttribute('last_login_at'))->not->toBeNull()
+        ->and(session(EnsureUserIsActive::LOGIN_TIME))->toBe(now()->getTimestamp());
 });
 
 it('logs a failed login for an unknown identifier without a subject', function (): void {

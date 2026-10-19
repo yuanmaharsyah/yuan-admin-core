@@ -21,6 +21,20 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Core migration `create_activity_log_table` (spatie v5 columns + `batch_uuid` + indexes); projects don't publish the spatie stub.
 - `ModuleRegistry::forClass()` and `ModuleDefinition::customActions()` / `STANDARD_ACTIONS`.
 - Dependency: `spatie/laravel-activitylog ^5.1`. The package forces its activitylog settings (activity model, write action, no buffering, default log name `system`).
+- RBAC core (`Yuan\AdminCore\Permissions`, spec §6): `Level` (spatie Role with `label`, `description`, `is_protected`; `Level::superAdmin()`), `HasLevel` user trait (`assignLevel()` with a batched `level_changed`, `level()`, `isSuperAdmin()`; `assignRole` / `removeRole` / `syncRoles` / `givePermissionTo` / `syncPermissions` throw), `PermissionSynchronizer` + `permissions:sync`, `PermissionMatrix` (build, save with the dependency rule, one batched `permissions_updated`, `LevelPermissionsUpdated` event), `GuardRailViolation`.
+- Guard rails: always ≥1 active Super Admin; the protected level is immutable; a level with users can't be deleted (checked before spatie detaches anything).
+- Session revocation on deactivate, level change and password change through `users.sessions_invalidated_at` (any session driver) plus a rotated remember token; stored `sessions` rows are deleted on the database driver.
+- Middleware aliases `active` (`EnsureUserIsActive`), `superadmin` (`EnsureSuperAdmin`) and `permission` (spatie); `Gate::before` passes Super Admin.
+- `Auth\AuthenticateUser` for `Fortify::authenticateUsing()`: inactive accounts are refused at login with `login_failed` (reason `inactive`).
+- `ImmutableActivity::visibleTo($viewer)` (SA visibility rule) and the `HasActivityHistory` model trait.
+- `AuthData` gains `level` (`LevelData`) and `permissions` (Super Admin: every synced permission); `PermissionMatrixData` / `PermissionMatrixRowData`.
+- `AdminCoreSeeder` (idempotent; `admin-core.seed.password` / `ADMIN_SEED_PASSWORD`, required in production) and `admin:create-superadmin`.
+- Core migrations `create_permission_tables` and `add_admin_columns_to_users_table` (`username`, `is_active`, `last_login_at`, `sessions_invalidated_at`, soft deletes). Login stamps `last_login_at`.
+- Failed and locked logins resolve the account from the identifier, so the SA visibility rule can hide attempts on Super Admin accounts.
+- Dependency: `spatie/laravel-permission ^8.3`.
+
+### Changed
+- Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.
 
 ### Fixed
 - `LogsModuleActivity` no longer stores attributes with an `encrypted` cast; the trait read them decrypted, so they reached `attribute_changes` in plain text.

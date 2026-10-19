@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Illuminate\Auth\GenericUser;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -11,24 +11,27 @@ use Inertia\Testing\AssertableInertia;
 use Spatie\LaravelData\Data;
 use Yuan\AdminCore\Http\Middleware\HandleInertiaRequests;
 use Yuan\AdminCore\Tests\Fixtures\Http\ProjectInertiaMiddleware;
+use Yuan\AdminCore\Tests\Fixtures\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Laravel\withCookie;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     Route::middleware(['web', HandleInertiaRequests::class])->get('/probe', fn () => Inertia::render('Demo::Index'));
     Route::middleware(['web', ProjectInertiaMiddleware::class])->get('/project-probe', fn () => Inertia::render('Demo::Index'));
 });
 
-function user(): GenericUser
+function user(): User
 {
-    return new GenericUser(['id' => 7, 'name' => 'Budi', 'email' => 'budi@example.test', 'password' => 'secret', 'remember_token' => 'token']);
+    return User::query()->create(['name' => 'Budi', 'email' => 'budi@example.test', 'password' => 'Rahasia123', 'is_active' => true]);
 }
 
 it('shares guest props', function (): void {
     AssertableInertia::fromTestResponse(get('/probe'))
-        ->where('auth', ['user' => null, 'is_super_admin' => false])
+        ->where('auth', ['user' => null, 'level' => null, 'is_super_admin' => false, 'permissions' => []])
         ->where('menu', [])
         ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true]);
 });
@@ -36,8 +39,10 @@ it('shares guest props', function (): void {
 it('shares only id, name and email of the user, and their menu', function (): void {
     Gate::define('demo.view', fn (): bool => true);
 
-    AssertableInertia::fromTestResponse(actingAs(user())->get('/probe'))
-        ->where('auth.user', ['id' => 7, 'name' => 'Budi', 'email' => 'budi@example.test'])
+    $user = user();
+
+    AssertableInertia::fromTestResponse(actingAs($user)->get('/probe'))
+        ->where('auth.user', ['id' => $user->id, 'name' => 'Budi', 'email' => 'budi@example.test'])
         ->where('auth.is_super_admin', false)
         ->where('menu.0.key', 'master')
         ->where('menu.0.items.0.slug', 'demo')
@@ -56,7 +61,8 @@ it('reads the panel state from the admin_panel cookie', function (): void {
 
 it('shares only Data objects', function (): void {
     Gate::define('demo.view', fn (): bool => true);
-    $request = Request::create('/probe')->setUserResolver(fn (): GenericUser => user());
+    $user = user();
+    $request = Request::create('/probe')->setUserResolver(fn (): User => $user);
     $shared = (new HandleInertiaRequests)->share($request);
 
     expect($shared['auth']())->toBeInstanceOf(Data::class)

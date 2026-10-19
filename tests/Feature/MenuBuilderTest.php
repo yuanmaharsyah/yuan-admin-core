@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-use Illuminate\Auth\GenericUser;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Yuan\AdminCore\Data\MenuGroupData;
 use Yuan\AdminCore\Data\MenuItemData;
 use Yuan\AdminCore\Registry\MenuBuilder;
+use Yuan\AdminCore\Tests\Fixtures\Models\User;
+
+uses(RefreshDatabase::class);
 
 /**
  * @return array<string, list<string>>
  */
-function menuFor(GenericUser $user): array
+function menuFor(User $user): array
 {
     $menu = [];
 
@@ -23,7 +26,7 @@ function menuFor(GenericUser $user): array
 }
 
 it('shows nothing without permissions', function (): void {
-    expect(menuFor(new GenericUser(['id' => 1])))->toBe([]);
+    expect(menuFor(makeUser()))->toBe([]);
 });
 
 it('shows only the modules the user may view, grouped in config order', function (): void {
@@ -31,7 +34,7 @@ it('shows only the modules the user may view, grouped in config order', function
     Gate::define('notes.view', fn (): bool => true);
     Gate::define('hidden.view', fn (): bool => true);
 
-    expect(menuFor(new GenericUser(['id' => 1])))->toBe([
+    expect(menuFor(makeUser()))->toBe([
         'master' => ['demo'],
         'sistem' => ['notes'],
     ]);
@@ -40,7 +43,7 @@ it('shows only the modules the user may view, grouped in config order', function
 it('shows superadmin_only modules to Super Admin, ordered by order then label', function (): void {
     Gate::before(fn (): bool => true);
 
-    expect(menuFor(new GenericUser(['id' => 1])))->toBe([
+    expect(menuFor(makeUser()))->toBe([
         'master' => ['admin-only', 'demo'],
         'sistem' => ['notes'],
     ]);
@@ -49,7 +52,7 @@ it('shows superadmin_only modules to Super Admin, ordered by order then label', 
 it('builds groups and items with label, icon and link', function (): void {
     Gate::define('demo.view', fn (): bool => true);
 
-    expect(app(MenuBuilder::class)->build(new GenericUser(['id' => 1])))->toEqual([
+    expect(app(MenuBuilder::class)->build(makeUser()))->toEqual([
         new MenuGroupData('master', 'Master Data', 'database', [
             new MenuItemData('demo', 'Demo', 'receipt', url('/admin/demo')),
         ]),

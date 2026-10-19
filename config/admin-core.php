@@ -31,7 +31,8 @@ return [
 
     'routes' => [
         'prefix' => 'admin',
-        'middleware' => ['web', 'auth'],
+        // `active` logs out deactivated users and revoked sessions.
+        'middleware' => ['web', 'auth', 'active'],
     ],
 
     'menu' => [
@@ -61,6 +62,12 @@ return [
             'no_hp' => 'full',
             'alamat' => 'full',
         ],
+    ],
+
+    'seed' => [
+        // Password of the two seeded Super Admins. Empty: each gets a random
+        // password printed once by the seeder (refused in production).
+        'password' => env('ADMIN_SEED_PASSWORD'),
     ],
 
     'pages' => [

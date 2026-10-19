@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Yuan\AdminCore\Http\Middleware;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
 use Yuan\AdminCore\Data\AppData;
 use Yuan\AdminCore\Data\AuthData;
-use Yuan\AdminCore\Data\UserData;
 use Yuan\AdminCore\Registry\MenuBuilder;
 
 /**
@@ -26,10 +24,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'auth' => fn (): AuthData => new AuthData(
-                user: $request->user() === null ? null : UserData::fromUser($request->user()),
-                is_super_admin: $request->user() !== null && Gate::forUser($request->user())->allows('admin-core.superadmin'),
-            ),
+            'auth' => fn (): AuthData => AuthData::fromUser($request->user()),
             'menu' => fn (): array => $request->user() === null ? [] : app(MenuBuilder::class)->build($request->user()),
             'app' => fn (): AppData => new AppData(
                 name: config()->string('app.name'),

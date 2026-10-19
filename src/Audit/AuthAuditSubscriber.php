@@ -11,6 +11,8 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Yuan\AdminCore\Auth\AuthenticateUser;
 
 /**
  * Security events (`log_name` = `auth` for sign-in events). The causer is set
@@ -49,21 +51,21 @@ final class AuthAuditSubscriber
     }
 
     /**
-     * The matched user (if any) is the subject, so the SA visibility rule can
-     * hide failed attempts on Super Admin accounts.
+     * The account the identifier belongs to (if any) is the subject, so the SA
+     * visibility rule can hide attempts on Super Admin accounts.
      */
     public function failed(Failed $event): void
     {
-        Audit::record(
-            AuditEvent::LoginFailed,
-            $event->user instanceof Model ? $event->user : null,
-            ['username' => $event->credentials[$this->usernameField()] ?? null],
-        );
+        $username = $event->credentials[AuthenticateUser::usernameField()] ?? null;
+
+        Audit::record(AuditEvent::LoginFailed, $event->user instanceof Model ? $event->user : $this->userFor($username), ['username' => $username]);
     }
 
     public function lockout(Lockout $event): void
     {
-        Audit::record(AuditEvent::LoginLocked, meta: ['username' => $event->request->input($this->usernameField())]);
+        $username = $event->request->input(AuthenticateUser::usernameField());
+
+        Audit::record(AuditEvent::LoginLocked, $this->userFor($username), ['username' => $username]);
     }
 
     private function recordFor(?Authenticatable $user, AuditEvent $event): void
@@ -73,13 +75,15 @@ final class AuthAuditSubscriber
         }
     }
 
-    /**
-     * The login identifier field; follows Fortify's setting when it is installed.
-     */
-    private function usernameField(): string
+    private function userFor(mixed $username): ?Model
     {
-        $field = config('fortify.username', 'email');
+        if (! is_string($username) || $username === '') {
+            return null;
+        }
 
-        return is_string($field) ? $field : 'email';
+        $user = Auth::createUserProvider(config()->string('auth.guards.'.config()->string('auth.defaults.guard').'.provider'))
+            ?->retrieveByCredentials([AuthenticateUser::usernameField() => $username]);
+
+        return $user instanceof Model ? $user : null;
     }
 }
