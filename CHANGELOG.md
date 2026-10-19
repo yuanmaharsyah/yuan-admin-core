@@ -32,6 +32,9 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Core migrations `create_permission_tables` and `add_admin_columns_to_users_table` (`username`, `is_active`, `last_login_at`, soft deletes). Login stamps `last_login_at`.
 - Failed and locked logins resolve the account from the identifier, so the SA visibility rule can hide attempts on Super Admin accounts.
 - Dependency: `spatie/laravel-permission ^8.3`.
+- `Testing\ContractAssertions`: the runtime contract checks of spec §9.1, run over the current app's modules (projects call them from `tests/Feature/ContractTest.php`).
+- `Testing\ModuleAssertions`: module test helpers `actingAsLevelWith()`, `actingAsSuperAdmin()`, `assertGuestRedirected()`, `assertForbiddenWithout()`, `assertAudited()` (with masked-field checks) and `assertNotVisibleToNonSuperAdmin()`.
+- `Audit\NotAudited` attribute: the opt-out from `LogsModuleActivity`, with a required reason.
 
 ### Changed
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.

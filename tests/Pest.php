@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Testing\PendingCommand;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Permissions\PermissionSynchronizer;
+use Yuan\AdminCore\Registry\ModuleRegistry;
+use Yuan\AdminCore\Tests\ContractTestCase;
 use Yuan\AdminCore\Tests\Fixtures\Models\User;
 use Yuan\AdminCore\Tests\TestCase;
 
 pest()->extend(TestCase::class)->in('Feature');
+pest()->extend(ContractTestCase::class)->in('Contract', 'Fixtures/Contract');
 
 /**
  * @return list<array{name: string, path: string, namespace: string}>
@@ -126,4 +130,44 @@ function command(string $name, array $parameters = []): PendingCommand
     }
 
     return $command;
+}
+
+/**
+ * Point the registry at the given roots, as a project with those modules would.
+ *
+ * @param  list<array{name: string, path: string, namespace: string}>  $roots
+ */
+function useModuleRoots(array $roots): void
+{
+    app()->instance(ModuleRegistry::class, new ModuleRegistry(
+        $roots,
+        array_keys(config()->array('admin-core.menu.groups')),
+        [],
+        sys_get_temp_dir().'/admin-core-test-roots-'.getmypid().'.php',
+    ));
+}
+
+/**
+ * Adds the `Broken` root (module `Leaky`) next to the compliant one, with its
+ * routes registered as the provider would.
+ */
+function withBrokenModules(): void
+{
+    useModuleRoots([ContractTestCase::CONTRACT_ROOT, ContractTestCase::BROKEN_ROOT]);
+
+    /** @var list<string> $middleware */
+    $middleware = config()->array('admin-core.routes.middleware');
+    Route::middleware($middleware)->prefix('admin/leaky')->name('leaky.')->group(TestCase::FIXTURES.'/Broken/Leaky/Routes/web.php');
+}
+
+/**
+ * A temp copy of a compliant fixture module, as the only module of a root.
+ */
+function copyOfContractModule(string $name): string
+{
+    $root = temporaryRoot();
+    app('files')->copyDirectory(TestCase::FIXTURES."/Contract/{$name}", "{$root}/{$name}");
+    useModuleRoots([['name' => 'project', 'path' => $root, 'namespace' => 'Copy\\']]);
+
+    return "{$root}/{$name}";
 }
