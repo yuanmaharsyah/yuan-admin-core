@@ -50,7 +50,7 @@ it('turns off the core-root modules listed in admin-core.modules.disabled', func
 
 it('refuses to turn off a core module', function (): void {
     registry(fixtureRoots(), disabled: ['notes'])->all();
-})->throws(InvalidModuleDefinition::class, 'Module "notes" in ['.TestCase::FIXTURES.'/core/Notes/module.php] is a core module');
+})->throws(InvalidModuleDefinition::class, 'Module "notes" in ['.TestCase::FIXTURES.'/Core/Notes/module.php] is a core module');
 
 it('fails on a slug used by two modules, naming both files', function (): void {
     $root = temporaryRoot();

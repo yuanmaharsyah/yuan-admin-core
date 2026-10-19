@@ -15,8 +15,8 @@ pest()->extend(TestCase::class)->in('Feature');
 function fixtureRoots(): array
 {
     return [
-        ['name' => 'core', 'path' => TestCase::FIXTURES.'/core', 'namespace' => 'Yuan\\AdminCore\\Tests\\Fixtures\\Core\\'],
-        ['name' => 'project', 'path' => TestCase::FIXTURES.'/modules', 'namespace' => 'Yuan\\AdminCore\\Tests\\Fixtures\\Modules\\'],
+        ['name' => 'core', 'path' => TestCase::FIXTURES.'/Core', 'namespace' => 'Yuan\\AdminCore\\Tests\\Fixtures\\Core\\'],
+        ['name' => 'project', 'path' => TestCase::FIXTURES.'/Modules', 'namespace' => 'Yuan\\AdminCore\\Tests\\Fixtures\\Modules\\'],
     ];
 }
 
