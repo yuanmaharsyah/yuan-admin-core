@@ -5,6 +5,7 @@ export type Href = NonNullable<InertiaLinkProps['href']>;
 /** Project links the shell needs; the project passes them from its Wayfinder routes. */
 export type ShellLinks = {
     profile: Href;
+    changePassword: Href;
     logout: Href;
 };
 

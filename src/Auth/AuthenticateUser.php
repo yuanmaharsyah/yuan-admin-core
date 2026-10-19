@@ -13,7 +13,8 @@ use Yuan\AdminCore\Audit\Audit;
 use Yuan\AdminCore\Audit\AuditEvent;
 
 /**
- * The login check, for `Fortify::authenticateUsing()`: wrong credentials
+ * The login check, for `Fortify::authenticateUsing()`: the login field takes a
+ * username or an email (an `@` means email). Wrong credentials
  * return null (Fortify fires `Failed`, counts the attempt and shows its
  * message); the right password on an inactive account is refused with
  * `login_failed` (reason `inactive`).
@@ -31,7 +32,7 @@ final class AuthenticateUser
             return null;
         }
 
-        $user = $users->retrieveByCredentials([$field => $username]);
+        $user = $users->retrieveByCredentials(self::credentials($username));
 
         if ($user === null || ! $users->validateCredentials($user, ['password' => $password])) {
             return null;
@@ -44,6 +45,17 @@ final class AuthenticateUser
         }
 
         return $user;
+    }
+
+    /**
+     * The column a login value is looked up in: one field takes a username or
+     * an email (ui-design §4.7); an `@` means email.
+     *
+     * @return array<string, string>
+     */
+    public static function credentials(string $login): array
+    {
+        return [str_contains($login, '@') ? 'email' : 'username' => $login];
     }
 
     /**

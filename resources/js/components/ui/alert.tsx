@@ -3,14 +3,21 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
+// Soft status style (ui-design §1.1): status colour at 12% behind ink text;
+// the icon and the title take the status colour.
 const alertVariants = cva(
-    'relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded border px-4 py-3 text-body has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
+    'flex w-full gap-2.5 rounded p-3 text-table leading-normal [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0',
     {
         variants: {
             variant: {
-                default: 'bg-background text-foreground',
+                default: 'bg-muted',
                 destructive:
-                    'text-destructive-foreground *:data-[slot=alert-description]:text-destructive-foreground/80 [&>svg]:text-current',
+                    'bg-destructive/12 [&_[data-slot=alert-title]]:text-destructive [&>svg]:text-destructive',
+                warning:
+                    'bg-warning/12 [&_[data-slot=alert-title]]:text-warning [&>svg]:text-warning',
+                info: 'bg-info/12 [&_[data-slot=alert-title]]:text-info [&>svg]:text-info',
+                success:
+                    'bg-success/12 [&_[data-slot=alert-title]]:text-success [&>svg]:text-success',
             },
         },
         defaultVariants: {
@@ -19,6 +26,7 @@ const alertVariants = cva(
     },
 );
 
+/** Errors and warnings are announced (`role="alert"`), the rest is `status`. */
 function Alert({
     className,
     variant,
@@ -27,21 +35,22 @@ function Alert({
     return (
         <div
             data-slot="alert"
-            role="alert"
+            role={
+                variant === 'destructive' || variant === 'warning'
+                    ? 'alert'
+                    : 'status'
+            }
             className={cn(alertVariants({ variant }), className)}
             {...props}
         />
     );
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
+function AlertTitle({ className, ...props }: React.ComponentProps<'strong'>) {
     return (
-        <div
+        <strong
             data-slot="alert-title"
-            className={cn(
-                'col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight',
-                className,
-            )}
+            className={cn('block font-semibold', className)}
             {...props}
         />
     );
@@ -54,10 +63,7 @@ function AlertDescription({
     return (
         <div
             data-slot="alert-description"
-            className={cn(
-                'col-start-2 grid justify-items-start gap-1 text-body text-muted-foreground [&_p]:leading-relaxed',
-                className,
-            )}
+            className={cn('text-foreground', className)}
             {...props}
         />
     );

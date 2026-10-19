@@ -36,6 +36,9 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `Testing\ModuleAssertions`: module test helpers `actingAsLevelWith()`, `actingAsSuperAdmin()`, `assertGuestRedirected()`, `assertForbiddenWithout()`, `assertAudited()` (with masked-field checks) and `assertNotVisibleToNonSuperAdmin()`.
 - `Audit\NotAudited` attribute: the opt-out from `LogsModuleActivity`, with a required reason.
 - PHPStan rules for controllers, registered by `extension.neon` (projects include `vendor/yuan/admin-core/extension.neon`): `InertiaPropsRule` (Inertia props must be Data objects, scalars or Inertia prop wrappers of those; identifier `adminCore.inertiaProps`) and `RequestInputRule` (no `all()`, `validated()` or key-less `input()`; identifier `adminCore.requestInput`).
+- Auth pages `Core::Auth/{Login,ForgotPassword,ResetPassword,ChangePassword}` with `AuthLayout`, `AuthCard`, `FormField`, `PasswordInput` and their Data objects (`Data\Auth\*`); `ResetPasswordData`, `UpdatePasswordData`.
+- `Auth\PasswordRules`: spec §8 rules (min 10, mixed case, number; `admin-core.passwords`) set as `Password::defaults()`, with a hint text.
+- `Http\ErrorPages`: 403 / 404 / 419 / 500 / 503 as `Core::Errors/Show` (`ErrorPageData`); `admin-core.routes.home`.
 - `Testing\ArchRules`: filesystem helpers for the arch tests of spec §9.1 (module namespaces, isolation map, source scans).
 - Theme stylesheet `resources/css/admin-core.css` (ui-design §1): light/dark tokens, Tailwind mapping, named type steps and control heights, shadow and overlay tokens, Geist / Geist Mono (projects install `@fontsource-variable/geist` and `@fontsource-variable/geist-mono`).
 - Frontend: shadcn primitives moved into the package and restyled (`components/ui`), `usePermission()` / `<Can>`, `lib/format.ts` (id-ID), `useT()` translation helper with `id` / `en` dictionaries, `<Icon name>`.
@@ -45,6 +48,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Layout shell: `AdminLayout` (rail, item panel, mobile sheet, topbar, breadcrumbs, user menu, theme toggle, maintenance banner), `PageHeader`, `CommandPalette` (`cmdk`), flash `Toaster`, theme switch in the user menu; `BreadcrumbData` / `BreadcrumbsData`; `AppData.route`; `MenuItemData.create_href`.
 
 ### Changed
+- Login accepts a username or an email in one field (`AuthenticateUser::credentials()`); the failed-login audit resolves the account the same way.
 - `module.php` `icon` must be a lucide icon name from `resources/icons/lucide.json` (was: any kebab-case string).
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.
 

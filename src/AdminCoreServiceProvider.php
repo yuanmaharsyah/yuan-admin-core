@@ -15,12 +15,14 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Yuan\AdminCore\Audit\AuditContext;
 use Yuan\AdminCore\Audit\AuthAuditSubscriber;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\WriteActivity;
+use Yuan\AdminCore\Auth\PasswordRules;
 use Yuan\AdminCore\Console\CreateSuperAdminCommand;
 use Yuan\AdminCore\Console\DoctorCommand;
 use Yuan\AdminCore\Console\ModulesCacheCommand;
@@ -70,6 +72,9 @@ final class AdminCoreServiceProvider extends ServiceProvider
         $this->bootAudit();
 
         $this->bootRbac();
+
+        // Spec §8 password rules; a project's own provider may replace them.
+        Password::defaults(fn (): Password => PasswordRules::defaults());
 
         $this->app->make(PageResolver::class)->register($this->app);
 

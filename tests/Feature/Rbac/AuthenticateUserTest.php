@@ -22,6 +22,15 @@ it('returns the user for the right password', function (): void {
     expect(attemptLogin($user->email, 'Rahasia123')?->getAuthIdentifier())->toBe($user->id);
 });
 
+it('takes a username or an email in the same login field', function (): void {
+    $user = makeUser();
+    $user->forceFill(['username' => 'budi.santoso'])->save();
+
+    expect(attemptLogin('budi.santoso', 'Rahasia123')?->getAuthIdentifier())->toBe($user->id)
+        ->and(attemptLogin($user->email, 'Rahasia123')?->getAuthIdentifier())->toBe($user->id)
+        ->and(attemptLogin('Budi.Santoso@', 'Rahasia123'))->toBeNull();
+});
+
 it('returns null for a wrong password or an unknown or empty identifier, writing nothing itself', function (string $email, string $password): void {
     makeUser('Budi')->forceFill(['email' => 'budi@example.test'])->save();
 

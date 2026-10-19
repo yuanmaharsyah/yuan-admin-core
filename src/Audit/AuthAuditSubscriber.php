@@ -82,7 +82,7 @@ final class AuthAuditSubscriber
         }
 
         $user = Auth::createUserProvider(config()->string('auth.guards.'.config()->string('auth.defaults.guard').'.provider'))
-            ?->retrieveByCredentials([AuthenticateUser::usernameField() => $username]);
+            ?->retrieveByCredentials(AuthenticateUser::credentials($username));
 
         return $user instanceof Model ? $user : null;
     }

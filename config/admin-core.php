@@ -31,6 +31,8 @@ return [
 
     'routes' => [
         'prefix' => 'admin',
+        // Route name of the signed-in home page (error pages link back to it).
+        'home' => 'dashboard',
         // `active` logs out deactivated users and revoked sessions.
         'middleware' => ['web', 'auth', 'active'],
     ],
@@ -78,6 +80,14 @@ return [
         // Folder of the package's own `Core::` pages (auth, errors), as seen
         // from the project, so Vite entries are relative to the project root.
         'core_path' => base_path('vendor/yuan/admin-core/resources/js/pages'),
+    ],
+
+    // Password rules (spec §8), applied as Password::defaults(): min length,
+    // mixed case and a number. uncompromised() calls an online API, so it is
+    // off by default for offline servers.
+    'passwords' => [
+        'min' => 10,
+        'uncompromised' => false,
     ],
 
     // A full-width notice under the topbar for every signed-in user; null hides

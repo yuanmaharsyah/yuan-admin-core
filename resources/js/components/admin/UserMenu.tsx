@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Moon, Sun, UserRound } from 'lucide-react';
+import { KeyRound, LogOut, Moon, Sun, UserRound } from 'lucide-react';
 import { useAppearance } from '../../hooks/useAppearance';
 import { useT } from '../../lib/i18n';
 import type { ShellLinks } from '../../lib/shell';
@@ -46,6 +46,12 @@ export function UserMenu({
                     <Link href={links.profile} className="w-full">
                         <UserRound />
                         {t('shell.profile')}
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href={links.changePassword} className="w-full">
+                        <KeyRound />
+                        {t('shell.change_password')}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
