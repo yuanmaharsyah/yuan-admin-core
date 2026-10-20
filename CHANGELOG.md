@@ -53,6 +53,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Forms (frontend-behavior §6): `TextField`, `TextareaField`, `SelectField`, `ComboboxField`, `RelationSelect` (module `lookup` routes answering `LookupData`), `DateField` (shadcn Calendar on `react-day-picker` + `date-fns`, typed `dd/mm/yyyy`, optional time), `NumberField` / `CurrencyField` (id-ID display, either notation pasted), `SwitchField`; `FormFooter`, `FormErrorSummary`, `UnsavedChangesGuard`, `StaleUpdateDialog`, `DetailGrid`, `useAdminForm`; `ui/popover`, `ui/calendar`; `lib/format` gains `formatLocalDate()`, `formatLocalDateTime()`, `parseLocalDate()`, `parseNumber()`. npm: `@radix-ui/react-popover`, `react-day-picker`, `date-fns`.
 - `Concurrency\PreventsStaleUpdates` (`updateUnlessStale()`, row lock, 409 `StaleUpdateException`).
 - Module UI dictionaries: `Dictionaries` interface, `ModuleDictionary<'slug'>`, `registerMessages()`; `t()` keys are checked by `tsc` across core and modules.
+- `Validation\VisibleRecord`: a foreign key must point at a live record the signed-in user may see (`visibleTo()`), for every relation field.
 - `ModuleAssertions::assertScopedToUser()` with `DataTable\VisibilityScope` (records `visibleTo()` calls only while a test asks).
 
 ### Changed
