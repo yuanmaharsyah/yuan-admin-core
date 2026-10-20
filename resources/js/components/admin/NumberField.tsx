@@ -13,7 +13,8 @@ type Props = FieldProps<number | null> & {
 /**
  * Locale-aware number entry (frontend-behavior §6): shows `1.250.000,5`,
  * keeps a plain number, and takes pasted text in either notation. The text
- * is reformatted when the field loses focus.
+ * is reformatted when the field loses focus. A lone `.` is a decimal mark
+ * in a decimal field and a thousands mark in a currency field (`parseNumber`).
  */
 export function NumberField({
     name,
@@ -31,6 +32,11 @@ export function NumberField({
     const show = (number: number | null) =>
         number === null ? '' : formatNumber(number, digits);
     const [text, setText] = useState(() => show(value));
+    const read = (input: string) => {
+        const parsed = parseNumber(input, digits > 0);
+
+        return parsed === null ? null : Number(parsed.toFixed(digits));
+    };
 
     return (
         <FormField
@@ -61,14 +67,10 @@ export function NumberField({
                     }
                     onChange={(event) => {
                         setText(event.target.value);
-                        const parsed = parseNumber(event.target.value);
-                        onChange(
-                            parsed === null
-                                ? null
-                                : Number(parsed.toFixed(digits)),
-                        );
+                        onChange(read(event.target.value));
                     }}
-                    onBlur={() => setText(show(value))}
+                    // Show how the input was read, in id-ID: `0.125` → `0,125`, `1,250,000` → `1.250.000`.
+                    onBlur={() => setText(show(read(text)))}
                 />
             </div>
         </FormField>

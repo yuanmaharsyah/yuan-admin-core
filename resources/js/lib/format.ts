@@ -88,11 +88,15 @@ export function parseLocalDate(text: string): string | null {
 
 /**
  * A typed or pasted number in either notation: `1.250.000,5` (id-ID) or
- * `1,250,000.5`. With both separators the last one is the decimal mark. A
- * single separator repeated is a thousands mark; a single `,` is decimal; a
- * single `.` is a thousands mark when exactly three digits follow it. Null when nothing numeric is left.
+ * `1,250,000.5`. With both separators the last one is the decimal mark; a
+ * repeated separator is a thousands mark; a single `,` is decimal. A single
+ * `.` depends on the field: in a decimal field (`decimalDot`) it is the
+ * decimal mark (`0.125` → 0,125; `12.5` → 12,5); in a whole-number field it
+ * is a thousands mark when exactly three digits follow it (`1.250` → 1250).
+ * Null when nothing numeric is left. NumberField shows the result in id-ID
+ * on blur, so the user sees how the input was read.
  */
-export function parseNumber(text: string): number | null {
+export function parseNumber(text: string, decimalDot = false): number | null {
     let value = text.replace(/[^\d,.-]/g, '');
     const comma = value.lastIndexOf(',');
     const dot = value.lastIndexOf('.');
@@ -110,7 +114,7 @@ export function parseNumber(text: string): number | null {
                 : value.split('.').join('').replace(',', '.');
     } else if (
         dot >= 0 &&
-        (/\.\d{3}$/.test(value) || value.indexOf('.') !== dot)
+        (value.indexOf('.') !== dot || (!decimalDot && /\.\d{3}$/.test(value)))
     ) {
         value = value.split('.').join('');
     }

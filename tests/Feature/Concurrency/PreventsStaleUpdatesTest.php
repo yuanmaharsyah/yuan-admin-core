@@ -7,41 +7,44 @@ use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Concurrency\StaleUpdateException;
 use Yuan\AdminCore\Tests\Fixtures\Modules\Demo\Models\DemoItem;
 
-use function Pest\Laravel\travel;
+use function Pest\Laravel\freezeSecond;
 
 uses(RefreshDatabase::class);
 
-it('saves when the row is unchanged since the form loaded', function (): void {
+it('raises lock_version by one on every update, whatever the path', function (): void {
     $item = DemoItem::query()->create(['name' => 'Lama']);
-    $loadedAt = $item->updated_at?->toIso8601String() ?? '';
-    travel(5)->seconds();
+    expect($item->fresh()?->lock_version)->toBe(0);
 
-    $item->updateUnlessStale(['name' => 'Baru'], $loadedAt);
+    $item->update(['name' => 'Dua']);
+    DemoItem::query()->findOrFail($item->id)->update(['name' => 'Tiga']);
+    $item->refresh()->updateUnlessStale(['name' => 'Empat'], 2);
 
-    expect($item->fresh()?->name)->toBe('Baru');
+    expect($item->fresh()?->lock_version)->toBe(3)
+        ->and($item->fresh()?->name)->toBe('Empat');
 });
 
-it('refuses and writes nothing when someone saved in between', function (): void {
+it('saves when the version is the one the form loaded', function (): void {
     $item = DemoItem::query()->create(['name' => 'Lama']);
-    $loadedAt = $item->updated_at?->toIso8601String() ?? '';
-    travel(5)->seconds();
-    DemoItem::query()->findOrFail($item->id)->update(['name' => 'Orang lain']);
+
+    $item->updateUnlessStale(['name' => 'Baru'], 0);
+
+    expect($item->fresh()?->only(['name', 'lock_version']))->toBe(['name' => 'Baru', 'lock_version' => 1]);
+});
+
+it('refuses the second of two saves in the same second', function (): void {
+    $item = DemoItem::query()->create(['name' => 'Lama']);
+    $first = DemoItem::query()->findOrFail($item->id);
+    $second = DemoItem::query()->findOrFail($item->id);
+    freezeSecond();
+
+    $first->updateUnlessStale(['name' => 'Orang lain'], 0);
     $audited = ImmutableActivity::query()->count();
 
-    expect(fn () => $item->updateUnlessStale(['name' => 'Saya'], $loadedAt))
+    expect(fn () => $second->updateUnlessStale(['name' => 'Saya'], 0))
         ->toThrow(StaleUpdateException::class, 'Data ini telah diubah oleh pengguna lain.');
 
-    expect($item->fresh()?->name)->toBe('Orang lain')
+    expect($item->fresh()?->only(['name', 'lock_version']))->toBe(['name' => 'Orang lain', 'lock_version' => 1])
         ->and(ImmutableActivity::query()->count())->toBe($audited);
-});
-
-it('compares the instant, whatever the offset the client sends', function (): void {
-    $item = DemoItem::query()->create(['name' => 'Lama']);
-    $loadedAt = $item->updated_at?->setTimezone('Asia/Jakarta')->toIso8601String() ?? '';
-
-    $item->updateUnlessStale(['name' => 'Baru'], $loadedAt);
-
-    expect($item->fresh()?->name)->toBe('Baru');
 });
 
 it('answers HTTP 409', function (): void {

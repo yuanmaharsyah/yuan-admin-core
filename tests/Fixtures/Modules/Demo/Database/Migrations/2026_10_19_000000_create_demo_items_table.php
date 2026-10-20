@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('secret')->nullable();
             $table->string('pin')->nullable();
             $table->string('status')->nullable()->index();
+            $table->unsignedInteger('lock_version')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

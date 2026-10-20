@@ -19,6 +19,7 @@ use Yuan\AdminCore\DataTable\HasVisibilityScope;
 /**
  * @property string|null $name
  * @property Carbon|null $updated_at
+ * @property int $lock_version
  */
 final class DemoItem extends Model implements DataTableModel
 {
@@ -29,6 +30,11 @@ final class DemoItem extends Model implements DataTableModel
     protected $fillable = ['name', 'nik', 'no_hp', 'secret', 'pin'];
 
     protected $hidden = ['pin'];
+
+    protected $casts = ['lock_version' => 'integer'];
+
+    /** @var array<string, mixed> */
+    protected $attributes = ['lock_version' => 0];
 
     /**
      * @return list<string>
