@@ -59,7 +59,7 @@ export function Toaster() {
             toastOptions={{
                 unstyled: true,
                 classNames: {
-                    toast: 'flex w-full items-start gap-3 rounded border border-border bg-popover p-3.5 text-popover-foreground sm:w-90',
+                    toast: 'flex w-full items-start gap-3 rounded border border-border bg-popover p-3.5 text-popover-foreground sm:w-100',
                     content: 'min-w-0 flex-1',
                     title: 'text-body font-semibold',
                     description: 'text-table text-muted-foreground',
