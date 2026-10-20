@@ -31,6 +31,17 @@ final class DataTableBuilder extends Builder
      */
     public function dataTable(Request $request): LengthAwarePaginator
     {
+        return $this->dataTableQuery($request)->paginate(DataTableQuery::perPage($request));
+    }
+
+    /**
+     * The list's search, filters and sort without paging: what a download of
+     * the current list exports.
+     *
+     * @return Builder<TModel>
+     */
+    public function dataTableQuery(Request $request): Builder
+    {
         $model = $this->getModel();
 
         if (! $model instanceof DataTableModel) {
@@ -39,13 +50,11 @@ final class DataTableBuilder extends Builder
 
         DataTableQuery::applySearch($this, $model->dataTableSearch(), DataTableQuery::search($request));
 
-        /** @var Builder<TModel> $query */
-        $query = QueryBuilder::for($this, $request)
+        /** @var Builder<TModel> */
+        return QueryBuilder::for($this, $request)
             ->allowedFilters(...array_map(fn (DataTableFilterData $filter): AllowedFilter => AllowedFilter::exact($filter->key), $model->dataTableFilters()))
             ->allowedSorts(...$model->dataTableSorts())
             ->defaultSort($model->dataTableDefaultSort())
             ->getEloquentBuilder();
-
-        return $query->paginate(DataTableQuery::perPage($request));
     }
 }

@@ -1,4 +1,4 @@
-import { Columns3, PlusCircle, Search, X } from 'lucide-react';
+import { Columns3, Download, PlusCircle, Search, X } from 'lucide-react';
 import type { useTableQuery } from '../../hooks/useTableQuery';
 import { useT } from '../../lib/i18n';
 import { cn } from '../../lib/utils';
@@ -20,6 +20,7 @@ type Props = {
     columns: { key: string; label: string }[];
     hidden: string[];
     onHiddenChange: (keys: string[]) => void;
+    onDownload?: () => void;
 };
 
 /** Search, one chip per filter (dashed when unset), Reset, and the column menu. */
@@ -30,6 +31,7 @@ export function DataTableToolbar({
     columns,
     hidden,
     onHiddenChange,
+    onDownload,
 }: Props) {
     const t = useT();
 
@@ -168,6 +170,19 @@ export function DataTableToolbar({
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
+            )}
+            {onDownload && (
+                <Button
+                    variant="outline"
+                    aria-label={t('table.download_label')}
+                    className="gap-1.5 border-border bg-card px-2.5 text-table"
+                    onClick={onDownload}
+                >
+                    <Download />
+                    <span className="max-sm:sr-only">
+                        {t('table.download')}
+                    </span>
+                </Button>
             )}
         </div>
     );

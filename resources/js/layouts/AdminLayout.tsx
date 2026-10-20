@@ -7,6 +7,7 @@ import { Breadcrumbs } from '../components/admin/Breadcrumbs';
 import { CommandPalette } from '../components/admin/CommandPalette';
 import { ItemPanel } from '../components/admin/ItemPanel';
 import { MaintenanceBanner } from '../components/admin/MaintenanceBanner';
+import { DownloadsLink } from '../components/admin/DownloadsLink';
 import { ThemeToggle } from '../components/admin/ThemeToggle';
 import { UserMenu } from '../components/admin/UserMenu';
 import { Button } from '../components/ui/button';
@@ -227,6 +228,7 @@ export function AdminLayout({
                     >
                         <Search className="size-4.5" />
                     </Button>
+                    <DownloadsLink href={links.downloads} />
                     <div className="hidden lg:block">
                         <ThemeToggle />
                     </div>

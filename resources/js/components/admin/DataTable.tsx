@@ -74,6 +74,8 @@ type Props<T extends Row> = {
     bulkDelete?: (ids: number[]) => void;
     /** Shown when the list is empty and nothing is filtered. */
     empty: EmptyStateProps;
+    /** The module's download route (pass it only when `download` is allowed); sends the current search, filters and sort. */
+    download?: Href;
 };
 
 const INTERACTIVE =
@@ -97,6 +99,7 @@ export function DataTable<T extends Row>({
     rowActions,
     bulkDelete,
     empty,
+    download,
 }: Props<T>) {
     const t = useT();
     const query = useTableQuery(state, data.meta.current_page);
@@ -132,6 +135,16 @@ export function DataTable<T extends Row>({
                 columns={columns.filter((column) => column.hideable !== false)}
                 hidden={hidden}
                 onHiddenChange={setHidden}
+                onDownload={
+                    download
+                        ? () =>
+                              query.download(
+                                  typeof download === 'string'
+                                      ? download
+                                      : download.url,
+                              )
+                        : undefined
+                }
             />
 
             <section

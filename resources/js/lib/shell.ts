@@ -7,6 +7,8 @@ export type ShellLinks = {
     profile: Href;
     changePassword: Href;
     logout: Href;
+    /** The Downloads page (Phase 07); without it the topbar shows the ready count only. */
+    downloads?: Href;
 };
 
 type MenuGroup = Yuan.AdminCore.Data.MenuGroupData;

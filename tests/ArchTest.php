@@ -63,9 +63,13 @@ arch('no FormRequests: input is a laravel-data object', function () use ($target
     }
 });
 
-// A source scan: Pest can't see a class that isn't installed (maatwebsite/excel arrives in Phase 06).
+arch('the Excel facade only in Yuan\AdminCore\Exports', function (): void {
+    expect('Maatwebsite\Excel\Facades\Excel')->toOnlyBeUsedIn('Yuan\AdminCore\Exports');
+});
+
+// A source scan too: it also catches the `Excel` alias, which the class rule can't see.
 it('downloads only through ExportManager', function () use ($production): void {
-    expect(ArchRules::filesMatching($production, '/Excel::download|Maatwebsite\\\\Excel\\\\Facades\\\\Excel/', ['/src/Exports/ExportManager.php']))->toBe([]);
+    expect(ArchRules::filesMatching($production, '/Excel::(download|store|queue|raw)|Maatwebsite\\\\Excel\\\\Facades\\\\Excel/', ['/src/Exports/ExportManager.php', '/src/Exports/ExportJob.php']))->toBe([]);
 });
 
 arch('activity log only through Yuan\AdminCore\Audit', function () use ($targets): void {

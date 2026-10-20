@@ -125,3 +125,14 @@ export function parseNumber(text: string, decimalDot = false): number | null {
 
     return Number(value);
 }
+
+/** A file size: `850 B`, `12,4 KB`, `3,2 MB`. */
+export function formatFileSize(bytes: number): string {
+    if (bytes < 1024) {
+        return `${formatNumber(bytes, 0)} B`;
+    }
+
+    return bytes < 1024 * 1024
+        ? `${formatNumber(bytes / 1024, 1)} KB`
+        : `${formatNumber(bytes / 1024 / 1024, 1)} MB`;
+}

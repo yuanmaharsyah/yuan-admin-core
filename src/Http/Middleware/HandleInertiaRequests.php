@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Yuan\AdminCore\Data\AppData;
 use Yuan\AdminCore\Data\AuthData;
+use Yuan\AdminCore\Data\DownloadsData;
 use Yuan\AdminCore\Registry\MenuBuilder;
 
 /**
@@ -34,6 +35,7 @@ class HandleInertiaRequests extends Middleware
                 maintenance_banner: is_string($banner = config('admin-core.maintenance_banner')) && $banner !== '' ? $banner : null,
                 route: $request->route()?->getName(),
             ),
+            'downloads' => fn (): DownloadsData => DownloadsData::forUser($request->user()),
         ];
     }
 }

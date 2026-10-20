@@ -103,6 +103,23 @@ export function useTableQuery(state: State, page: number) {
         setPage: (next: number) => visit({ page: next }),
         setPerPage: (perPage: number) => visit({ per_page: perPage, page: 1 }),
         retry: () => visit({}),
+        /**
+         * The list's download with the current search, filters and sort: the
+         * server answers with the file (the page stays) or a "queued" flash.
+         */
+        download: (href: string) =>
+            router.get(
+                href,
+                toParams({
+                    search: state.search,
+                    sort: state.sort,
+                    filter: state.filter,
+                }),
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            ),
     };
 }
 

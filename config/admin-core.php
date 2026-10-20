@@ -90,6 +90,25 @@ return [
         'uncompromised' => false,
     ],
 
+    // List downloads (spec §7, ExportManager). Up to `threshold` rows the file
+    // streams at once; above it an ExportJob writes it to `disk` and it stays
+    // downloadable for `ttl_hours`. Settings overrides the threshold in Phase 07.
+    'exports' => [
+        'threshold' => 5000,
+        'disk' => 'local',
+        'ttl_hours' => 24,
+    ],
+
+    // Files attached to records (HasAttachments): a private disk only, served
+    // through signed URLs valid for `url_ttl_minutes`. A model may narrow
+    // `mimes` and `max_kb` in attachmentRules().
+    'attachments' => [
+        'disk' => 'local',
+        'max_kb' => 10240,
+        'mimes' => ['pdf', 'jpg', 'jpeg', 'png', 'xlsx', 'docx'],
+        'url_ttl_minutes' => 5,
+    ],
+
     // A full-width notice under the topbar for every signed-in user; null hides
     // it. Settings overrides it from Phase 07.
     'maintenance_banner' => env('ADMIN_MAINTENANCE_BANNER'),
