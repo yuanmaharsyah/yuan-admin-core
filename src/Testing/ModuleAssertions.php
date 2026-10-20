@@ -11,6 +11,7 @@ use LogicException;
 use PHPUnit\Framework\Assert;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\Masker;
+use Yuan\AdminCore\DataTable\VisibilityScope;
 use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Permissions\PermissionSynchronizer;
 use Yuan\AdminCore\Registry\ModuleRegistry;
@@ -113,6 +114,27 @@ final class ModuleAssertions
         }
 
         return $row;
+    }
+
+    /**
+     * The request runs `$model::query()->visibleTo($user)` for the signed-in
+     * user, so an "own unit only" rule on the model reaches this route (spec §7).
+     *
+     * @param  class-string<Model>  $model
+     * @param  array<string, mixed>  $data
+     */
+    public static function assertScopedToUser(string $model, string $method, string $uri, array $data = []): void
+    {
+        $user = auth()->id();
+        Assert::assertNotNull($user, 'Sign in before assertScopedToUser().');
+
+        $calls = VisibilityScope::record(fn () => call(strtoupper($method), $uri, $data));
+
+        Assert::assertContains(
+            ['model' => $model, 'user' => $user],
+            $calls,
+            strtoupper($method)." {$uri} never calls {$model}::query()->visibleTo() with the signed-in user.",
+        );
     }
 
     /**

@@ -6,8 +6,10 @@ namespace Yuan\AdminCore\Tests\Fixtures\Modules\Demo\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Yuan\AdminCore\Audit\HasActivityHistory;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
+use Yuan\AdminCore\Concurrency\PreventsStaleUpdates;
 use Yuan\AdminCore\Data\DataTableFilterData;
 use Yuan\AdminCore\Data\OptionData;
 use Yuan\AdminCore\DataTable\DataTableModel;
@@ -16,10 +18,11 @@ use Yuan\AdminCore\DataTable\HasVisibilityScope;
 
 /**
  * @property string|null $name
+ * @property Carbon|null $updated_at
  */
 final class DemoItem extends Model implements DataTableModel
 {
-    use HasActivityHistory, HasDataTable, HasVisibilityScope, LogsModuleActivity, SoftDeletes;
+    use HasActivityHistory, HasDataTable, HasVisibilityScope, LogsModuleActivity, PreventsStaleUpdates, SoftDeletes;
 
     protected $table = 'demo_items';
 

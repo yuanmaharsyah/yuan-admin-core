@@ -76,3 +76,17 @@ it('checks that a row is hidden from non-SA viewers', function (): void {
     expect(fn () => ModuleAssertions::assertNotVisibleToNonSuperAdmin(ModuleAssertions::assertAudited($staff, 'level_changed')))
         ->toThrow(AssertionFailedError::class, 'is visible to a non-Super Admin');
 });
+
+it('checks that a route scopes its query to the signed-in user', function (): void {
+    Route::get('/scoped', fn (): int => DemoItem::query()->visibleTo(auth()->user())->count());
+    Route::get('/unscoped', fn (): int => DemoItem::query()->count());
+    Route::get('/someone-else', fn (): int => DemoItem::query()->visibleTo(null)->count());
+    ModuleAssertions::actingAsLevelWith(['demo.view']);
+
+    ModuleAssertions::assertScopedToUser(DemoItem::class, 'get', '/scoped');
+
+    expect(fn () => ModuleAssertions::assertScopedToUser(DemoItem::class, 'get', '/unscoped'))
+        ->toThrow(AssertionFailedError::class, 'never calls')
+        ->and(fn () => ModuleAssertions::assertScopedToUser(DemoItem::class, 'get', '/someone-else'))
+        ->toThrow(AssertionFailedError::class, 'never calls');
+});

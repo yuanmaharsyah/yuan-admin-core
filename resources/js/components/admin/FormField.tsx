@@ -52,3 +52,32 @@ export function FormField({
 export function fieldMessageId(name: string): string {
     return `${name}-message`;
 }
+
+/** The props every form control shares (frontend-behavior §6, §9). */
+export type FieldProps<V> = {
+    name: string;
+    label: string;
+    value: V;
+    onChange: (value: V) => void;
+    error?: string;
+    required?: boolean;
+    help?: string;
+    disabled?: boolean;
+};
+
+/** Wires a control to its FormField: id, invalid state, message and required. */
+export function controlProps(field: {
+    name: string;
+    error?: string;
+    required?: boolean;
+    disabled?: boolean;
+}) {
+    return {
+        id: field.name,
+        name: field.name,
+        'aria-invalid': field.error ? true : undefined,
+        'aria-describedby': fieldMessageId(field.name),
+        'aria-required': field.required || undefined,
+        disabled: field.disabled,
+    };
+}

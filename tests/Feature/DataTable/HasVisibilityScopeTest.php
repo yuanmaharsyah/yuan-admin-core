@@ -31,7 +31,7 @@ it('applies a model override to the list query', function (): void {
         /**
          * @param  Builder<static>  $query
          */
-        public function scopeVisibleTo(Builder $query, ?Authenticatable $user): void
+        protected function applyVisibility(Builder $query, ?Authenticatable $user): void
         {
             $query->where('name', 'like', '%'.$user?->getAttribute('name'));
         }

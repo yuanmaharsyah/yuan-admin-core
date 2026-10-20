@@ -40,3 +40,84 @@ export function formatCurrency(value: number): string {
         maximumFractionDigits: 0,
     }).format(value);
 }
+
+/*
+ * Form values travel without a timezone, already in the app timezone: a date
+ * as `YYYY-MM-DD`, a date and time as `YYYY-MM-DD HH:mm` (frontend-behavior §6).
+ * They are formatted as UTC so no browser offset shifts them.
+ */
+export function formatLocalDate(value: string): string {
+    return formatDate(`${value.slice(0, 10)}T00:00:00Z`, 'UTC');
+}
+
+export function formatLocalDateTime(value: string): string {
+    return formatDateTime(
+        `${value.slice(0, 10)}T${value.slice(11, 16)}:00Z`,
+        'UTC',
+    );
+}
+
+/**
+ * Typed `dd/mm/yyyy` (also `-` or `.`, two-digit years as 20yy) to
+ * `YYYY-MM-DD`; null when it isn't a real date.
+ */
+export function parseLocalDate(text: string): string | null {
+    const match = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/.exec(
+        text.trim(),
+    );
+
+    if (!match) {
+        return null;
+    }
+
+    const [day, month] = [Number(match[1]), Number(match[2])];
+    const year =
+        match[3].length === 2 ? 2000 + Number(match[3]) : Number(match[3]);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (
+        date.getUTCFullYear() !== year ||
+        date.getUTCMonth() !== month - 1 ||
+        date.getUTCDate() !== day
+    ) {
+        return null;
+    }
+
+    return date.toISOString().slice(0, 10);
+}
+
+/**
+ * A typed or pasted number in either notation: `1.250.000,5` (id-ID) or
+ * `1,250,000.5`. With both separators the last one is the decimal mark. A
+ * single separator repeated is a thousands mark; a single `,` is decimal; a
+ * single `.` is a thousands mark when exactly three digits follow it. Null when nothing numeric is left.
+ */
+export function parseNumber(text: string): number | null {
+    let value = text.replace(/[^\d,.-]/g, '');
+    const comma = value.lastIndexOf(',');
+    const dot = value.lastIndexOf('.');
+
+    if (comma >= 0 && dot >= 0) {
+        const decimal = comma > dot ? ',' : '.';
+        value = value
+            .split(decimal === ',' ? '.' : ',')
+            .join('')
+            .replace(decimal, '.');
+    } else if (comma >= 0) {
+        value =
+            value.indexOf(',') !== comma
+                ? value.split(',').join('')
+                : value.split('.').join('').replace(',', '.');
+    } else if (
+        dot >= 0 &&
+        (/\.\d{3}$/.test(value) || value.indexOf('.') !== dot)
+    ) {
+        value = value.split('.').join('');
+    }
+
+    if (!/^-?\d+(\.\d+)?$/.test(value)) {
+        return null;
+    }
+
+    return Number(value);
+}
