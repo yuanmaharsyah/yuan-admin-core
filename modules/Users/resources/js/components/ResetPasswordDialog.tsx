@@ -10,6 +10,7 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@admin-core/components/ui/dialog';
+import { useAction } from '@admin-core/hooks/useAction';
 import { useT } from '@admin-core/lib/i18n';
 import { cn } from '@admin-core/lib/utils';
 import { useForm } from '@inertiajs/react';
@@ -33,6 +34,7 @@ export function ResetPasswordDialog({
     passwordHint,
 }: Props) {
     const t = useT();
+    const sending = useAction();
     const form = useForm<{
         mode: 'generate' | 'set';
         password: string;
@@ -52,7 +54,10 @@ export function ResetPasswordDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={close}>
+        <Dialog
+            open={open}
+            onOpenChange={(next) => (sending.pending ? undefined : close(next))}
+        >
             <DialogContent
                 role="alertdialog"
                 hideClose
@@ -70,10 +75,13 @@ export function ResetPasswordDialog({
                     className="flex flex-col gap-4"
                     onSubmit={(event) => {
                         event.preventDefault();
-                        form.submit(resetPassword(user.id), {
-                            preserveScroll: true,
-                            onSuccess: () => close(false),
-                        });
+                        sending.run((done) =>
+                            form.submit(resetPassword(user.id), {
+                                preserveScroll: true,
+                                onSuccess: () => close(false),
+                                onFinish: done,
+                            }),
+                        );
                     }}
                 >
                     <div
@@ -165,7 +173,7 @@ export function ResetPasswordDialog({
                         <Button
                             type="submit"
                             className="font-semibold"
-                            disabled={form.processing}
+                            loading={sending.pending}
                         >
                             {t('users.reset_submit')}
                         </Button>

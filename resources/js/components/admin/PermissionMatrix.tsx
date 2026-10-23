@@ -400,7 +400,7 @@ export function PermissionMatrix({ matrix, processing, onSave }: Props) {
                     </Button>
                     <Button
                         className="font-semibold"
-                        disabled={processing}
+                        loading={processing}
                         onClick={() => onSave(draft)}
                     >
                         {t('matrix.save')}

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 import { Fragment, useState } from 'react';
+import { useAction } from '../../hooks/useAction';
 import { useTableQuery } from '../../hooks/useTableQuery';
 import { useT } from '../../lib/i18n';
 import type { Href } from '../../lib/shell';
@@ -70,8 +71,12 @@ type Props<T extends Row> = {
     rowHref?: (row: T) => Href;
     /** The `⋯` menu; return only the permitted actions. */
     rowActions?: (row: T) => RowAction[];
-    /** Shows the checkbox column and the bulk bar (pass it only when `delete` is allowed). */
-    bulkDelete?: (ids: number[]) => void;
+    /**
+     * Shows the checkbox column and the bulk bar (pass it only when `delete`
+     * is allowed). Call `onFinish` when the request ends: the confirm button
+     * spins until then.
+     */
+    bulkDelete?: (ids: number[], onFinish: () => void) => void;
     /** Shown when the list is empty and nothing is filtered. */
     empty: EmptyStateProps;
     /** The module's download route (pass it only when `download` is allowed); sends the current search, filters and sort. */
@@ -102,6 +107,8 @@ export function DataTable<T extends Row>({
     download,
 }: Props<T>) {
     const t = useT();
+    const deleting = useAction();
+    const downloading = useAction();
     const query = useTableQuery(state, data.meta.current_page);
     const [hidden, setHidden] = useHiddenColumns(slug);
     // Selection belongs to the page it was made on: new data (paging, filtering,
@@ -138,13 +145,17 @@ export function DataTable<T extends Row>({
                 onDownload={
                     download
                         ? () =>
-                              query.download(
-                                  typeof download === 'string'
-                                      ? download
-                                      : download.url,
+                              downloading.run((done) =>
+                                  query.download(
+                                      typeof download === 'string'
+                                          ? download
+                                          : download.url,
+                                      done,
+                                  ),
                               )
                         : undefined
                 }
+                downloading={downloading.pending}
             />
 
             <section
@@ -433,10 +444,15 @@ export function DataTable<T extends Row>({
                     itemName={t('dialog.delete_many', {
                         count: selected.length,
                     })}
-                    onConfirm={() => {
-                        setConfirming(false);
-                        bulkDelete(selected);
-                    }}
+                    loading={deleting.pending}
+                    onConfirm={() =>
+                        deleting.run((done) =>
+                            bulkDelete(selected, () => {
+                                done();
+                                setConfirming(false);
+                            }),
+                        )
+                    }
                 />
             )}
         </>

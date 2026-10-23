@@ -7,6 +7,7 @@ type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     itemName: string;
+    loading?: boolean;
     onConfirm: () => void;
 };
 
@@ -15,6 +16,7 @@ export function ForceDeleteDialog({
     open,
     onOpenChange,
     itemName,
+    loading = false,
     onConfirm,
 }: Props) {
     const t = useT();
@@ -31,7 +33,8 @@ export function ForceDeleteDialog({
             itemName={itemName}
             description={t('trash.force_text', { name: itemName })}
             confirmLabel={t('trash.force_delete')}
-            processing={typed.trim() !== itemName.trim()}
+            confirmDisabled={typed.trim() !== itemName.trim()}
+            loading={loading}
             onConfirm={onConfirm}
         >
             <Input

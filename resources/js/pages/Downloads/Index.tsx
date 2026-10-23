@@ -1,12 +1,13 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Download, FileSpreadsheet } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { EmptyState } from '../../components/admin/EmptyState';
 import { PageHeader } from '../../components/admin/PageHeader';
 import { StatusBadge } from '../../components/admin/StatusBadge';
 import type { StatusTone } from '../../components/admin/StatusBadge';
 import { Button } from '../../components/ui/button';
+import { useAction } from '../../hooks/useAction';
 import { formatDateTime, formatNumber } from '../../lib/format';
 import type { MessageKey } from '../../lib/i18n';
 import { useT } from '../../lib/i18n';
@@ -32,6 +33,8 @@ export default function Index({
     downloads_list: Yuan.AdminCore.Data.DownloadListData;
 }) {
     const t = useT();
+    const [fetching, setFetching] = useState<number | null>(null);
+    const fetchingUrl = useAction();
     const { app } = usePage().props;
     const items = downloads_list.items;
     const processing = items.some((item) => item.status === 'processing');
@@ -50,16 +53,23 @@ export default function Index({
         return () => window.clearInterval(timer);
     }, [processing]);
 
-    const download = (item: Item) =>
-        item.url_href &&
-        fetch(item.url_href, { headers: { Accept: 'application/json' } })
-            .then((response) =>
-                response.ok
-                    ? (response.json() as Promise<Yuan.AdminCore.Data.SignedUrlData>)
-                    : Promise.reject(response),
-            )
-            .then((signed) => window.location.assign(signed.url))
-            .catch(() => toast.error(t('attachments.download_failed')));
+    const download = (item: Item, href: string | null) =>
+        href &&
+        fetchingUrl.run((done) => {
+            setFetching(item.id);
+            fetch(href, { headers: { Accept: 'application/json' } })
+                .then((response) =>
+                    response.ok
+                        ? (response.json() as Promise<Yuan.AdminCore.Data.SignedUrlData>)
+                        : Promise.reject(response),
+                )
+                .then((signed) => window.location.assign(signed.url))
+                .catch(() => toast.error(t('attachments.download_failed')))
+                .finally(() => {
+                    setFetching(null);
+                    done();
+                });
+        });
 
     return (
         <>
@@ -186,11 +196,20 @@ export default function Index({
                                                                     item.module_label,
                                                             },
                                                         )}
+                                                        loading={
+                                                            fetching === item.id
+                                                        }
                                                         onClick={() =>
-                                                            void download(item)
+                                                            download(
+                                                                item,
+                                                                item.url_href,
+                                                            )
                                                         }
                                                     >
-                                                        <Download />
+                                                        {fetching !==
+                                                            item.id && (
+                                                            <Download />
+                                                        )}
                                                     </Button>
                                                 )}
                                             </td>

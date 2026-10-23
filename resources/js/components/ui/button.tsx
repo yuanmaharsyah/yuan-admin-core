@@ -3,6 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { cn } from '../../lib/utils';
+import { Spinner } from './spinner';
 
 const buttonVariants = cva(
     "inline-flex items-center justify-center gap-2 rounded text-body font-medium whitespace-nowrap transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -35,24 +36,47 @@ const buttonVariants = cva(
     },
 );
 
+/**
+ * `loading` (frontend-behavior §2): a spinner before the label, disabled and
+ * `aria-busy` while the server works, so the action can't be sent twice.
+ */
 function Button({
     className,
     variant,
     size,
     asChild = false,
+    loading = false,
+    disabled,
+    children,
     ...props
 }: React.ComponentProps<'button'> &
     VariantProps<typeof buttonVariants> & {
         asChild?: boolean;
+        loading?: boolean;
     }) {
-    const Comp = asChild ? Slot : 'button';
+    if (asChild) {
+        return (
+            <Slot
+                data-slot="button"
+                className={cn(buttonVariants({ variant, size, className }))}
+                {...props}
+            >
+                {children}
+            </Slot>
+        );
+    }
 
     return (
-        <Comp
+        <button
             data-slot="button"
             className={cn(buttonVariants({ variant, size, className }))}
+            disabled={disabled || loading}
+            aria-busy={loading || undefined}
             {...props}
-        />
+        >
+            {loading && <Spinner aria-hidden="true" role={undefined} />}
+            {children}
+        </button>
     );
 }
 

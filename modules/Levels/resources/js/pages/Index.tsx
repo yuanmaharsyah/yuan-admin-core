@@ -2,6 +2,7 @@ import { ConfirmDialog } from '@admin-core/components/admin/ConfirmDialog';
 import { PageHeader } from '@admin-core/components/admin/PageHeader';
 import { Button } from '@admin-core/components/ui/button';
 import { formatNumber } from '@admin-core/lib/format';
+import { useAction } from '@admin-core/hooks/useAction';
 import { useT } from '@admin-core/lib/i18n';
 import { Head, Link, router } from '@inertiajs/react';
 import { Lock, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function Index({
     levels: Yuan.AdminCore.Modules.Levels.Data.LevelListData;
 }) {
     const t = useT();
+    const removing = useAction();
     const [deleting, setDeleting] = useState<Row | null>(null);
 
     return (
@@ -141,14 +143,19 @@ export default function Index({
                 title={t('levels.delete_title')}
                 itemName={deleting?.label ?? ''}
                 description={t('levels.delete_text')}
+                loading={removing.pending}
                 onConfirm={() => {
                     if (deleting) {
-                        router.delete(destroy(deleting.id), {
-                            preserveScroll: true,
-                        });
+                        removing.run((done) =>
+                            router.delete(destroy(deleting.id), {
+                                preserveScroll: true,
+                                onFinish: () => {
+                                    done();
+                                    setDeleting(null);
+                                },
+                            }),
+                        );
                     }
-
-                    setDeleting(null);
                 }}
             />
         </>

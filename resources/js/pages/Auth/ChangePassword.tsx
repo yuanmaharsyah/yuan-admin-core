@@ -5,7 +5,7 @@ import { AuthCard } from '../../components/admin/AuthCard';
 import { fieldMessageId, FormField } from '../../components/admin/FormField';
 import { PasswordInput } from '../../components/admin/PasswordInput';
 import { Button } from '../../components/ui/button';
-import { Spinner } from '../../components/ui/spinner';
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 import { initials } from '../../lib/shell';
 
@@ -13,20 +13,25 @@ export default function ChangePassword(
     props: Yuan.AdminCore.Data.Auth.ChangePasswordPageData,
 ) {
     const t = useT();
+    const sending = useAction();
     const form = useForm({
         current_password: '',
         password: '',
         password_confirmation: '',
     });
     const submit = () =>
-        form.put(props.submit_href, {
-            onFinish: () =>
-                form.reset(
-                    'current_password',
-                    'password',
-                    'password_confirmation',
-                ),
-        });
+        sending.run((done) =>
+            form.put(props.submit_href, {
+                onFinish: () => {
+                    done();
+                    form.reset(
+                        'current_password',
+                        'password',
+                        'password_confirmation',
+                    );
+                },
+            }),
+        );
     const field = (
         name: 'current_password' | 'password' | 'password_confirmation',
         autoComplete: string,
@@ -102,11 +107,9 @@ export default function ChangePassword(
                 <Button
                     type="submit"
                     size="auth"
-                    disabled={form.processing}
-                    aria-busy={form.processing}
+                    loading={form.processing}
                     className="w-full font-semibold"
                 >
-                    {form.processing && <Spinner />}
                     {t(form.processing ? 'auth.saving' : 'auth.save_password')}
                 </Button>
                 {props.required ? (

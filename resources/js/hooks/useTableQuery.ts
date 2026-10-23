@@ -107,7 +107,7 @@ export function useTableQuery(state: State, page: number) {
          * The list's download with the current search, filters and sort: the
          * server answers with the file (the page stays) or a "queued" flash.
          */
-        download: (href: string) =>
+        download: (href: string, onFinish?: () => void) =>
             router.get(
                 href,
                 toParams({
@@ -118,6 +118,7 @@ export function useTableQuery(state: State, page: number) {
                 {
                     preserveState: true,
                     preserveScroll: true,
+                    onFinish,
                 },
             ),
     };

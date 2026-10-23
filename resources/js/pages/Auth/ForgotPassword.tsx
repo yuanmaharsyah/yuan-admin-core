@@ -6,21 +6,25 @@ import { fieldMessageId, FormField } from '../../components/admin/FormField';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Spinner } from '../../components/ui/spinner';
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 
 export default function ForgotPassword(
     props: Yuan.AdminCore.Data.Auth.ForgotPasswordPageData,
 ) {
     const t = useT();
+    const sending = useAction();
     const form = useForm({ email: '' });
     // Bumped on each successful request, so the resend countdown restarts.
     const [sends, setSends] = useState(0);
     const submit = () =>
-        form.post(props.submit_href, {
-            preserveState: true,
-            onSuccess: () => setSends((count) => count + 1),
-        });
+        sending.run((done) =>
+            form.post(props.submit_href, {
+                onFinish: done,
+                preserveState: true,
+                onSuccess: () => setSends((count) => count + 1),
+            }),
+        );
     const back = (
         <Link
             href={props.login_href}
@@ -97,11 +101,9 @@ export default function ForgotPassword(
                 <Button
                     type="submit"
                     size="auth"
-                    disabled={form.processing}
-                    aria-busy={form.processing}
+                    loading={form.processing}
                     className="w-full font-semibold"
                 >
-                    {form.processing && <Spinner />}
                     {t(form.processing ? 'auth.sending' : 'auth.forgot_submit')}
                 </Button>
                 {back}
@@ -131,11 +133,10 @@ function ResendButton({ seconds, busy }: { seconds: number; busy: boolean }) {
             type="submit"
             size="auth"
             variant="outline"
-            disabled={left > 0 || busy}
-            aria-busy={busy}
+            disabled={left > 0}
+            loading={busy}
             className="w-full font-semibold tabular-nums"
         >
-            {busy && <Spinner />}
             {left > 0 ? t('auth.resend_in', { time }) : t('auth.resend')}
         </Button>
     );

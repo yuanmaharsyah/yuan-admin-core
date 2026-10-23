@@ -8,20 +8,26 @@ import { Button } from '../../components/ui/button';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Spinner } from '../../components/ui/spinner';
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 
 export default function Login(props: Yuan.AdminCore.Data.Auth.LoginPageData) {
     const t = useT();
+    const sending = useAction();
     const form = useForm({ username: '', password: '', remember: false });
     // A message on a filled-in username is a sign-in failure (wrong credentials,
     // inactive account, too many attempts): shown above the form, not inline.
     const signInError =
         form.data.username !== '' ? form.errors.username : undefined;
     const submit = () =>
-        form.post(props.submit_href, {
-            onFinish: () => form.reset('password'),
-        });
+        sending.run((done) =>
+            form.post(props.submit_href, {
+                onFinish: () => {
+                    done();
+                    form.reset('password');
+                },
+            }),
+        );
 
     return (
         <>
@@ -104,11 +110,9 @@ export default function Login(props: Yuan.AdminCore.Data.Auth.LoginPageData) {
                 <Button
                     type="submit"
                     size="auth"
-                    disabled={form.processing}
-                    aria-busy={form.processing}
+                    loading={form.processing}
                     className="w-full font-semibold"
                 >
-                    {form.processing && <Spinner />}
                     {t(
                         form.processing
                             ? 'auth.processing'

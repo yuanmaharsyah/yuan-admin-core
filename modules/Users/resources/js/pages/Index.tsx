@@ -9,6 +9,7 @@ import { StatusBadge } from '@admin-core/components/admin/StatusBadge';
 import { Button } from '@admin-core/components/ui/button';
 import { usePermission } from '@admin-core/hooks/usePermission';
 import { formatDateTime } from '@admin-core/lib/format';
+import { useAction } from '@admin-core/hooks/useAction';
 import { useT } from '@admin-core/lib/i18n';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2, Users as UsersIcon } from 'lucide-react';
@@ -33,6 +34,7 @@ type Props = {
 /** Users list (ui-design §4.1, reference `users-index`). */
 export default function Index({ users, table }: Props) {
     const t = useT();
+    const removing = useAction();
     const { app, auth } = usePage().props;
     const { can, isSuperAdmin } = usePermission();
     const [deleting, setDeleting] = useState<Row | null>(null);
@@ -155,8 +157,9 @@ export default function Index({ users, table }: Props) {
                     rowActions={rowActions}
                     bulkDelete={
                         can('users.delete')
-                            ? (ids) =>
+                            ? (ids, onFinish) =>
                                   router.delete(bulkDestroy(), {
+                                      onFinish,
                                       data: {
                                           ids: ids.filter(
                                               (id) => id !== auth.user?.id,
@@ -181,14 +184,19 @@ export default function Index({ users, table }: Props) {
                 title={t('users.delete_title')}
                 itemName={deleting?.name ?? ''}
                 description={t('users.delete_text')}
+                loading={removing.pending}
                 onConfirm={() => {
                     if (deleting) {
-                        router.delete(destroy(deleting.id), {
-                            preserveScroll: true,
-                        });
+                        removing.run((done) =>
+                            router.delete(destroy(deleting.id), {
+                                preserveScroll: true,
+                                onFinish: () => {
+                                    done();
+                                    setDeleting(null);
+                                },
+                            }),
+                        );
                     }
-
-                    setDeleting(null);
                 }}
             />
         </>

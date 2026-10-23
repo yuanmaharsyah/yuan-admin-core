@@ -1,8 +1,8 @@
 import { PageHeader } from '@admin-core/components/admin/PageHeader';
 import { PermissionMatrix } from '@admin-core/components/admin/PermissionMatrix';
+import { useAction } from '@admin-core/hooks/useAction';
 import { useT } from '@admin-core/lib/i18n';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { index } from '@/routes/levels';
 import { update as savePermissions } from '@/routes/levels/permissions';
 
@@ -13,7 +13,7 @@ export default function Permissions({
     matrix: Yuan.AdminCore.Data.PermissionMatrixData;
 }) {
     const t = useT();
-    const [processing, setProcessing] = useState(false);
+    const saving = useAction();
     const title = t('levels.permissions_title', { name: matrix.level.label });
 
     return (
@@ -28,16 +28,14 @@ export default function Permissions({
                 <PermissionMatrix
                     key={JSON.stringify(matrix.rows.map((row) => row.granted))}
                     matrix={matrix}
-                    processing={processing}
+                    processing={saving.pending}
                     onSave={(grants) =>
-                        router.put(
-                            savePermissions(matrix.level.id),
-                            { grants },
-                            {
-                                preserveScroll: true,
-                                onStart: () => setProcessing(true),
-                                onFinish: () => setProcessing(false),
-                            },
+                        saving.run((done) =>
+                            router.put(
+                                savePermissions(matrix.level.id),
+                                { grants },
+                                { preserveScroll: true, onFinish: done },
+                            ),
                         )
                     }
                 />

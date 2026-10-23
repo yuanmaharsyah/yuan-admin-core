@@ -66,9 +66,11 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Forced password change: `RequirePasswordChange` middleware (append to the `web` group after `active`) keeps a user with `must_change_password` on `/account/password` (or logout) until they change it; set on create and on an admin reset. `ChangePasswordPageData` gains `required` and `logout_href`.
 - `/account/profile` (`Core::Account/Profile`, `ProfileData`, `UpdateProfileData` with `lock_version`) and `Account\AccountRoutes::register()` (profile, password, downloads) for the project's signed-in route group.
 - Events `UserCreated`, `UserLevelChanged`, `UserDeactivated` and `ExportCompleted`, dispatched after the commit.
+- Loading state on action buttons (frontend-behavior §2): `Button loading` (spinner, disabled, `aria-busy`), `useAction()` (one request at a time, a second click ignored), `ConfirmDialog loading` (stays open, can't be dismissed), `useAdminForm` ignores a second submit; wired on form footers, confirm dialogs (delete, force delete, deactivate), bulk delete, list download, matrix save, reset password, activate, trash restore, signed-URL downloads and the auth forms.
 - `DataTableFilterData::column` (hidden) filters on a column other than the key, such as `roles.id`; `LogsModuleActivity::auditLogName()` overrides the log name.
 
 ### Changed
+- `ConfirmDialog` `processing` is now `confirmDisabled` (it only ever disabled the confirm button); `DataTable` `bulkDelete` receives an `onFinish` callback; `StaleUpdateDialog` `onReload` receives one too (`useAdminForm().reload(onFinish?)`).
 - Projects' `App\Models\User` now extends the core User model, and the starter kit's settings profile page, its FormRequest and `Account\PasswordController` are replaced by the core account pages (`AccountRoutes::register()`).
 - `Trash::delete()` reports the rows it actually deleted (a model whose `delete()` is refused isn't counted or offered for undo); nothing deleted flashes the error "Tidak ada data yang dihapus." instead of a success toast.
 - `AdminCoreSeeder` sets `must_change_password` on the seeded Super Admins outside the `local` and `testing` environments.

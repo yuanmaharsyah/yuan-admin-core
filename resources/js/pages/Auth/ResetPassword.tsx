@@ -6,13 +6,14 @@ import { PasswordInput } from '../../components/admin/PasswordInput';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Spinner } from '../../components/ui/spinner';
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 
 export default function ResetPassword(
     props: Yuan.AdminCore.Data.Auth.ResetPasswordPageData,
 ) {
     const t = useT();
+    const sending = useAction();
     const form = useForm({
         token: props.token,
         email: props.email,
@@ -20,9 +21,14 @@ export default function ResetPassword(
         password_confirmation: '',
     });
     const submit = () =>
-        form.post(props.submit_href, {
-            onFinish: () => form.reset('password', 'password_confirmation'),
-        });
+        sending.run((done) =>
+            form.post(props.submit_href, {
+                onFinish: () => {
+                    done();
+                    form.reset('password', 'password_confirmation');
+                },
+            }),
+        );
     const back = (
         <Link
             href={props.login_href}
@@ -133,11 +139,9 @@ export default function ResetPassword(
                 <Button
                     type="submit"
                     size="auth"
-                    disabled={form.processing}
-                    aria-busy={form.processing}
+                    loading={form.processing}
                     className="w-full font-semibold"
                 >
-                    {form.processing && <Spinner />}
                     {t(form.processing ? 'auth.saving' : 'auth.save_password')}
                 </Button>
                 {back}

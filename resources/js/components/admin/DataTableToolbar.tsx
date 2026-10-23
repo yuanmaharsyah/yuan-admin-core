@@ -21,6 +21,8 @@ type Props = {
     hidden: string[];
     onHiddenChange: (keys: string[]) => void;
     onDownload?: () => void;
+    /** The download request is running. */
+    downloading?: boolean;
 };
 
 /** Search, one chip per filter (dashed when unset), Reset, and the column menu. */
@@ -32,6 +34,7 @@ export function DataTableToolbar({
     hidden,
     onHiddenChange,
     onDownload,
+    downloading = false,
 }: Props) {
     const t = useT();
 
@@ -176,9 +179,10 @@ export function DataTableToolbar({
                     variant="outline"
                     aria-label={t('table.download_label')}
                     className="gap-1.5 border-border bg-card px-2.5 text-table"
+                    loading={downloading}
                     onClick={onDownload}
                 >
-                    <Download />
+                    {!downloading && <Download />}
                     <span className="max-sm:sr-only">
                         {t('table.download')}
                     </span>

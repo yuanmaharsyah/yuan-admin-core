@@ -3,6 +3,7 @@ import { DetailGrid } from '@admin-core/components/admin/DetailGrid';
 import { PageHeader } from '@admin-core/components/admin/PageHeader';
 import { StatusBadge } from '@admin-core/components/admin/StatusBadge';
 import { Button } from '@admin-core/components/ui/button';
+import { useAction } from '@admin-core/hooks/useAction';
 import { usePermission } from '@admin-core/hooks/usePermission';
 import { formatDateTime } from '@admin-core/lib/format';
 import { useT } from '@admin-core/lib/i18n';
@@ -24,6 +25,8 @@ type Props = {
  */
 export default function Show({ user, options }: Props) {
     const t = useT();
+    const activating = useAction();
+    const confirming = useAction();
     const page = usePage();
     const { app } = page.props;
     const { flash } = page;
@@ -79,15 +82,21 @@ export default function Show({ user, options }: Props) {
                                         <Button
                                             variant="outline"
                                             className="bg-transparent"
+                                            loading={activating.pending}
                                             onClick={() =>
-                                                router.post(
-                                                    activate(user.id),
-                                                    {},
-                                                    { preserveScroll: true },
+                                                activating.run((done) =>
+                                                    router.post(
+                                                        activate(user.id),
+                                                        {},
+                                                        {
+                                                            preserveScroll: true,
+                                                            onFinish: done,
+                                                        },
+                                                    ),
                                                 )
                                             }
                                         >
-                                            <Power />
+                                            {!activating.pending && <Power />}
                                             {t('users.activate')}
                                         </Button>
                                     )}
@@ -187,14 +196,22 @@ export default function Show({ user, options }: Props) {
                 itemName={user.name}
                 description={t('users.deactivate_text')}
                 confirmLabel={t('users.deactivate')}
-                onConfirm={() => {
-                    setDialog(null);
-                    router.post(
-                        deactivate(user.id),
-                        {},
-                        { preserveScroll: true },
-                    );
-                }}
+                loading={confirming.pending}
+                onConfirm={() =>
+                    confirming.run((done) =>
+                        router.post(
+                            deactivate(user.id),
+                            {},
+                            {
+                                preserveScroll: true,
+                                onFinish: () => {
+                                    done();
+                                    setDialog(null);
+                                },
+                            },
+                        ),
+                    )
+                }
             />
             <ConfirmDialog
                 open={dialog === 'delete'}
@@ -202,10 +219,17 @@ export default function Show({ user, options }: Props) {
                 title={t('users.delete_title')}
                 itemName={user.name}
                 description={t('users.delete_text')}
-                onConfirm={() => {
-                    setDialog(null);
-                    router.delete(destroy(user.id));
-                }}
+                loading={confirming.pending}
+                onConfirm={() =>
+                    confirming.run((done) =>
+                        router.delete(destroy(user.id), {
+                            onFinish: () => {
+                                done();
+                                setDialog(null);
+                            },
+                        }),
+                    )
+                }
             />
         </>
     );

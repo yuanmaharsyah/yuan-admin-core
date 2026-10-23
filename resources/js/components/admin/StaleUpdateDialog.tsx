@@ -1,3 +1,4 @@
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -5,7 +6,7 @@ type Props = {
     open: boolean;
     /** The fields the user changed, copied as JSON by "Salin perubahan saya". */
     dirtyData: Record<string, unknown>;
-    onReload: () => void;
+    onReload: (onFinish: () => void) => void;
 };
 
 /**
@@ -15,6 +16,7 @@ type Props = {
  */
 export function StaleUpdateDialog({ open, dirtyData, onReload }: Props) {
     const t = useT();
+    const reloading = useAction();
 
     return (
         <ConfirmDialog
@@ -25,13 +27,16 @@ export function StaleUpdateDialog({ open, dirtyData, onReload }: Props) {
             destructive={false}
             cancelLabel={false}
             secondaryLabel={t('form.stale_copy')}
-            onSecondary={() => {
-                void navigator.clipboard
-                    .writeText(JSON.stringify(dirtyData, null, 2))
-                    .finally(onReload);
-            }}
+            loading={reloading.pending}
+            onSecondary={() =>
+                reloading.run((done) => {
+                    void navigator.clipboard
+                        .writeText(JSON.stringify(dirtyData, null, 2))
+                        .finally(() => onReload(done));
+                })
+            }
             confirmLabel={t('form.stale_reload')}
-            onConfirm={onReload}
+            onConfirm={() => reloading.run(onReload)}
         />
     );
 }

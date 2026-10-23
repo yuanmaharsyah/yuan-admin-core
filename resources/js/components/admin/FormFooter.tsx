@@ -30,7 +30,7 @@ export function FormFooter({ cancelHref, processing, dirty }: Props) {
             </Button>
             <Button
                 type="submit"
-                disabled={processing}
+                loading={processing}
                 className="font-semibold"
             >
                 {processing ? t('form.saving') : t('form.save')}

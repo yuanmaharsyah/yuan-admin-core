@@ -5,6 +5,7 @@ import { DataTable } from '../../components/admin/DataTable';
 import type { DataTableColumn } from '../../components/admin/DataTable';
 import { ForceDeleteDialog } from '../../components/admin/ForceDeleteDialog';
 import { PageHeader } from '../../components/admin/PageHeader';
+import { useAction } from '../../hooks/useAction';
 import { formatDateTime } from '../../lib/format';
 import { useT } from '../../lib/i18n';
 
@@ -22,6 +23,7 @@ type Props = {
  */
 export default function Index({ items, table, trash }: Props) {
     const t = useT();
+    const acting = useAction();
     const { app } = usePage().props;
     const [forceDeleting, setForceDeleting] = useState<Item | null>(null);
     const title = t('trash.title', { module: trash.module_label });
@@ -63,10 +65,15 @@ export default function Index({ items, table, trash }: Props) {
                             label: t('trash.restore'),
                             icon: RotateCcw,
                             onSelect: () =>
-                                router.post(
-                                    trash.restore_href,
-                                    { ids: [row.id] },
-                                    { preserveScroll: true },
+                                acting.run((done) =>
+                                    router.post(
+                                        trash.restore_href,
+                                        { ids: [row.id] },
+                                        {
+                                            preserveScroll: true,
+                                            onFinish: done,
+                                        },
+                                    ),
                                 ),
                         },
                         {
@@ -87,15 +94,20 @@ export default function Index({ items, table, trash }: Props) {
                 open={forceDeleting !== null}
                 onOpenChange={(open) => !open && setForceDeleting(null)}
                 itemName={forceDeleting?.label ?? ''}
+                loading={acting.pending}
                 onConfirm={() => {
                     if (forceDeleting) {
-                        router.delete(trash.destroy_href, {
-                            data: { ids: [forceDeleting.id] },
-                            preserveScroll: true,
-                        });
+                        acting.run((done) =>
+                            router.delete(trash.destroy_href, {
+                                data: { ids: [forceDeleting.id] },
+                                preserveScroll: true,
+                                onFinish: () => {
+                                    done();
+                                    setForceDeleting(null);
+                                },
+                            }),
+                        );
                     }
-
-                    setForceDeleting(null);
                 }}
             />
         </>

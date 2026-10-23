@@ -19,7 +19,10 @@ type Props = {
     description?: string;
     confirmLabel?: string;
     destructive?: boolean;
-    processing?: boolean;
+    /** The confirm button can't be pressed yet (e.g. the typed name doesn't match). */
+    confirmDisabled?: boolean;
+    /** The action is running: the confirm button spins and the dialog can't be dismissed. */
+    loading?: boolean;
     onConfirm: () => void;
     /** Label of the first, focused button (Batal); false leaves it out. */
     cancelLabel?: string | false;
@@ -42,7 +45,8 @@ export function ConfirmDialog({
     description,
     confirmLabel,
     destructive = true,
-    processing = false,
+    confirmDisabled = false,
+    loading = false,
     onConfirm,
     cancelLabel,
     secondaryLabel,
@@ -52,7 +56,10 @@ export function ConfirmDialog({
     const t = useT();
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(next) => (loading ? undefined : onOpenChange(next))}
+        >
             <DialogContent
                 role="alertdialog"
                 hideClose
@@ -78,6 +85,7 @@ export function ConfirmDialog({
                             <Button
                                 variant="outline"
                                 className="bg-transparent font-semibold"
+                                disabled={loading}
                                 autoFocus
                             >
                                 {cancelLabel ?? t('dialog.cancel')}
@@ -89,6 +97,7 @@ export function ConfirmDialog({
                             variant="outline"
                             className="bg-transparent font-semibold"
                             autoFocus={cancelLabel === false}
+                            disabled={loading}
                             onClick={onSecondary}
                         >
                             {secondaryLabel}
@@ -97,7 +106,8 @@ export function ConfirmDialog({
                     <Button
                         variant={destructive ? 'destructive' : 'default'}
                         className="font-semibold"
-                        disabled={processing}
+                        disabled={confirmDisabled}
+                        loading={loading}
                         onClick={onConfirm}
                     >
                         {confirmLabel ?? t('dialog.delete')}

@@ -3,6 +3,7 @@ import { Download, FileText, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { formatDateTime, formatFileSize } from '../../lib/format';
+import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 import { Button } from '../ui/button';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -19,16 +20,26 @@ export function AttachmentList({ items }: { items: File[] }) {
     const t = useT();
     const { app } = usePage().props;
     const [deleting, setDeleting] = useState<File | null>(null);
+    const [fetching, setFetching] = useState<number | null>(null);
+    const fetchingUrl = useAction();
+    const removing = useAction();
 
     const download = (file: File) =>
-        fetch(file.url_href, { headers: { Accept: 'application/json' } })
-            .then((response) =>
-                response.ok
-                    ? (response.json() as Promise<Yuan.AdminCore.Data.SignedUrlData>)
-                    : Promise.reject(response),
-            )
-            .then((signed) => window.location.assign(signed.url))
-            .catch(() => toast.error(t('attachments.download_failed')));
+        fetchingUrl.run((done) => {
+            setFetching(file.id);
+            fetch(file.url_href, { headers: { Accept: 'application/json' } })
+                .then((response) =>
+                    response.ok
+                        ? (response.json() as Promise<Yuan.AdminCore.Data.SignedUrlData>)
+                        : Promise.reject(response),
+                )
+                .then((signed) => window.location.assign(signed.url))
+                .catch(() => toast.error(t('attachments.download_failed')))
+                .finally(() => {
+                    setFetching(null);
+                    done();
+                });
+        });
 
     if (items.length === 0) {
         return <EmptyState icon={FileText} title={t('attachments.empty')} />;
@@ -68,9 +79,10 @@ export function AttachmentList({ items }: { items: File[] }) {
                             aria-label={t('attachments.download', {
                                 name: file.name,
                             })}
-                            onClick={() => void download(file)}
+                            loading={fetching === file.id}
+                            onClick={() => download(file)}
                         >
-                            <Download />
+                            {fetching !== file.id && <Download />}
                         </Button>
                         {file.destroy_href && (
                             <Button
@@ -94,15 +106,22 @@ export function AttachmentList({ items }: { items: File[] }) {
                 title={t('attachments.delete_title')}
                 itemName={deleting?.name ?? ''}
                 description={t('attachments.delete_text')}
+                loading={removing.pending}
                 onConfirm={() => {
-                    if (deleting?.destroy_href) {
-                        router.delete(deleting.destroy_href, {
-                            preserveScroll: true,
-                            only: ['attachments'],
-                        });
-                    }
+                    const href = deleting?.destroy_href;
 
-                    setDeleting(null);
+                    if (href) {
+                        removing.run((done) =>
+                            router.delete(href, {
+                                preserveScroll: true,
+                                only: ['attachments'],
+                                onFinish: () => {
+                                    done();
+                                    setDeleting(null);
+                                },
+                            }),
+                        );
+                    }
                 }}
             />
         </>
