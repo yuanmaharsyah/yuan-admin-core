@@ -191,4 +191,21 @@ export const en: Messages = {
         'Could not create the download link. Try again.',
     'attachments.meta': '{size} · {user} · {date}',
     'attachments.dismiss': 'Dismiss the message for {name}',
+    'downloads.title': 'Downloads',
+    'downloads.description':
+        'Large exports prepared in the background. Files are kept for {hours} hours.',
+    'downloads.file': 'File',
+    'downloads.rows': 'Rows',
+    'downloads.status': 'Status',
+    'downloads.created': 'Created',
+    'downloads.expires': 'Available until',
+    'downloads.download': 'Download {name}',
+    'downloads.processing': 'Processing',
+    'downloads.ready': 'Ready',
+    'downloads.failed': 'Failed',
+    'downloads.expired': 'Expired',
+    'downloads.empty_title': 'No downloads yet',
+    'downloads.empty_text':
+        'Large list exports appear here when they are ready.',
+    'downloads.list': 'Download list',
 };

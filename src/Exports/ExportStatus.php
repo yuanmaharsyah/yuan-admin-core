@@ -13,4 +13,6 @@ enum ExportStatus: string
     case Processing = 'processing';
     case Ready = 'ready';
     case Failed = 'failed';
+    /** Shown only: a ready export past `expires_at`, waiting for `model:prune`. Never stored. */
+    case Expired = 'expired';
 }

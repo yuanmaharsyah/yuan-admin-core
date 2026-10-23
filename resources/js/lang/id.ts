@@ -193,4 +193,21 @@ export const id = {
     'attachments.download_failed': 'Tautan unduhan gagal dibuat. Coba lagi.',
     'attachments.meta': '{size} · {user} · {date}',
     'attachments.dismiss': 'Tutup pesan untuk {name}',
+    'downloads.title': 'Unduhan',
+    'downloads.description':
+        'Ekspor besar yang disiapkan di latar belakang. Berkas tersimpan {hours} jam.',
+    'downloads.file': 'Berkas',
+    'downloads.rows': 'Baris',
+    'downloads.status': 'Status',
+    'downloads.created': 'Dibuat',
+    'downloads.expires': 'Berlaku sampai',
+    'downloads.download': 'Unduh {name}',
+    'downloads.processing': 'Diproses',
+    'downloads.ready': 'Siap',
+    'downloads.failed': 'Gagal',
+    'downloads.expired': 'Kedaluwarsa',
+    'downloads.empty_title': 'Belum ada unduhan',
+    'downloads.empty_text':
+        'Ekspor daftar yang besar akan muncul di sini setelah siap.',
+    'downloads.list': 'Daftar unduhan',
 } as const;

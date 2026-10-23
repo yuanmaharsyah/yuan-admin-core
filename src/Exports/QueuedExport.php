@@ -34,6 +34,17 @@ final class QueuedExport extends Model
 
     protected $fillable = ['user_id', 'module', 'filters', 'row_count', 'status', 'path', 'error', 'expires_at'];
 
+    /** The status the user sees: a ready export past `expires_at` is expired. */
+    public function displayStatus(): ExportStatus
+    {
+        return $this->status === ExportStatus::Ready && ! $this->expires_at?->isFuture() ? ExportStatus::Expired : $this->status;
+    }
+
+    public function isDownloadable(): bool
+    {
+        return $this->displayStatus() === ExportStatus::Ready && $this->path !== null;
+    }
+
     /**
      * @return Builder<self>
      */
