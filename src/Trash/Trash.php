@@ -28,8 +28,10 @@ use Yuan\AdminCore\Registry\ModuleRegistry;
 final class Trash
 {
     /**
-     * Soft-deletes the models and flashes "Dipindahkan ke Sampah"; Super Admin
-     * also gets the Urungkan action, which posts to `{slug}.trash.restore`.
+     * Soft-deletes the models and flashes "Dipindahkan ke Sampah" with the
+     * number of rows actually deleted (a bulk selection may hold rows the
+     * caller filtered out); Super Admin also gets the Urungkan action, which
+     * posts to `{slug}.trash.restore`. Nothing deleted flashes an error.
      *
      * @template TModel of Model
      *
@@ -37,19 +39,25 @@ final class Trash
      */
     public static function delete(Collection $models, string $slug): void
     {
-        self::write(fn () => $models->each->delete());
+        $deleted = self::write(fn () => $models->filter(fn (Model $model): bool => $model->delete() === true));
 
-        $first = $models->first();
+        if ($deleted->isEmpty()) {
+            Inertia::flash((new FlashData(error: __('Tidak ada data yang dihapus.')))->toArray());
+
+            return;
+        }
+
+        $first = $deleted->first();
         $restore = "{$slug}.trash.restore";
         $user = auth()->user();
 
         Inertia::flash((new FlashData(
             success: __('Dipindahkan ke Sampah'),
-            description: $models->count() === 1 && $first !== null
+            description: $deleted->count() === 1
                 ? self::moduleLabel($slug).' '.self::label($first)
-                : __(':count item', ['count' => $models->count()]),
+                : __(':count item', ['count' => $deleted->count()]),
             undo: $user !== null && Gate::forUser($user)->allows('admin-core.superadmin') && Route::has($restore)
-                ? new UndoData(href: route($restore), ids: self::ids($models))
+                ? new UndoData(href: route($restore), ids: self::ids($deleted))
                 : new Optional,
         ))->toArray());
     }
@@ -117,9 +125,15 @@ final class Trash
         return $model::query()->withoutGlobalScope(SoftDeletingScope::class)->whereNotNull((new $model)->qualifyColumn('deleted_at'));
     }
 
-    private static function write(callable $callback): void
+    /**
+     * @template TResult
+     *
+     * @param  callable(): TResult  $callback
+     * @return TResult
+     */
+    private static function write(callable $callback): mixed
     {
-        DB::transaction(fn () => Audit::batch($callback(...)));
+        return DB::transaction(fn () => Audit::batch($callback(...)));
     }
 
     /**

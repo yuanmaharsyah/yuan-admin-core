@@ -137,3 +137,16 @@ it('names a single deleted row and gives no undo to other users', function (): v
 
     expect(session(SessionKey::FLASH_DATA))->toBe(['success' => 'Dipindahkan ke Sampah', 'description' => 'Demo Satu']);
 });
+
+it('counts only the rows it deleted, and says so when there were none', function (): void {
+    DemoItem::deleting(fn (DemoItem $item): bool => $item->name !== 'Terkunci');
+    $items = new Collection([DemoItem::query()->create(['name' => 'Satu']), DemoItem::query()->create(['name' => 'Terkunci'])]);
+    actingAs(makeUser());
+
+    Trash::delete($items, 'demo');
+    expect(session(SessionKey::FLASH_DATA))->toBe(['success' => 'Dipindahkan ke Sampah', 'description' => 'Demo Satu']);
+
+    session()->forget(SessionKey::FLASH_DATA);
+    Trash::delete($items->where('name', 'Terkunci'), 'demo');
+    expect(session(SessionKey::FLASH_DATA))->toBe(['error' => 'Tidak ada data yang dihapus.']);
+});

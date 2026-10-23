@@ -70,6 +70,8 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 
 ### Changed
 - Projects' `App\Models\User` now extends the core User model, and the starter kit's settings profile page, its FormRequest and `Account\PasswordController` are replaced by the core account pages (`AccountRoutes::register()`).
+- `Trash::delete()` reports the rows it actually deleted (a model whose `delete()` is refused isn't counted or offered for undo); nothing deleted flashes the error "Tidak ada data yang dihapus." instead of a success toast.
+- `AdminCoreSeeder` sets `must_change_password` on the seeded Super Admins outside the `local` and `testing` environments.
 - `ModuleRegistry::forClass()` also matches a model's parent classes, so a project model that extends a core module's model belongs to that module.
 - Login accepts a username or an email in one field (`AuthenticateUser::credentials()`); the failed-login audit resolves the account the same way.
 - `module.php` `icon` must be a lucide icon name from `resources/icons/lucide.json` (was: any kebab-case string).

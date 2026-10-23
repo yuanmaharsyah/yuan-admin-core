@@ -53,10 +53,23 @@ it('hides Super Admin accounts from other levels: not listed, every route a 404'
     post("/admin/users/{$admin->id}/deactivate")->assertNotFound();
     post("/admin/users/{$admin->id}/reset-password", ['mode' => 'generate'])->assertNotFound();
     delete("/admin/users/{$admin->id}")->assertNotFound();
-    delete('/admin/users', ['ids' => [$admin->id]])->assertRedirect();
+    delete('/admin/users', ['ids' => [$admin->id]])->assertRedirect()->assertInertiaFlash('error', 'Tidak ada data yang dihapus.');
 
     expect($admin->fresh()?->is_active)->toBeTrue()
         ->and(User::query()->find($admin->id))->not->toBeNull();
+});
+
+it('counts only the users it deleted when a bulk selection holds a Super Admin', function (): void {
+    $admin = superAdminAccount();
+    $staff = User::factory()->count(2)->create();
+    ModuleAssertions::actingAsLevelWith(['users.view', 'users.delete']);
+
+    delete('/admin/users', ['ids' => [...$staff->modelKeys(), $admin->id]])
+        ->assertRedirect()
+        ->assertInertiaFlash('description', '2 item');
+
+    expect(User::onlyTrashed()->count())->toBe(2)
+        ->and($admin->fresh()?->trashed())->toBeFalse();
 });
 
 it('keeps the Super Admin level out of other levels\' hands', function (): void {

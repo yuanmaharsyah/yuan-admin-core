@@ -9,6 +9,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Spatie\Permission\Models\Permission;
+use Yuan\AdminCore\Modules\Users\Models\User;
 use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Permissions\PermissionSynchronizer;
 
@@ -49,7 +50,14 @@ final class AdminCoreSeeder extends Seeder
                 throw new RuntimeException("The user model [{$model}] must use the HasLevel trait.");
             }
 
-            $user->forceFill([...$account, 'password' => $this->password($account['username']), 'is_active' => true])->save();
+            $user->forceFill([...$account, 'password' => $this->password($account['username']), 'is_active' => true]);
+
+            // Outside local and testing, the seeded password must be changed at the first sign-in.
+            if ($user instanceof User && ! app()->environment('local', 'testing')) {
+                $user->must_change_password = true;
+            }
+
+            $user->save();
             $user->assignLevel($superAdmin);
         }
     }
