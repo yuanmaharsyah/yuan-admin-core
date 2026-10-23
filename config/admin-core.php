@@ -90,11 +90,12 @@ return [
         'uncompromised' => false,
     ],
 
-    // List downloads (spec §7, ExportManager). Up to `threshold` rows the file
-    // streams at once; above it an ExportJob writes it to `disk` and it stays
-    // downloadable for `ttl_hours`. Settings overrides the threshold in Phase 07.
+    // List downloads (spec §7, ExportManager). Up to `queue_threshold` rows the
+    // file streams at once; above it an ExportJob writes it to `disk` and it
+    // stays downloadable for `ttl_hours`. Settings overrides the threshold in
+    // Phase 07.
     'exports' => [
-        'threshold' => 5000,
+        'queue_threshold' => (int) env('ADMIN_EXPORT_QUEUE_THRESHOLD', 5000),
         'disk' => 'local',
         'ttl_hours' => 24,
     ],
