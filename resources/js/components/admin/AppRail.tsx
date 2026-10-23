@@ -12,6 +12,8 @@ type Props = {
     appName: string;
     activeKey?: string;
     onSelectGroup: (key: string) => void;
+    /** A one-item group's link was followed (it may be the current URL). */
+    onNavigate: () => void;
     logout: Href;
     /** Panel toggle; omitted in the mobile sheet. */
     panel?: { open: boolean; onToggle: () => void };
@@ -25,6 +27,7 @@ export function AppRail({
     appName,
     activeKey,
     onSelectGroup,
+    onNavigate,
     logout,
     panel,
     touch = false,
@@ -62,6 +65,7 @@ export function AppRail({
                                 href={group.items[0].href}
                                 aria-label={group.label}
                                 aria-current={active ? 'true' : undefined}
+                                onClick={onNavigate}
                                 className={buttonClass(active)}
                             >
                                 {icon}

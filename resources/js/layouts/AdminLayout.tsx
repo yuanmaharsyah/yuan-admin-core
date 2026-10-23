@@ -102,6 +102,14 @@ export function AdminLayout({
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [overlayOpen]);
 
+    // Open states are keyed to the URL, so a link to the current URL must
+    // clear them itself: else the panel keeps another group's items.
+    const followDirectLink = () => {
+        setViewed(null);
+        setOverlay(null);
+        setSheet(null);
+    };
+
     const selectGroup = (key: string) => {
         setViewed({ url, key });
 
@@ -130,6 +138,7 @@ export function AdminLayout({
                     appName={app.name}
                     activeKey={active.group?.key}
                     onSelectGroup={selectGroup}
+                    onNavigate={followDirectLink}
                     logout={links.logout}
                     panel={{ open: panelOpen, onToggle: togglePanel }}
                 />
@@ -167,6 +176,7 @@ export function AdminLayout({
                         appName={app.name}
                         activeKey={active.group?.key}
                         onSelectGroup={(key) => setViewed({ url, key })}
+                        onNavigate={followDirectLink}
                         logout={links.logout}
                         touch
                     />
