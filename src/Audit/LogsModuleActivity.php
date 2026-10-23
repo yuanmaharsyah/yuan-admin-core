@@ -34,7 +34,13 @@ trait LogsModuleActivity
                 ...array_filter($this->getFillable(), fn (string $field): bool => $masker->rule($field) === 'omit'),
                 ...array_keys(array_filter($this->getCasts(), fn (string $cast): bool => str_starts_with($cast, 'encrypted') || str_contains($cast, 'AsEncrypted'))),
             ])
-            ->useLogName(app(ModuleRegistry::class)->forClass(static::class)?->slug);
+            ->useLogName($this->auditLogName());
+    }
+
+    /** The module's slug; a core model outside a module (Level) names its log itself. */
+    protected function auditLogName(): ?string
+    {
+        return app(ModuleRegistry::class)->forClass(static::class)?->slug;
     }
 
     /**

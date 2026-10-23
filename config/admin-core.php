@@ -90,6 +90,20 @@ return [
         'uncompromised' => false,
     ],
 
+    // The swappable User model (spec §2.2): the project's class, which extends
+    // Yuan\AdminCore\Modules\Users\Models\User. Keep it equal to
+    // auth.providers.users.model.
+    'models' => [
+        'user' => 'App\\Models\\User',
+    ],
+
+    'users' => [
+        // A class implementing Yuan\AdminCore\Users\UserFormExtension: extra
+        // fields (columns the project adds to `users` with its own migration)
+        // in the Users forms, their validation and the detail page. Null: none.
+        'form_extension' => null,
+    ],
+
     // List downloads (spec §7, ExportManager). Up to `queue_threshold` rows the
     // file streams at once; above it an ExportJob writes it to `disk` and it
     // stays downloadable for `ttl_hours`. Settings overrides the threshold in

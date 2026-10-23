@@ -34,6 +34,7 @@ final readonly class PermissionMatrix
             $rows[] = new PermissionMatrixRowData(
                 slug: $module->slug,
                 label: __($module->label),
+                group: __($this->groups()[$module->group]['label'] ?? $module->group),
                 actions: $module->actions,
                 granted: $granted[$module->slug] ?? [],
             );
@@ -104,9 +105,21 @@ final readonly class PermissionMatrix
     private function modules(): array
     {
         $modules = array_values(array_filter($this->registry->enabled(), fn (ModuleDefinition $module): bool => ! $module->superadminOnly));
-        usort($modules, fn (ModuleDefinition $a, ModuleDefinition $b): int => [$a->order, $a->label] <=> [$b->order, $b->label]);
+        $groups = $this->groups();
+        usort($modules, fn (ModuleDefinition $a, ModuleDefinition $b): int => [$groups[$a->group]['order'] ?? 0, $a->order, $a->label] <=> [$groups[$b->group]['order'] ?? 0, $b->order, $b->label]);
 
         return $modules;
+    }
+
+    /**
+     * The menu groups (`admin-core.menu.groups`), so the matrix groups rows like the menu.
+     *
+     * @return array<string, array{label: string, order: int}>
+     */
+    private function groups(): array
+    {
+        /** @var array<string, array{label: string, order: int}> */
+        return config()->array('admin-core.menu.groups');
     }
 
     /**

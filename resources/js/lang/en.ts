@@ -208,4 +208,41 @@ export const en: Messages = {
     'downloads.empty_text':
         'Large list exports appear here when they are ready.',
     'downloads.list': 'Download list',
+    'auth.change_required':
+        'You must change your password before you continue.',
+    'profile.title': 'Profile',
+    'profile.description': "Your account's name and email.",
+    'profile.name': 'Name',
+    'profile.email': 'Email',
+    'profile.username': 'Username',
+    'profile.level': 'Level',
+    'profile.admin_only':
+        'Only an administrator of {app} can change the username and level.',
+    'matrix.title': 'Permission matrix',
+    'matrix.search': 'Search modules…',
+    'matrix.search_label': 'Search modules',
+    'matrix.module': 'Module',
+    'matrix.all_modules': 'All modules',
+    'matrix.all_of': 'All modules: {action}',
+    'matrix.row_all': 'All actions: {module}',
+    'matrix.cell': '{module}: {action}',
+    'matrix.not_declared': 'Not applicable',
+    'matrix.unsaved': 'Not saved',
+    'matrix.no_match': 'No module matches "{query}"',
+    'matrix.dirty': '{count} unsaved changes',
+    'matrix.discard': 'Discard',
+    'matrix.save': 'Save',
+    'matrix.hint_view_added':
+        'View on {module} was ticked too, because {action} needs view access.',
+    'matrix.hint_row_cleared':
+        'The other actions on {module} were unticked too, because they need View.',
+    'matrix.hint_column_view':
+        'View was ticked too, because {action} needs view access.',
+    'matrix.hint_column_cleared':
+        'The other actions were unticked too, because they need View.',
+    'matrix.action.view': 'View',
+    'matrix.action.create': 'Create',
+    'matrix.action.edit': 'Edit',
+    'matrix.action.delete': 'Delete',
+    'matrix.action.download': 'Download',
 };

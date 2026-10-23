@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info, LogOut } from 'lucide-react';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AuthCard } from '../../components/admin/AuthCard';
 import { fieldMessageId, FormField } from '../../components/admin/FormField';
 import { PasswordInput } from '../../components/admin/PasswordInput';
@@ -49,6 +50,14 @@ export default function ChangePassword(
         <>
             <Head title={t('auth.change_title')} />
             <AuthCard title={t('auth.change_title')} onSubmit={submit}>
+                {props.required && (
+                    <Alert variant="info">
+                        <Info />
+                        <AlertDescription>
+                            {t('auth.change_required')}
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <div className="flex items-center gap-2.5 rounded bg-muted px-3 py-2.5 text-table">
                     <span
                         aria-hidden="true"
@@ -100,13 +109,25 @@ export default function ChangePassword(
                     {form.processing && <Spinner />}
                     {t(form.processing ? 'auth.saving' : 'auth.save_password')}
                 </Button>
-                <Link
-                    href={props.back_href}
-                    className="flex items-center justify-center gap-1.5 font-medium"
-                >
-                    <ArrowLeft className="size-4" />
-                    {t('common.back')}
-                </Link>
+                {props.required ? (
+                    <Link
+                        href={props.logout_href}
+                        method="post"
+                        as="button"
+                        className="flex items-center justify-center gap-1.5 font-medium"
+                    >
+                        <LogOut className="size-4" />
+                        {t('shell.logout')}
+                    </Link>
+                ) : (
+                    <Link
+                        href={props.back_href}
+                        className="flex items-center justify-center gap-1.5 font-medium"
+                    >
+                        <ArrowLeft className="size-4" />
+                        {t('common.back')}
+                    </Link>
+                )}
             </AuthCard>
         </>
     );

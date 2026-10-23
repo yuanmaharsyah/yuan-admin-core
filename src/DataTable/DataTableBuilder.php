@@ -52,7 +52,7 @@ final class DataTableBuilder extends Builder
 
         /** @var Builder<TModel> */
         return QueryBuilder::for($this, $request)
-            ->allowedFilters(...array_map(fn (DataTableFilterData $filter): AllowedFilter => AllowedFilter::exact($filter->key), $model->dataTableFilters()))
+            ->allowedFilters(...array_map(fn (DataTableFilterData $filter): AllowedFilter => AllowedFilter::exact($filter->key, $filter->column ?? $filter->key), $model->dataTableFilters()))
             ->allowedSorts(...$model->dataTableSorts())
             ->defaultSort($model->dataTableDefaultSort())
             ->getEloquentBuilder();

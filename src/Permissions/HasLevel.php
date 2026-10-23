@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 use Yuan\AdminCore\Audit\Audit;
 use Yuan\AdminCore\Audit\AuditEvent;
+use Yuan\AdminCore\Events\UserLevelChanged;
 use Yuan\AdminCore\Http\Middleware\EnsureUserIsActive;
 
 /**
@@ -101,6 +102,8 @@ trait HasLevel
                 $this->revokeSessions();
             }
         }));
+
+        DB::afterCommit(fn () => UserLevelChanged::dispatch($this, $previous, $level));
     }
 
     public function assignRole(mixed ...$roles): static

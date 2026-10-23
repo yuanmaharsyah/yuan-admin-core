@@ -210,4 +210,41 @@ export const id = {
     'downloads.empty_text':
         'Ekspor daftar yang besar akan muncul di sini setelah siap.',
     'downloads.list': 'Daftar unduhan',
+    'auth.change_required':
+        'Anda harus mengganti kata sandi sebelum melanjutkan.',
+    'profile.title': 'Profil',
+    'profile.description': 'Nama dan email akun Anda.',
+    'profile.name': 'Nama',
+    'profile.email': 'Email',
+    'profile.username': 'Username',
+    'profile.level': 'Level',
+    'profile.admin_only':
+        'Username dan level hanya dapat diubah oleh administrator {app}.',
+    'matrix.title': 'Matriks hak akses',
+    'matrix.search': 'Cari modul…',
+    'matrix.search_label': 'Cari modul',
+    'matrix.module': 'Modul',
+    'matrix.all_modules': 'Semua modul',
+    'matrix.all_of': 'Semua modul: {action}',
+    'matrix.row_all': 'Semua aksi: {module}',
+    'matrix.cell': '{module}: {action}',
+    'matrix.not_declared': 'Tidak berlaku',
+    'matrix.unsaved': 'Belum disimpan',
+    'matrix.no_match': 'Tidak ada modul yang cocok dengan "{query}"',
+    'matrix.dirty': '{count} perubahan belum disimpan',
+    'matrix.discard': 'Batalkan',
+    'matrix.save': 'Simpan',
+    'matrix.hint_view_added':
+        'View pada {module} ikut dicentang karena {action} membutuhkan akses lihat.',
+    'matrix.hint_row_cleared':
+        'Aksi lain pada {module} ikut dilepas karena membutuhkan View.',
+    'matrix.hint_column_view':
+        'View ikut dicentang karena {action} membutuhkan akses lihat.',
+    'matrix.hint_column_cleared':
+        'Aksi lain ikut dilepas karena membutuhkan View.',
+    'matrix.action.view': 'View',
+    'matrix.action.create': 'Create',
+    'matrix.action.edit': 'Edit',
+    'matrix.action.delete': 'Delete',
+    'matrix.action.download': 'Download',
 } as const;

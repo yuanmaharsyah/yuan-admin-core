@@ -13,7 +13,8 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
  * replayed from browser history: `Inertia::flash(new FlashData(success: ...)->toArray())`.
  * Unset keys are left out, so several flashes in one request merge.
  * `description` is the toast's second line; `undo` adds the Urungkan action
- * (Super Admin only, frontend-behavior §7).
+ * (Super Admin only, frontend-behavior §7). `secret` is a value the page
+ * shows once in a dialog (a temporary password); the toaster never shows it.
  */
 #[TypeScript]
 final class FlashData extends Data
@@ -24,5 +25,6 @@ final class FlashData extends Data
         public string|Optional $info = new Optional,
         public string|Optional $description = new Optional,
         public UndoData|Optional $undo = new Optional,
+        public string|Optional $secret = new Optional,
     ) {}
 }

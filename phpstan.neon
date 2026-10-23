@@ -7,7 +7,10 @@ parameters:
     level: 8
     paths:
         - src
+        - modules
         - tests
     excludePaths:
         # Deliberate violations for the rule tests in tests/PHPStan.
         - tests/PHPStan/Fixtures
+        # Core-module tests run in the skeleton (they need the whole app); its PHPStan analyses them.
+        - modules/*/Tests/*

@@ -14,6 +14,7 @@ use Illuminate\Queue\Attributes\Tries;
 use Maatwebsite\Excel\Facades\Excel;
 use Yuan\AdminCore\Audit\Audit;
 use Yuan\AdminCore\Audit\AuditEvent;
+use Yuan\AdminCore\Events\ExportCompleted;
 
 /**
  * Writes a large download to `admin-core.exports.disk` for the user who asked
@@ -59,6 +60,7 @@ final class ExportJob implements ShouldQueue
             meta: ['rows' => $rows, 'filters' => $filters, 'format' => $format, 'queued' => true],
             module: $this->queued->module,
         ));
+        ExportCompleted::dispatch($this->queued);
     }
 
     public function failed(): void

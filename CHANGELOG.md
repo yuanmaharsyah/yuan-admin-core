@@ -59,8 +59,18 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `PageHeader`: the actions wrap below a title that doesn't fit (no more mid-word breaks on phones).
 - `Validation\VisibleRecord`: a foreign key must point at a live record the signed-in user may see (`visibleTo()`), for every relation field.
 - `ModuleAssertions::assertScopedToUser()` with `DataTable\VisibilityScope` (records `visibleTo()` calls only while a test asks).
+- Core `Users` module (`/admin/users`, frontend-behavior §8.1): list (search, Level and Status filters), create, show, edit (`updateUnlessStale`), activate / deactivate, reset password (generated, shown once through `FlashData::secret`, or set by the admin), soft delete + Trash, download. Super Admin accounts are invisible to other levels (`applyVisibility()`, 404 on every route) and only a Super Admin can give the Super Admin level; nobody deactivates, resets or deletes their own account (`UserAccounts::refuseSelf()`, Super Admin included); usernames can't contain `@`.
+- The swappable core User model `Yuan\AdminCore\Modules\Users\Models\User` (config `admin-core.models.user`); the project's `App\Models\User` extends it. Module migration adds `must_change_password`, `lock_version` and indexes to `users`.
+- User form extension (spec §2.2): `admin-core.users.form_extension` names a `Users\UserFormExtension` (fields as `ExtraFieldData`: text, number or select; rules per field); the Users forms, validation (`extra.*`), `UserData::extra` (`ExtraValueData`) and the detail page pick them up. The columns come from a project migration.
+- Core `Levels` module (`/admin/levels`, Super Admin only, frontend-behavior §8.2): list with user counts, create / edit (`lock_version` on `roles`, core migration) / delete (refused while users hold the level; the protected level is never editable), and the Hak Akses page with the `PermissionMatrix` component (grouped, collapsible rows, row and column toggles, the View dependency rule with hints, changed cells, search, sticky save bar, leave-page guard). `Level` is audited under `log_name` `levels`; `PermissionMatrixRowData::group`, rows ordered by menu group.
+- Forced password change: `RequirePasswordChange` middleware (append to the `web` group after `active`) keeps a user with `must_change_password` on `/account/password` (or logout) until they change it; set on create and on an admin reset. `ChangePasswordPageData` gains `required` and `logout_href`.
+- `/account/profile` (`Core::Account/Profile`, `ProfileData`, `UpdateProfileData` with `lock_version`) and `Account\AccountRoutes::register()` (profile, password, downloads) for the project's signed-in route group.
+- Events `UserCreated`, `UserLevelChanged`, `UserDeactivated` and `ExportCompleted`, dispatched after the commit.
+- `DataTableFilterData::column` (hidden) filters on a column other than the key, such as `roles.id`; `LogsModuleActivity::auditLogName()` overrides the log name.
 
 ### Changed
+- Projects' `App\Models\User` now extends the core User model, and the starter kit's settings profile page, its FormRequest and `Account\PasswordController` are replaced by the core account pages (`AccountRoutes::register()`).
+- `ModuleRegistry::forClass()` also matches a model's parent classes, so a project model that extends a core module's model belongs to that module.
 - Login accepts a username or an email in one field (`AuthenticateUser::credentials()`); the failed-login audit resolves the account the same way.
 - `module.php` `icon` must be a lucide icon name from `resources/icons/lucide.json` (was: any kebab-case string).
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.

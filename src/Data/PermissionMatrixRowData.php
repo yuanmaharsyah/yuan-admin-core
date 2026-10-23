@@ -8,7 +8,8 @@ use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 /**
- * One module of the matrix: the actions it declares and those the level has.
+ * One module of the matrix, in its menu group: the actions it declares and
+ * those the level has.
  */
 #[TypeScript]
 final class PermissionMatrixRowData extends Data
@@ -20,6 +21,7 @@ final class PermissionMatrixRowData extends Data
     public function __construct(
         public string $slug,
         public string $label,
+        public string $group,
         public array $actions,
         public array $granted,
     ) {}

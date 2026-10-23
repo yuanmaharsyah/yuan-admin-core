@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Yuan\AdminCore\Permissions;
 
 use Spatie\Permission\Models\Role;
+use Yuan\AdminCore\Audit\LogsModuleActivity;
+use Yuan\AdminCore\Concurrency\PreventsStaleUpdates;
 
 /**
  * A Level is a spatie Role (spec §5, D5). Super Admin is the level with
@@ -15,10 +17,16 @@ use Spatie\Permission\Models\Role;
  * @property string $label
  * @property string|null $description
  * @property bool $is_protected
+ * @property int $lock_version
  */
 final class Level extends Role
 {
+    use LogsModuleActivity, PreventsStaleUpdates;
+
     public const string SUPER_ADMIN = 'super-admin';
+
+    /** @var array<string, mixed> */
+    protected $attributes = ['lock_version' => 0];
 
     protected $fillable = ['name', 'guard_name', 'label', 'description'];
 
@@ -61,9 +69,14 @@ final class Level extends Role
         return $this->label;
     }
 
+    protected function auditLogName(): string
+    {
+        return 'levels';
+    }
+
     protected function casts(): array
     {
-        return ['is_protected' => 'boolean'];
+        return ['is_protected' => 'boolean', 'lock_version' => 'integer'];
     }
 
     protected static function booted(): void

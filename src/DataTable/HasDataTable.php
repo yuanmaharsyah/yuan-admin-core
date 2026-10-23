@@ -59,7 +59,7 @@ trait HasDataTable
     /** The `table` prop for the list page. */
     public static function dataTableState(Request $request): DataTableStateData
     {
-        $model = new static;
+        $model = static::query()->getModel();
         $sortable = $model->dataTableSorts();
         $filters = $model->dataTableFilters();
         $keys = array_column($filters, 'key');

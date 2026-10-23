@@ -77,13 +77,17 @@ final class ModuleRegistry
     }
 
     /**
-     * The module a class belongs to, from its namespace (`{root namespace}{Name}\\`).
+     * The module a class belongs to, from its namespace (`{root namespace}{Name}\\`),
+     * or from a parent's: a project's swapped model (`App\\Models\\User` extending
+     * the core Users model) belongs to the module it extends.
      */
     public function forClass(string $class): ?ModuleDefinition
     {
-        foreach ($this->all() as $module) {
-            if (str_starts_with($class, $module->namespace.$module->name.'\\')) {
-                return $module;
+        foreach ([$class, ...(class_exists($class) ? array_values(class_parents($class)) : [])] as $candidate) {
+            foreach ($this->all() as $module) {
+                if (str_starts_with($candidate, $module->namespace.$module->name.'\\')) {
+                    return $module;
+                }
             }
         }
 

@@ -23,15 +23,15 @@ function permissionsOf(Level $level): array
     return $level->permissions()->orderBy('name')->pluck('name')->all();
 }
 
-it('builds a row per enabled, non-superadmin_only module with its declared actions', function (): void {
+it('builds a row per enabled, non-superadmin_only module with its declared actions, in menu-group order', function (): void {
     $matrix = app(PermissionMatrix::class)->build(levelWith(['demo.view', 'demo.approve']));
 
     expect($matrix->level->name)->toBe('staf')
         ->and($matrix->columns)->toBe(['view', 'create', 'edit', 'delete', 'download', 'approve'])
-        ->and(array_map(fn (PermissionMatrixRowData $row): string => $row->slug, $matrix->rows))->toBe(['notes', 'demo', 'hidden'])
-        ->and($matrix->rows[1]->actions)->toBe(['view', 'create', 'approve'])
-        ->and($matrix->rows[1]->granted)->toEqualCanonicalizing(['view', 'approve'])
-        ->and($matrix->rows[0]->granted)->toBe([]);
+        ->and(array_map(fn (PermissionMatrixRowData $row): string => "{$row->group}/{$row->slug}", $matrix->rows))->toBe(['Master Data/demo', 'Master Data/hidden', 'Sistem/notes'])
+        ->and($matrix->rows[0]->actions)->toBe(['view', 'create', 'approve'])
+        ->and($matrix->rows[0]->granted)->toEqualCanonicalizing(['view', 'approve'])
+        ->and($matrix->rows[2]->granted)->toBe([]);
 });
 
 it('adds view when another action is granted', function (): void {
@@ -69,7 +69,7 @@ it('writes one batched permissions_updated with the diff and fires the event', f
 
     app(PermissionMatrix::class)->save($level, ['demo' => ['view', 'approve']]);
 
-    $row = ImmutableActivity::query()->sole();
+    $row = ImmutableActivity::query()->where('event', 'permissions_updated')->sole();
     expect($row->only(['event', 'log_name', 'subject_id']))->toBe(['event' => 'permissions_updated', 'log_name' => 'levels', 'subject_id' => $level->id])
         ->and($row->batch_uuid)->toBeString()
         ->and($row->getProperty('meta'))->toBe(['added' => ['demo.view', 'demo.approve'], 'removed' => ['notes.view'], 'subject_label' => 'Staf']);
@@ -78,10 +78,11 @@ it('writes one batched permissions_updated with the diff and fires the event', f
 
 it('writes nothing when nothing changes', function (): void {
     $level = levelWith(['demo.view']);
+    $before = ImmutableActivity::query()->count();
 
     app(PermissionMatrix::class)->save($level, ['demo' => ['view']]);
 
-    expect(ImmutableActivity::query()->count())->toBe(0);
+    expect(ImmutableActivity::query()->count())->toBe($before);
 });
 
 it('rolls back the permissions when the audit write fails', function (): void {
