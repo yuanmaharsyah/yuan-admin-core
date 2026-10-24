@@ -7,31 +7,33 @@ namespace Yuan\AdminCore\Attachments;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
- * Files on a record (spec §7): private disk, signed 5-minute download URLs
- * authorized by the record's `view` policy; uploading and deleting need
- * `update`. Routes: `AttachmentController::routes(Model::class)`.
+ * Files on a record (spec §7) in named slots: private disk, signed 5-minute
+ * download URLs authorized by the record's `view` policy; deleting needs
+ * `update`. Files are uploaded with the record's form (AttachmentUploads).
+ * Routes: `AttachmentController::routes(Model::class)`.
  */
 trait HasAttachments
 {
     /**
+     * The record's files, newest first; only one slot's with a key.
+     *
      * @return MorphMany<Attachment, $this>
      */
-    public function attachments(): MorphMany
+    public function attachments(?string $collection = null): MorphMany
     {
-        return $this->morphMany(Attachment::class, 'attachable')->latest('id');
+        $files = $this->morphMany(Attachment::class, 'attachable')->latest('id');
+
+        return $collection === null ? $files : $files->where('collection', $collection);
     }
 
     /**
-     * Allowed extensions and the size limit; override to narrow the
-     * `admin-core.attachments` defaults.
+     * Slot key => slot, in display order; override to name the slots. The
+     * default is one `lampiran` slot with the `admin-core.attachments` limits.
      *
-     * @return array{mimes: list<string>, max_kb: int}
+     * @return array<string, AttachmentSlot>
      */
-    public function attachmentRules(): array
+    public function attachmentSlots(): array
     {
-        /** @var list<string> $mimes */
-        $mimes = config()->array('admin-core.attachments.mimes');
-
-        return ['mimes' => $mimes, 'max_kb' => config()->integer('admin-core.attachments.max_kb')];
+        return ['lampiran' => AttachmentSlot::multiple(__('Lampiran'))];
     }
 }

@@ -114,6 +114,8 @@ export function AttachmentList({ items }: { items: File[] }) {
                         removing.run((done) =>
                             router.delete(href, {
                                 preserveScroll: true,
+                                // An edit form keeps what the user typed.
+                                preserveState: true,
                                 only: ['attachments'],
                                 onFinish: () => {
                                     done();
@@ -125,5 +127,40 @@ export function AttachmentList({ items }: { items: File[] }) {
                 }}
             />
         </>
+    );
+}
+
+/**
+ * The Lampiran tab of a Show page: each slot as a titled group of its files
+ * (frontend-behavior §8.5).
+ */
+export function AttachmentSlots({
+    slots,
+}: {
+    slots: Yuan.AdminCore.Data.AttachmentSlotData[];
+}) {
+    const t = useT();
+
+    return (
+        <div className="flex flex-col gap-6">
+            {slots.map((slot) => (
+                <section
+                    key={slot.key}
+                    aria-label={slot.label}
+                    className="flex flex-col gap-1"
+                >
+                    <h3 className="m-0 border-b border-rule pb-2 text-label text-muted-foreground uppercase">
+                        {slot.label}
+                    </h3>
+                    {slot.items.length > 0 ? (
+                        <AttachmentList items={slot.items} />
+                    ) : (
+                        <p className="m-0 py-3 text-table text-muted-foreground">
+                            {t('attachments.slot_empty')}
+                        </p>
+                    )}
+                </section>
+            ))}
+        </div>
     );
 }

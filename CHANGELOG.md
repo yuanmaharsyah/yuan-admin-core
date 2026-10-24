@@ -88,7 +88,10 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `/home` (`admin-core.home`, `Http\HomeController`, in `AccountRoutes::register()`): sign-in lands on the first menu item the user may open (Beranda first), else `Core::Errors/NoAccess`.
 - `ImmutableActivity::visibleTo()` reports to `VisibilityScope`, so `assertScopedToUser()` / `assertWidgetUsesScope()` see audit queries.
 
+- Named attachment slots: core migration `add_collection_to_attachments_table` (`collection`, default `lampiran`); `HasAttachments::attachmentSlots()` and `attachments(?slot)`; `AttachmentSlot` (single / multiple, required, mimes, max KB); `AttachmentUploads` (`rules()`, `attributes()`, `saveWith()`, `save()`); `AttachmentSlotData`; components `FileField`, `AttachmentFields`, `AttachmentSlots`. Audit meta of attachment events carries the `slot`.
+
 ### Changed
+- Breaking: files are uploaded with the record's form (`files.{slot}` in the input Data, `AttachmentUploads::saveWith()`), not one by one to `{slug}.attachments.store`: that route, `UploadAttachmentData`, `HasAttachments::attachmentRules()` and the `FileUpload` component are gone. `AttachmentsData` is now `slots: AttachmentSlotData[]`. `AttachmentController::routes()` no longer needs `edit` (the delete route is added only when the module declares it). Models without `attachmentSlots()` get one `lampiran` slot with the old limits.
 - `admin-core.routes.home` is gone: error pages, the password change and sign-in go to `/home` (set Fortify `home` to `/home`). The starter kit's `/dashboard` route and page are removed.
 - `admin-core.maintenance_banner` (`ADMIN_MAINTENANCE_BANNER`) and `AppData.maintenance_banner` are replaced by Settings → Akses Situs and `AppData.site_access`.
 - `StatTile` `icon` also takes a lucide name; `SegmentBar` takes an `action` beside its title.

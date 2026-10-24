@@ -174,6 +174,9 @@ export const en: Messages = {
     'attachments.title': 'Attachments',
     'attachments.tab': 'Attachments ({count})',
     'attachments.empty': 'No attachments yet',
+    'attachments.drop_replace': 'Drop a replacement file here or',
+    'attachments.remove': 'Remove {name}',
+    'attachments.slot_empty': 'No files yet.',
     'attachments.drop': 'Drop files here or',
     'attachments.browse': 'choose files',
     'attachments.rules': '{types} · max {size}',
@@ -182,11 +185,8 @@ export const en: Messages = {
     'attachments.delete_title': 'Delete attachment',
     'attachments.delete_text':
         'The file is removed for good and cannot be restored.',
-    'attachments.cancel': 'Cancel the upload of {name}',
-    'attachments.uploading': 'Uploading {percent}%',
     'attachments.too_big': 'The file is larger than {size}.',
     'attachments.wrong_type': 'This file type is not allowed.',
-    'attachments.failed': 'Upload failed. Try again.',
     'attachments.download_failed':
         'Could not create the download link. Try again.',
     'attachments.meta': '{size} · {user} · {date}',

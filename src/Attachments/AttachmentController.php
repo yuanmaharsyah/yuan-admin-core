@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,25 +20,27 @@ use Yuan\AdminCore\Audit\Audit;
 use Yuan\AdminCore\Audit\AuditEvent;
 use Yuan\AdminCore\Data\AttachmentData;
 use Yuan\AdminCore\Data\AttachmentsData;
+use Yuan\AdminCore\Data\AttachmentSlotData;
 use Yuan\AdminCore\Data\FlashData;
 use Yuan\AdminCore\Data\SignedUrlData;
-use Yuan\AdminCore\Data\UploadAttachmentData;
 use Yuan\AdminCore\DataTable\HasVisibilityScope;
 use Yuan\AdminCore\Registry\ModuleRegistry;
 
 /**
- * Files of a module's records (spec §7). A module adds the routes with
- * `AttachmentController::routes(Model::class)`; the record is always loaded
- * through `visibleTo()`, viewing and downloading need its `view` policy,
- * uploading and deleting its `update` policy. Downloads are 5-minute signed
- * URLs from a private disk.
+ * Files of a module's records (spec §7), in named slots. A module adds the
+ * routes with `AttachmentController::routes(Model::class)`; the record is
+ * always loaded through `visibleTo()`, downloading needs its `view` policy,
+ * deleting its `update` policy. Downloads are 5-minute signed URLs from a
+ * private disk. Uploads go with the record's form (AttachmentUploads).
  */
 final class AttachmentController
 {
     /**
-     * `{slug}.attachments.store|url|download|destroy`, inside the module's route group.
+     * `{slug}.attachments.url|download` (+ `destroy` when the module declares
+     * `edit`), inside the module's route group. Uploads go with the record's
+     * form (AttachmentUploads).
      *
-     * @param  class-string<Model>  $model  Uses HasAttachments and HasVisibilityScope; its module declares `view` and `edit`.
+     * @param  class-string<Model>  $model  Uses HasAttachments and HasVisibilityScope.
      */
     public static function routes(string $model): void
     {
@@ -49,68 +50,41 @@ final class AttachmentController
             }
         }
 
-        $module = app(ModuleRegistry::class)->forClass($model);
-
-        if ($module === null || array_diff(['view', 'edit'], $module->actions) !== []) {
-            throw new InvalidArgumentException("Attachments of {$model} need a module that declares view and edit.");
-        }
-
+        $module = app(ModuleRegistry::class)->forClass($model) ?? throw new InvalidArgumentException("{$model} is not in a module.");
         $view = "permission:{$module->slug}.view";
-        $edit = "permission:{$module->slug}.edit";
 
-        Route::post('{record}/attachments', [self::class, 'store'])->whereNumber('record')->middleware($edit)->defaults('model', $model)->name('attachments.store');
         Route::get('attachments/{attachment}/url', [self::class, 'url'])->whereNumber('attachment')->middleware($view)->defaults('model', $model)->name('attachments.url');
         Route::get('attachments/{attachment}/download', [self::class, 'download'])->whereNumber('attachment')->middleware([$view, 'signed'])->defaults('model', $model)->name('attachments.download');
-        Route::delete('attachments/{attachment}', [self::class, 'destroy'])->whereNumber('attachment')->middleware($edit)->defaults('model', $model)->name('attachments.destroy');
+
+        if (in_array('edit', $module->actions, true)) {
+            Route::delete('attachments/{attachment}', [self::class, 'destroy'])->whereNumber('attachment')->middleware("permission:{$module->slug}.edit")->defaults('model', $model)->name('attachments.destroy');
+        }
     }
 
     /**
-     * The `attachments` prop of a Show page.
+     * The `attachments` prop of a Show, Edit or Create page: every slot with
+     * its files (none for a record not saved yet).
      */
     public static function data(Model $record, ?Authenticatable $user): AttachmentsData
     {
         $slug = self::slugOf($record::class);
-        $mayEdit = $user !== null && Gate::forUser($user)->allows('update', $record);
-        $rules = method_exists($record, 'attachmentRules') ? $record->attachmentRules() : ['mimes' => [], 'max_kb' => 0];
-        $items = method_exists($record, 'attachments') ? $record->attachments()->with('uploader')->get() : collect();
+        $mayDelete = $record->exists && $user !== null && Route::has("{$slug}.attachments.destroy") && Gate::forUser($user)->allows('update', $record);
+        $files = $record->exists && method_exists($record, 'attachments') ? $record->attachments()->with('uploader')->get()->groupBy('collection') : collect();
+        $slots = [];
 
-        return new AttachmentsData(
-            items: array_values($items->map(fn (Attachment $file): AttachmentData => self::item($file, $slug, $mayEdit))->all()),
-            upload_href: $mayEdit ? route("{$slug}.attachments.store", $record) : null,
-            accept: $rules['mimes'],
-            max_kb: $rules['max_kb'],
-        );
-    }
+        foreach (AttachmentUploads::slots($record) as $key => $slot) {
+            $slots[] = new AttachmentSlotData(
+                key: $key,
+                label: $slot->label,
+                multiple: $slot->multiple,
+                required: $slot->required,
+                accept: $slot->mimes,
+                max_kb: $slot->maxKb,
+                items: array_values(($files[$key] ?? collect())->map(fn (Attachment $file): AttachmentData => self::item($file, $slug, $mayDelete))->all()),
+            );
+        }
 
-    /**
-     * @param  class-string<Model>  $model
-     */
-    public function store(Request $request, UploadAttachmentData $data, int $record, string $model): AttachmentData
-    {
-        $parent = self::record($model, $record, $request->user());
-        Gate::authorize('update', $parent);
-
-        $disk = config()->string('admin-core.attachments.disk');
-        $slug = self::slugOf($model);
-        $path = $data->file->storeAs("attachments/{$slug}/".now()->format('Y/m'), Str::uuid().'.'.$data->file->extension(), $disk);
-        $name = self::cleanName($data->file->getClientOriginalName());
-
-        $file = DB::transaction(function () use ($parent, $disk, $path, $name, $data, $request): Attachment {
-            $file = new Attachment([
-                'disk' => $disk,
-                'path' => $path,
-                'original_name' => $name,
-                'mime' => $data->file->getMimeType() ?? 'application/octet-stream',
-                'size' => $data->file->getSize(),
-                'uploaded_by' => $request->user()?->getAuthIdentifier(),
-            ]);
-            $file->attachable()->associate($parent)->save();
-            Audit::record(AuditEvent::AttachmentUploaded, $parent, ['name' => $name, 'size' => $file->size]);
-
-            return $file;
-        });
-
-        return self::item($file->load('uploader'), $slug, true);
+        return new AttachmentsData(slots: $slots);
     }
 
     /**
@@ -133,7 +107,7 @@ final class AttachmentController
     public function download(Request $request, int $attachment, string $model): StreamedResponse
     {
         $file = self::attachment($model, $attachment, $request->user());
-        Audit::record(AuditEvent::AttachmentDownloaded, $file->attachable, ['name' => $file->original_name]);
+        Audit::record(AuditEvent::AttachmentDownloaded, $file->attachable, ['name' => $file->original_name, 'slot' => $file->collection]);
 
         return Storage::disk($file->disk)->download($file->path, $file->original_name);
     }
@@ -146,7 +120,7 @@ final class AttachmentController
         $file = self::attachment($model, $attachment, $request->user(), 'update');
 
         DB::transaction(function () use ($file): void {
-            Audit::record(AuditEvent::AttachmentDeleted, $file->attachable, ['name' => $file->original_name]);
+            Audit::record(AuditEvent::AttachmentDeleted, $file->attachable, ['name' => $file->original_name, 'slot' => $file->collection]);
             $file->delete();
         });
         Storage::disk($file->disk)->delete($file->path);
@@ -209,13 +183,5 @@ final class AttachmentController
     private static function slugOf(string $model): string
     {
         return app(ModuleRegistry::class)->forClass($model)->slug ?? throw new InvalidArgumentException("{$model} is not in a module.");
-    }
-
-    /** The client's file name as display metadata: no path, no control characters, at most 200 characters. */
-    private static function cleanName(string $name): string
-    {
-        $clean = trim((string) preg_replace('/[\x00-\x1F\x7F]/u', '', basename(str_replace('\\', '/', $name))));
-
-        return Str::limit($clean === '' ? 'berkas' : $clean, 200, '');
     }
 }

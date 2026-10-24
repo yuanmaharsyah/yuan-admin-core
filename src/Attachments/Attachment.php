@@ -17,6 +17,7 @@ use Yuan\AdminCore\Audit\NotAudited;
  * @property int $id
  * @property string $attachable_type
  * @property int $attachable_id
+ * @property string $collection The slot key (HasAttachments::attachmentSlots()).
  * @property string $disk
  * @property string $path
  * @property string $original_name
@@ -29,7 +30,7 @@ use Yuan\AdminCore\Audit\NotAudited;
 #[NotAudited(reason: 'Uploads and deletions are audited on the parent record as attachment_uploaded / attachment_deleted.')]
 final class Attachment extends Model
 {
-    protected $fillable = ['disk', 'path', 'original_name', 'mime', 'size', 'uploaded_by'];
+    protected $fillable = ['collection', 'disk', 'path', 'original_name', 'mime', 'size', 'uploaded_by'];
 
     /**
      * @return MorphTo<Model, $this>
