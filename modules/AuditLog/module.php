@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use Yuan\AdminCore\Modules\AuditLog\Widgets\ActivityByDay;
+use Yuan\AdminCore\Modules\AuditLog\Widgets\FailedLogins;
 
 return [
     'name' => 'AuditLog',
@@ -14,5 +16,8 @@ return [
     'superadmin_only' => false,
     'menu' => true,
     'actions' => ['view', 'download'],
-    'widgets' => [],
+    'widgets' => [
+        FailedLogins::class,
+        ActivityByDay::class,
+    ],
 ];

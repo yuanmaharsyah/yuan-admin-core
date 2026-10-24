@@ -15,6 +15,7 @@ use Yuan\AdminCore\Auth\PasswordRules;
 use Yuan\AdminCore\Data\Auth\ChangePasswordPageData;
 use Yuan\AdminCore\Data\Auth\UpdatePasswordData;
 use Yuan\AdminCore\Data\FlashData;
+use Yuan\AdminCore\Http\HomeController;
 use Yuan\AdminCore\Modules\Users\Models\User;
 
 /**
@@ -31,7 +32,7 @@ final class PasswordController
 
         return Inertia::render('Core::Auth/ChangePassword', new ChangePasswordPageData(
             submit_href: route('account.password.update'),
-            back_href: route(config()->string('admin-core.routes.home')),
+            back_href: HomeController::url(),
             logout_href: route('logout'),
             required: $user->must_change_password,
             user_name: $user->name,
@@ -50,7 +51,7 @@ final class PasswordController
         });
         Inertia::flash((new FlashData(success: __('Kata sandi berhasil diubah.')))->toArray());
 
-        return to_route(config()->string('admin-core.routes.home'));
+        return redirect()->to(HomeController::url());
     }
 
     private static function user(Request $request): User

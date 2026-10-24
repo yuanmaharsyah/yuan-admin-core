@@ -38,7 +38,7 @@ final class ErrorPages
             }
 
             $signedIn = $request->user() !== null;
-            $home = $signedIn ? route(config()->string('admin-core.routes.home')) : route('login');
+            $home = $signedIn ? HomeController::url() : route('login');
 
             return Inertia::render('Core::Errors/Show', new ErrorPageData(status: $status, home_href: $home, signed_in: $signedIn))
                 ->toResponse($request)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,6 +13,7 @@ use Spatie\LaravelData\Data;
 use Yuan\AdminCore\Data\BreadcrumbData;
 use Yuan\AdminCore\Data\BreadcrumbsData;
 use Yuan\AdminCore\Http\Middleware\HandleInertiaRequests;
+use Yuan\AdminCore\Settings\Settings;
 use Yuan\AdminCore\Tests\Fixtures\Http\ProjectInertiaMiddleware;
 use Yuan\AdminCore\Tests\Fixtures\Models\User;
 
@@ -35,7 +37,14 @@ it('shares guest props', function (): void {
     AssertableInertia::fromTestResponse(get('/probe'))
         ->where('auth', ['user' => null, 'level' => null, 'is_super_admin' => false, 'permissions' => []])
         ->where('menu', [])
-        ->where('app', ['name' => config('app.name'), 'locale' => app()->getLocale(), 'timezone' => config('app.timezone'), 'panel_open' => true, 'maintenance_banner' => null, 'route' => 'probe']);
+        ->where('app.name', config('app.name'))
+        ->where('app.locale', app()->getLocale())
+        ->where('app.timezone', config('app.timezone'))
+        ->where('app.panel_open', true)
+        ->where('app.site_access', null)
+        ->where('app.route', 'probe')
+        ->where('app.logo', null)
+        ->where('app.settings', fn (Collection $settings): bool => $settings->has('kontak.whatsapp') && ! $settings->has('akses.mode'));
 });
 
 it('shares only id, name and email of the user, and their menu', function (): void {
@@ -61,15 +70,21 @@ it('reads the panel state from the admin_panel cookie', function (): void {
     AssertableInertia::fromTestResponse(withCookie('admin_panel', 'false')->get('/probe'))->where('app.panel_open', false);
 });
 
-it('shares the maintenance banner from config, and none when it is empty', function (?string $banner, ?string $shared): void {
-    config(['admin-core.maintenance_banner' => $banner]);
+it('shares the site access mode for the shell banner while it is not open', function (): void {
+    app(Settings::class)->save('akses', ['mode' => 'maintenance', 'pesan' => 'Pemeliharaan Sabtu 22.00–23.00 WIB.']);
 
-    AssertableInertia::fromTestResponse(get('/probe'))->where('app.maintenance_banner', $shared);
-})->with([
-    'set' => ['Pemeliharaan sistem Sabtu 22.00–23.00 WIB.', 'Pemeliharaan sistem Sabtu 22.00–23.00 WIB.'],
-    'null' => [null, null],
-    'empty env value' => ['', null],
-]);
+    AssertableInertia::fromTestResponse(get('/probe'))->where('app.site_access', ['mode' => 'maintenance', 'message' => 'Pemeliharaan Sabtu 22.00–23.00 WIB.']);
+
+    app(Settings::class)->save('akses', ['mode' => 'open']);
+
+    AssertableInertia::fromTestResponse(get('/probe'))->where('app.site_access', null);
+});
+
+it('shares the branding logo from config while Settings has none', function (): void {
+    config(['admin-core.branding.logo' => 'images/logo.png']);
+
+    AssertableInertia::fromTestResponse(get('/probe'))->where('app.logo', asset('images/logo.png'));
+});
 
 it('renders the breadcrumbs page prop as a list of label and optional link', function (): void {
     Route::middleware(['web', HandleInertiaRequests::class])->get('/crumbs', fn () => Inertia::render('Demo::Index', [

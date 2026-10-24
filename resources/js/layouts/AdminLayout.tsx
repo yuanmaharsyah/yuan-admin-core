@@ -136,6 +136,7 @@ export function AdminLayout({
                 <AppRail
                     menu={menu}
                     appName={app.name}
+                    logo={app.logo}
                     activeKey={active.group?.key}
                     onSelectGroup={selectGroup}
                     onNavigate={followDirectLink}
@@ -174,6 +175,7 @@ export function AdminLayout({
                     <AppRail
                         menu={menu}
                         appName={app.name}
+                        logo={app.logo}
                         activeKey={active.group?.key}
                         onSelectGroup={(key) => setViewed({ url, key })}
                         onNavigate={followDirectLink}
@@ -244,7 +246,7 @@ export function AdminLayout({
                     </div>
                     {auth.user && <UserMenu user={auth.user} links={links} />}
                 </header>
-                <MaintenanceBanner message={app.maintenance_banner} />
+                <MaintenanceBanner access={app.site_access} />
                 <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pt-2 pb-4 lg:px-8 lg:pt-4 lg:pb-8">
                     {children}
                 </main>

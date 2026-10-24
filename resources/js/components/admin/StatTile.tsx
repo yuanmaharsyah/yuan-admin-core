@@ -2,9 +2,11 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatCurrency, formatNumber } from '../../lib/format';
 import { Skeleton } from '../ui/skeleton';
+import { Icon as NamedIcon } from './Icon';
 
 type Props = {
-    icon: LucideIcon;
+    /** A lucide component, or a lucide name when it arrives as data (widgets). */
+    icon: LucideIcon | string;
     label: string;
     value: number;
     format?: 'number' | 'currency';
@@ -37,7 +39,15 @@ export function StatTile({
                 </>
             ) : (
                 <>
-                    <Icon aria-hidden="true" className="size-5" />
+                    {typeof Icon === 'string' ? (
+                        <NamedIcon
+                            name={Icon}
+                            aria-hidden="true"
+                            className="size-5"
+                        />
+                    ) : (
+                        <Icon aria-hidden="true" className="size-5" />
+                    )}
                     <div className="h-7" />
                     <div className="text-label text-muted-foreground uppercase">
                         {label}

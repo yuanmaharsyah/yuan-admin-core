@@ -277,4 +277,19 @@ export const en: Messages = {
     'history.failed': 'Could not load the history',
     'history.failed_text':
         'The server did not respond. Check the connection and try again.',
+    'widgets.see_all': 'See all',
+    'widgets.failed': 'Could not load',
+    'widgets.retry': 'Try again',
+    'errors.no_access.title': 'No access yet',
+    'errors.no_access.text':
+        'Your account has no access to any module yet. Ask an administrator for access.',
+    'site.maintenance_title': 'Under maintenance',
+    'site.maintenance_text':
+        'The site is under maintenance. Please come back in a while.',
+    'site.coming_soon_title': 'Coming soon',
+    'site.coming_soon_text': 'This site opens soon.',
+    'site.banner_maintenance':
+        'Maintenance mode is on: public pages are closed.',
+    'site.banner_coming_soon':
+        'Coming-soon mode is on: public pages are closed.',
 };

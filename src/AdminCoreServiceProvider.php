@@ -23,6 +23,7 @@ use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\WriteActivity;
 use Yuan\AdminCore\Auth\PasswordRules;
+use Yuan\AdminCore\Console\AccessCommand;
 use Yuan\AdminCore\Console\AuditPruneCommand;
 use Yuan\AdminCore\Console\CreateSuperAdminCommand;
 use Yuan\AdminCore\Console\DoctorCommand;
@@ -36,6 +37,7 @@ use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Registry\ModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleRegistry;
 use Yuan\AdminCore\Registry\PageResolver;
+use Yuan\AdminCore\Settings\Settings;
 
 final class AdminCoreServiceProvider extends ServiceProvider
 {
@@ -45,6 +47,7 @@ final class AdminCoreServiceProvider extends ServiceProvider
 
         $this->app->singleton(ModuleRegistry::class, fn (): ModuleRegistry => ModuleRegistry::fromConfig(config()));
         $this->app->singleton(PageResolver::class);
+        $this->app->singleton(Settings::class);
         $this->registerAudit();
         config(['permission.models.role' => Level::class]);
 
@@ -74,6 +77,8 @@ final class AdminCoreServiceProvider extends ServiceProvider
 
         $this->bootRbac();
 
+        $this->app->booted(fn () => $this->app->make(Settings::class)->applyToConfig());
+
         // Spec §8 password rules; a project's own provider may replace them.
         Password::defaults(fn (): Password => PasswordRules::defaults());
 
@@ -84,7 +89,7 @@ final class AdminCoreServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ModulesCacheCommand::class, ModulesClearCommand::class, ModulesListCommand::class, DoctorCommand::class,
-                PermissionsSyncCommand::class, CreateSuperAdminCommand::class, AuditPruneCommand::class,
+                PermissionsSyncCommand::class, CreateSuperAdminCommand::class, AuditPruneCommand::class, AccessCommand::class,
             ]);
             $this->optimizes(optimize: 'modules:cache', clear: 'modules:clear', key: 'modules');
         }

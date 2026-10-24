@@ -22,6 +22,7 @@ use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
 use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\NotAudited;
+use Yuan\AdminCore\Dashboard\Widget;
 use Yuan\AdminCore\DataTable\HasVisibilityScope;
 use Yuan\AdminCore\Registry\InvalidModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleDefinition;
@@ -202,6 +203,49 @@ final class ContractAssertions
         ];
 
         self::failOnViolations('Permissions out of sync with the module configs; run permissions:sync', $violations);
+    }
+
+    /**
+     * Every widget listed in a `module.php` extends `Widget`, has a unique key
+     * prefixed with its module's slug, and its permission exists after
+     * `permissions:sync` (spec §7.2).
+     */
+    public static function assertWidgetContract(): void
+    {
+        $violations = [];
+        $keys = [];
+        /** @var list<string> $permissions */
+        $permissions = Permission::query()->pluck('name')->all();
+
+        foreach (app(ModuleRegistry::class)->enabled() as $module) {
+            foreach ($module->widgets as $class) {
+                $widget = is_subclass_of($class, Widget::class) ? app($class) : null;
+
+                if (! $widget instanceof Widget) {
+                    $violations[] = "{$module->name}: {$class} does not extend ".Widget::class;
+
+                    continue;
+                }
+
+                $key = $widget->key();
+
+                if (! str_starts_with($key, "{$module->slug}.")) {
+                    $violations[] = "{$class}: key \"{$key}\" must start with \"{$module->slug}.\"";
+                }
+
+                if (isset($keys[$key])) {
+                    $violations[] = "{$class}: key \"{$key}\" is already used by {$keys[$key]}";
+                }
+
+                $keys[$key] = $class;
+
+                if (! in_array($widget->permission(), $permissions, true)) {
+                    $violations[] = "{$class}: permission \"{$widget->permission()}\" does not exist after permissions:sync";
+                }
+            }
+        }
+
+        self::failOnViolations('Widget contract (spec §7.2)', $violations);
     }
 
     /**

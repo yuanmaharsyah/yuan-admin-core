@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use LogicException;
 use Spatie\Activitylog\Models\Activity;
+use Yuan\AdminCore\DataTable\VisibilityScope;
 
 /**
  * The configured activity model. Rows are append-only (spec §7.1): updating or
@@ -37,6 +38,8 @@ final class ImmutableActivity extends Activity
     #[Scope]
     protected function visibleTo(Builder $query, Authenticatable $viewer): void
     {
+        VisibilityScope::applied(self::class, $viewer);
+
         if (method_exists($viewer, 'isSuperAdmin') && $viewer->isSuperAdmin()) {
             return;
         }

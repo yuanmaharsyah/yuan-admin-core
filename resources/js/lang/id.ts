@@ -279,4 +279,19 @@ export const id = {
     'history.failed': 'Gagal memuat riwayat',
     'history.failed_text':
         'Server tidak merespons. Periksa koneksi lalu coba lagi.',
+    'widgets.see_all': 'Lihat semua',
+    'widgets.failed': 'Gagal memuat',
+    'widgets.retry': 'Coba lagi',
+    'errors.no_access.title': 'Belum ada akses',
+    'errors.no_access.text':
+        'Akun Anda belum diberi akses ke modul mana pun. Hubungi administrator untuk mendapatkan akses.',
+    'site.maintenance_title': 'Sedang dalam pemeliharaan',
+    'site.maintenance_text':
+        'Situs sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.',
+    'site.coming_soon_title': 'Segera hadir',
+    'site.coming_soon_text': 'Situs ini akan segera dibuka.',
+    'site.banner_maintenance':
+        'Mode pemeliharaan aktif: halaman publik ditutup.',
+    'site.banner_coming_soon':
+        'Mode segera hadir aktif: halaman publik ditutup.',
 } as const;

@@ -27,7 +27,10 @@
             "Yuan\\AdminCore\\": "src/",
             "Yuan\\AdminCore\\Database\\Seeders\\": "database/seeders/",
             "Yuan\\AdminCore\\Modules\\": "modules/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

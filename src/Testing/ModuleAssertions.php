@@ -6,11 +6,14 @@ namespace Yuan\AdminCore\Testing;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use LogicException;
 use PHPUnit\Framework\Assert;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Audit\Masker;
+use Yuan\AdminCore\Dashboard\DashboardRange;
+use Yuan\AdminCore\Dashboard\Widget;
 use Yuan\AdminCore\DataTable\VisibilityScope;
 use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Permissions\PermissionSynchronizer;
@@ -146,6 +149,80 @@ final class ModuleAssertions
 
         Assert::assertFalse($visible(self::makeAdminUser()), "Audit row #{$row->getKey()} is visible to a non-Super Admin.");
         Assert::assertTrue($visible(self::makeAdminUser(Level::superAdmin())), "Audit row #{$row->getKey()} is hidden from Super Admin.");
+    }
+
+    /**
+     * The widget is missing from Beranda for a user with `dashboard.view` and
+     * every other permission of its module, and present once its own
+     * permission is added.
+     *
+     * @param  class-string<Widget>  $widget
+     */
+    public static function assertWidgetHiddenWithout(string $widget): void
+    {
+        $instance = app($widget);
+        $module = app(ModuleRegistry::class)->find($instance->slug());
+        Assert::assertNotNull($module, "No module for widget {$widget}.");
+        $others = array_values(array_diff(array_map(fn (string $action): string => "{$module->slug}.{$action}", $module->actions), [$instance->permission()]));
+        $keys = function (array $permissions): array {
+            self::actingAsLevelWith(array_values(array_unique(['dashboard.view', ...$permissions])));
+            $widgets = self::page()['dashboard']['widgets'] ?? [];
+
+            return is_array($widgets) ? array_column($widgets, 'key') : [];
+        };
+
+        Assert::assertNotContains($instance->key(), $keys($others), "{$widget} shows without {$instance->permission()}.");
+        Assert::assertContains($instance->key(), $keys([...$others, $instance->permission()]), "{$widget} is missing with {$instance->permission()}.");
+    }
+
+    /**
+     * The widget's data query calls `visibleTo()` with the signed-in user.
+     *
+     * @param  class-string<Widget>  $widget
+     * @param  class-string<Model>  $model
+     */
+    public static function assertWidgetUsesScope(string $widget, string $model): void
+    {
+        $user = auth()->user();
+        Assert::assertNotNull($user, 'Sign in before assertWidgetUsesScope().');
+        Cache::flush();
+
+        $calls = VisibilityScope::record(fn () => app($widget)->resolve($user, new DashboardRange));
+
+        Assert::assertContains(['model' => $model, 'user' => $user->getAuthIdentifier()], $calls, "{$widget}::data() never calls {$model}::query()->visibleTo() with the user.");
+    }
+
+    /**
+     * The widget resolves for the signed-in user within the budget, cache cold
+     * (spec §7.2: 300 ms on realistic data; seed that data first).
+     *
+     * @param  class-string<Widget>  $widget
+     */
+    public static function assertWidgetWithinBudget(string $widget, int $ms = 300): void
+    {
+        $user = auth()->user();
+        Assert::assertNotNull($user, 'Sign in before assertWidgetWithinBudget().');
+        Cache::flush();
+
+        $started = hrtime(true);
+        app($widget)->resolve($user, new DashboardRange('90d'));
+        $elapsed = (hrtime(true) - $started) / 1e6;
+
+        Assert::assertLessThan($ms, $elapsed, sprintf('%s took %.1f ms (budget %d ms).', $widget, $elapsed, $ms));
+    }
+
+    /**
+     * The Beranda page's props for the signed-in user.
+     *
+     * @return array<string, mixed>
+     */
+    private static function page(): array
+    {
+        $response = call('GET', route('dashboard.index'));
+        $response->assertOk();
+
+        /** @var array<string, mixed> */
+        return $response->viewData('page')['props'];
     }
 
     private static function actingAsLevel(Level $level): Model&Authenticatable

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { formatNumber } from '../../lib/format';
 import { cn } from '../../lib/utils';
 import { Skeleton } from '../ui/skeleton';
@@ -13,6 +14,8 @@ type Props = {
     loading?: boolean;
     /** Accessible name of each figure's button, e.g. "Filter event Dibuat, 5.210". */
     selectLabel?: (segment: Segment) => string;
+    /** Beside the title, e.g. a "Lihat semua" link. */
+    action?: ReactNode;
 };
 
 /** Colors in order, from the chart tokens (frontend-behavior §9). */
@@ -43,6 +46,7 @@ export function SegmentBar({
     onSelect,
     loading = false,
     selectLabel,
+    action,
 }: Props) {
     const total = segments.reduce((sum, segment) => sum + segment.value, 0);
     let x = 0;
@@ -53,9 +57,10 @@ export function SegmentBar({
             aria-busy={loading || undefined}
             className="flex min-w-0 flex-col gap-5 rounded bg-card p-6 text-card-foreground"
         >
-            <h2 className="border-b-2 border-rule pb-3 text-card-title">
-                {title}
-            </h2>
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b-2 border-rule pb-3">
+                <h2 className="flex-1 text-card-title">{title}</h2>
+                {action}
+            </div>
             {loading ? (
                 <>
                     <div className="flex flex-wrap gap-x-6 gap-y-4">

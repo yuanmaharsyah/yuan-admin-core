@@ -5,11 +5,13 @@ import type { Href } from '../../lib/shell';
 import { navigatesDirectly } from '../../lib/shell';
 import { cn } from '../../lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { AppMark } from './AppMark';
 import { Icon } from './Icon';
 
 type Props = {
     menu: Yuan.AdminCore.Data.MenuGroupData[];
     appName: string;
+    logo: string | null;
     activeKey?: string;
     onSelectGroup: (key: string) => void;
     /** A one-item group's link was followed (it may be the current URL). */
@@ -25,6 +27,7 @@ type Props = {
 export function AppRail({
     menu,
     appName,
+    logo,
     activeKey,
     onSelectGroup,
     onNavigate,
@@ -48,12 +51,7 @@ export function AppRail({
             aria-label={t('shell.rail')}
             className="flex h-full w-rail flex-col items-center gap-2 bg-rail py-3 text-rail-foreground"
         >
-            <div
-                aria-hidden="true"
-                className="flex size-8 shrink-0 items-center justify-center rounded bg-primary text-base font-bold text-card"
-            >
-                {appName.charAt(0).toUpperCase()}
-            </div>
+            <AppMark name={appName} logo={logo} />
             <div className="my-1.5 h-px w-8 shrink-0 bg-border" />
             <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-y-auto">
                 {menu.map((group) => {

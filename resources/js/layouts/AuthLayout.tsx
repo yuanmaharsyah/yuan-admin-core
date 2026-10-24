@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { AppMark } from '../components/admin/AppMark';
 
 /**
  * Centered auth layout (ui-design §4.7, reference auth): app mark and name,
@@ -12,12 +13,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-8 text-foreground">
             <main className="flex w-full max-w-100 flex-col gap-5">
                 <div className="flex items-center gap-3">
-                    <div
-                        aria-hidden="true"
-                        className="flex size-8 shrink-0 items-center justify-center rounded bg-primary text-base font-bold text-card"
-                    >
-                        {app.name.charAt(0).toUpperCase()}
-                    </div>
+                    <AppMark name={app.name} logo={app.logo} />
                     <div className="text-brand">{app.name}</div>
                 </div>
                 {children}

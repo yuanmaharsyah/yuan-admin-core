@@ -1,8 +1,15 @@
 import { TriangleAlert } from 'lucide-react';
+import { useT } from '../../lib/i18n';
 
-/** Full-width notice under the topbar while `app.maintenance_banner` is set. */
-export function MaintenanceBanner({ message }: { message: string | null }) {
-    if (!message) {
+/** Full-width notice under the topbar while Settings → Akses Situs isn't open (public pages are closed). */
+export function MaintenanceBanner({
+    access,
+}: {
+    access: Yuan.AdminCore.Data.SiteAccessPageData | null;
+}) {
+    const t = useT();
+
+    if (access === null) {
         return null;
     }
 
@@ -15,7 +22,14 @@ export function MaintenanceBanner({ message }: { message: string | null }) {
                 aria-hidden="true"
                 className="size-4 shrink-0 text-warning"
             />
-            <span>{message}</span>
+            <span>
+                {t(
+                    access.mode === 'maintenance'
+                        ? 'site.banner_maintenance'
+                        : 'site.banner_coming_soon',
+                )}
+                {access.message ? ` ${access.message}` : ''}
+            </span>
         </div>
     );
 }
