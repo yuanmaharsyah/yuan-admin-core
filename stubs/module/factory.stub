@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Database\Factories;
+
+{{ imports }}
+
+/**
+ * @extends Factory<{{ Name }}>
+ */
+final class {{ Name }}Factory extends Factory
+{
+    protected $model = {{ Name }}::class;
+
+    public function definition(): array
+    {
+        return [
+{{ values }}
+        ];
+    }
+}

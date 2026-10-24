@@ -206,9 +206,9 @@ final class ContractAssertions
     }
 
     /**
-     * Every widget listed in a `module.php` extends `Widget`, has a unique key
-     * prefixed with its module's slug, and its permission exists after
-     * `permissions:sync` (spec §7.2).
+     * No two widgets share a key, and every widget's permission exists after
+     * `permissions:sync` (spec §7.2). That each listed class is a `Widget`
+     * with a slug-prefixed key is checked at boot (ModuleDefinition).
      */
     public static function assertWidgetContract(): void
     {
@@ -219,19 +219,13 @@ final class ContractAssertions
 
         foreach (app(ModuleRegistry::class)->enabled() as $module) {
             foreach ($module->widgets as $class) {
-                $widget = is_subclass_of($class, Widget::class) ? app($class) : null;
+                $widget = app($class);
 
                 if (! $widget instanceof Widget) {
-                    $violations[] = "{$module->name}: {$class} does not extend ".Widget::class;
-
                     continue;
                 }
 
                 $key = $widget->key();
-
-                if (! str_starts_with($key, "{$module->slug}.")) {
-                    $violations[] = "{$class}: key \"{$key}\" must start with \"{$module->slug}.\"";
-                }
 
                 if (isset($keys[$key])) {
                     $violations[] = "{$class}: key \"{$key}\" is already used by {$keys[$key]}";

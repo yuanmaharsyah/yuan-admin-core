@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Yuan\AdminCore\Registry;
 
+use ReflectionClass;
+use Yuan\AdminCore\Dashboard\Widget;
+
 /**
  * A validated `module.php` (spec §3.1).
  */
@@ -69,6 +72,7 @@ final readonly class ModuleDefinition
             throw InvalidModuleDefinition::rule($file, 'group', 'must be one of the configured menu groups ('.implode(', ', $groups).')');
         }
 
+        $slug = self::string($config, 'slug', $file, self::KEBAB, 'must be lowercase kebab-case');
         $core = self::bool($config, 'core', $file);
         $enabled = self::bool($config, 'enabled', $file);
 
@@ -78,7 +82,7 @@ final readonly class ModuleDefinition
 
         return new self(
             name: $name,
-            slug: self::string($config, 'slug', $file, self::KEBAB, 'must be lowercase kebab-case'),
+            slug: $slug,
             label: self::string($config, 'label', $file, '/\S/', 'must not be empty'),
             icon: self::icon($config['icon'], $file),
             group: $group,
@@ -88,7 +92,7 @@ final readonly class ModuleDefinition
             superadminOnly: self::bool($config, 'superadmin_only', $file),
             menu: self::bool($config, 'menu', $file),
             actions: self::actions($config['actions'], $file),
-            widgets: self::widgets($config['widgets'], $file),
+            widgets: self::widgets($config['widgets'], $file, $slug),
             path: dirname($file),
             root: $root,
             namespace: $namespace,
@@ -201,7 +205,7 @@ final readonly class ModuleDefinition
     /**
      * @return list<class-string>
      */
-    private static function widgets(mixed $widgets, string $file): array
+    private static function widgets(mixed $widgets, string $file, string $slug): array
     {
         if (! is_array($widgets) || ! array_is_list($widgets)) {
             throw InvalidModuleDefinition::rule($file, 'widgets', 'must be a list');
@@ -212,6 +216,17 @@ final readonly class ModuleDefinition
         foreach ($widgets as $widget) {
             if (! is_string($widget) || ! class_exists($widget)) {
                 throw InvalidModuleDefinition::rule($file, 'widgets', 'must only list existing classes');
+            }
+
+            if (! is_subclass_of($widget, Widget::class)) {
+                throw InvalidModuleDefinition::rule($file, 'widgets', "must only list Widget classes ({$widget} isn't one)");
+            }
+
+            // key() is a constant per class; no constructor runs at boot.
+            $key = (new ReflectionClass($widget))->newInstanceWithoutConstructor()->key();
+
+            if (! str_starts_with($key, "{$slug}.")) {
+                throw InvalidModuleDefinition::rule($file, 'widgets', "must have keys starting with \"{$slug}.\" ({$widget} has \"{$key}\")");
             }
 
             $classes[] = $widget;

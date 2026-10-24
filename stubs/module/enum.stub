@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Enums;
+
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+use Yuan\AdminCore\Data\OptionData;
+
+#[TypeScript]
+enum {{ Enum }}: string
+{
+{{ cases }}
+
+    public function label(): string
+    {
+        return match ($this) {
+{{ labels }}
+        };
+    }
+
+    /**
+     * @return list<OptionData>
+     */
+    public static function options(): array
+    {
+        return array_map(fn (self $case): OptionData => new OptionData($case->value, $case->label()), self::cases());
+    }
+}

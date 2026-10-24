@@ -1,0 +1,19 @@
+    public function destroy(Request $request, int ${{ variable }}): RedirectResponse
+    {
+        $model = {{ Name }}::query()->visibleTo($request->user())->findOrFail(${{ variable }});
+        Gate::authorize('delete', $model);
+
+        Trash::delete($model->newCollection([$model]), '{{ slug }}');
+
+        return to_route('{{ slug }}.index');
+    }
+
+    public function bulkDestroy(Request $request, SelectionData $data): RedirectResponse
+    {
+        $records = {{ Name }}::query()->visibleTo($request->user())->whereKey($data->ids)->get();
+        $records->each(fn ({{ Name }} $record) => Gate::authorize('delete', $record));
+
+        Trash::delete($records, '{{ slug }}');
+
+        return back();
+    }

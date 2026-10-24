@@ -1,0 +1,6 @@
+    public function download(Request $request): SymfonyResponse
+    {
+        Gate::authorize('download', {{ Name }}::class);
+
+        return ExportManager::for({{ Name }}Export::class, $request);
+    }

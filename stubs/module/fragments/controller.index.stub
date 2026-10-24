@@ -1,0 +1,24 @@
+    public function index(Request $request): Response
+    {
+        Gate::authorize('viewAny', {{ Name }}::class);
+
+        return Inertia::render('{{ Name }}::Index', [
+            '{{ plural }}' => PaginatedData::fromPaginator({{ Name }}::query()->visibleTo($request->user()){{ with }}->dataTable($request), {{ Name }}ListItemData::class),
+            'table' => {{ Name }}::dataTableState($request),
+        ]);
+    }
+
+    /** The RelationSelect lookup of other modules: up to 20 records matching `search`. */
+    public function lookup(Request $request): LookupData
+    {
+        Gate::authorize('viewAny', {{ Name }}::class);
+
+        $query = {{ Name }}::query()->visibleTo($request->user());
+        DataTableQuery::applySearch($query, (new {{ Name }})->dataTableSearch(), DataTableQuery::search($request));
+
+        return new LookupData(array_values(
+            $query->latest('id')->limit(LookupData::LIMIT)->get()
+                ->map(fn ({{ Name }} $model): OptionData => new OptionData((string) $model->id, $model->auditLabel()))
+                ->all(),
+        ));
+    }

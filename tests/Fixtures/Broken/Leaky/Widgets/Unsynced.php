@@ -10,12 +10,12 @@ use Yuan\AdminCore\Dashboard\Widget;
 use Yuan\AdminCore\Dashboard\WidgetType;
 use Yuan\AdminCore\Data\Widgets\StatWidgetData;
 
-/** A key without the module's slug, and so a permission nobody synced. */
-final class Misnamed extends Widget
+/** A permission nobody synced (the module has no `export` action). */
+final class Unsynced extends Widget
 {
     public function key(): string
     {
-        return 'other.total';
+        return 'leaky.total';
     }
 
     public function label(): string
@@ -26,6 +26,11 @@ final class Misnamed extends Widget
     public function type(): WidgetType
     {
         return WidgetType::Stat;
+    }
+
+    public function permission(): string
+    {
+        return 'leaky.export';
     }
 
     public function data(Authenticatable $user, DashboardRange $range): StatWidgetData

@@ -1,0 +1,16 @@
+it('creates a {{ lower_label }} and audits it', function (): void {
+    {{ acting_create }};
+
+    post('{{ base }}', {{ input_fn }}())->assertSessionHasNoErrors()->assertRedirect();
+
+    ${{ variable }} = {{ Name }}::query()->sole();
+    ModuleAssertions::assertAudited(${{ variable }}, 'created'{{ masked }});
+});
+
+it('rejects a {{ lower_label }} without its required fields', function (): void {
+    {{ acting_create }};
+
+    post('{{ base }}', [])->assertSessionHasErrors([{{ required }}]);
+
+    expect({{ Name }}::query()->count())->toBe(0);
+});

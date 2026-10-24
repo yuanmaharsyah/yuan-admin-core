@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Data;
+
+{{ imports }}
+
+/** The choices of the {{ lower_label }} form's selects. */
+#[TypeScript]
+final class {{ Name }}FormOptionsData extends Data
+{
+    /**
+{{ param_docs }}
+     */
+    public function __construct(
+{{ properties }}
+    ) {}
+
+    public static function make(): self
+    {
+        return new self({{ values }});
+    }
+}

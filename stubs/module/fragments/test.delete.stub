@@ -1,0 +1,19 @@
+it('moves a {{ lower_label }} to the trash and audits it', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    {{ acting_delete }};
+
+    delete("{{ base }}/{${{ variable }}->id}")->assertRedirect();
+
+    expect(${{ variable }}->fresh()?->trashed())->toBeTrue();
+    ModuleAssertions::assertAudited(${{ variable }}, 'deleted'{{ masked }});
+});
+
+it('deletes the selected records in one audit batch', function (): void {
+    [$first, $second] = {{ Name }}::factory()->count(2)->create()->all();
+    {{ acting_delete }};
+
+    delete('{{ base }}', ['ids' => [$first->id, $second->id]])->assertRedirect();
+
+    expect({{ Name }}::query()->count())->toBe(0)
+        ->and(ImmutableActivity::query()->where('event', 'deleted')->pluck('batch_uuid')->unique()->filter())->toHaveCount(1);
+});

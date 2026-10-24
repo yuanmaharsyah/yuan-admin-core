@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Yuan\AdminCore\Registry\InvalidModuleDefinition;
 use Yuan\AdminCore\Registry\ModuleDefinition;
 use Yuan\AdminCore\Tests\Fixtures\Modules\Demo\Providers\DemoServiceProvider;
+use Yuan\AdminCore\Tests\Fixtures\Widgets\CustomerTotal;
+use Yuan\AdminCore\Tests\Fixtures\Widgets\InvoiceTotal;
 
 const MODULE_FILE = '/app/modules/Invoice/module.php';
 const GROUPS = ['beranda', 'master', 'keuangan', 'sistem'];
@@ -15,7 +17,7 @@ function definition(mixed $config): ModuleDefinition
 }
 
 it('loads a valid module.php into typed properties', function (): void {
-    $module = definition(moduleConfig(['widgets' => [DemoServiceProvider::class]]));
+    $module = definition(moduleConfig(['widgets' => [InvoiceTotal::class]]));
 
     expect($module)->toEqual(new ModuleDefinition(
         name: 'Invoice',
@@ -29,7 +31,7 @@ it('loads a valid module.php into typed properties', function (): void {
         superadminOnly: false,
         menu: true,
         actions: ['view', 'create', 'edit', 'delete', 'download'],
-        widgets: [DemoServiceProvider::class],
+        widgets: [InvoiceTotal::class],
         path: '/app/modules/Invoice',
         root: 'project',
         namespace: 'Modules\\',
@@ -69,4 +71,6 @@ it('rejects an invalid value', function (array $overrides, string $message): voi
     'actions as a map' => [['actions' => ['a' => 'view']], '"actions" must be a list.'],
     'core module disabled' => [['core' => true, 'enabled' => false], '"enabled" cannot be false for a core module.'],
     'unknown widget class' => [['widgets' => ['App\\Widgets\\Missing']], '"widgets" must only list existing classes.'],
+    'widget that is no Widget' => [['widgets' => [DemoServiceProvider::class]], '"widgets" must only list Widget classes ('.DemoServiceProvider::class." isn't one)."],
+    'widget key of another module' => [['widgets' => [CustomerTotal::class]], '"widgets" must have keys starting with "invoices." ('.CustomerTotal::class.' has "customers.total").'],
 ]);

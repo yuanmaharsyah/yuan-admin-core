@@ -1,0 +1,10 @@
+    public function data(Authenticatable $user, DashboardRange $range): StatStackWidgetData
+    {
+        $records = fn () => {{ Model }}::query()->visibleTo($user);
+
+        return new StatStackWidgetData([
+            new WidgetFigureData(key: 'total', label: __('Semua'), value: $records()->count()),
+            new WidgetFigureData(key: 'range', label: __('Dalam rentang'), value: $records()->whereBetween('created_at', [$range->from, $range->to])->count()),
+            new WidgetFigureData(key: 'today', label: __('Hari ini'), value: $records()->whereDate('created_at', today())->count()),
+        ]);
+    }

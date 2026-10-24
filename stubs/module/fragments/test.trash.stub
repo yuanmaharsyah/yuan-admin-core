@@ -1,0 +1,14 @@
+it('lets only Super Admin see the trash and restore', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    ${{ variable }}->delete();
+    {{ acting_delete }};
+
+    get('{{ base }}/trash')->assertForbidden();
+    post('{{ base }}/trash/restore', ['ids' => [${{ variable }}->id]])->assertForbidden();
+
+    ModuleAssertions::actingAsSuperAdmin();
+    post('{{ base }}/trash/restore', ['ids' => [${{ variable }}->id]])->assertRedirect();
+
+    expect(${{ variable }}->fresh()?->trashed())->toBeFalse();
+    ModuleAssertions::assertAudited(${{ variable }}, 'restored');
+});

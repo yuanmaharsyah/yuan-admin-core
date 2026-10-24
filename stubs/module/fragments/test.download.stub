@@ -1,0 +1,8 @@
+it('downloads the list as a file and audits one exported row', function (): void {
+    {{ Name }}::factory()->count(2)->create();
+    {{ acting_download }};
+
+    get('{{ base }}/download')->assertOk()->assertDownload();
+
+    expect(ImmutableActivity::query()->where('event', 'exported')->count())->toBe(1);
+});

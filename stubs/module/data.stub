@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Data;
+
+{{ imports }}
+
+/** {{ doc }} */
+#[TypeScript]
+final class {{ class }} extends Data
+{
+    public function __construct(
+{{ properties }}
+    ) {}
+
+    public static function fromModel({{ Name }} ${{ variable }}): self
+    {
+        return new self(
+{{ values }}
+        );
+    }
+}

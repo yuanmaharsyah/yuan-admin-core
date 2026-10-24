@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Modules\{{ Name }}\Models\{{ Name }};
+
+/**
+ * Fake {{ lower_label }} records for browser reviews and demos. Run it only on a
+ * rehearsal database: `php artisan db:seed --class="Modules\{{ Name }}\Database\Seeders\{{ Name }}Seeder"`.
+ */
+final class {{ Name }}Seeder extends Seeder
+{
+    public function run(): void
+    {
+        {{ Name }}::factory()->count(25)->create();
+    }
+}

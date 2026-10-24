@@ -1,0 +1,11 @@
+    public function show(Request $request, int ${{ variable }}): Response
+    {
+        $model = {{ Name }}::query()->visibleTo($request->user()){{ with }}->findOrFail(${{ variable }});
+        Gate::authorize('view', $model);
+
+        return Inertia::render('{{ Name }}::Show', [
+            '{{ variable }}' => {{ Name }}Data::fromModel($model),
+{{ show_props }}            'history' => ActivityHistory::prop($model, $request->user()),
+            'breadcrumbs' => self::breadcrumbs(new BreadcrumbData(label: $model->auditLabel(), href: null)),
+        ]);
+    }

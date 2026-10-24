@@ -1,0 +1,35 @@
+it('redirects guests to login', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+
+{{ guest_routes }}
+});
+
+{{ forbidden_test }}
+
+it('lists and shows {{ lower_label }} records', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    {{ acting_view }};
+
+    AssertableInertia::fromTestResponse(get('{{ base }}')->assertOk())
+        ->component('{{ Name }}::Index')
+        ->count('{{ plural }}.items', 1)
+        ->where('{{ plural }}.items.0.id', ${{ variable }}->id);
+
+    AssertableInertia::fromTestResponse(get("{{ base }}/{${{ variable }}->id}")->assertOk())
+        ->component('{{ Name }}::Show')
+        ->where('{{ variable }}.id', ${{ variable }}->id)
+        ->where('breadcrumbs.items.1.label', ${{ variable }}->auditLabel());
+});
+
+it('rejects a sort the list does not allow', function (): void {
+    {{ acting_view }};
+
+    get('{{ base }}?sort=lock_version')->assertStatus(400);
+});
+
+it('scopes every {{ lower_label }} query to the signed-in user', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    {{ acting_all }};
+
+{{ scope_routes }}
+});

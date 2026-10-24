@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Data;
+
+{{ imports }}
+
+/** {{ doc }} */
+#[TypeScript]
+final class {{ class }} extends Data
+{
+{{ constructor_doc }}    public function __construct(
+{{ properties }}
+    ) {}
+
+    /**
+     * @return array<string, list<mixed>>
+     */
+    public static function rules(): array
+    {
+        return [
+{{ rules }}
+        ];
+    }
+
+    /**
+     * Field names in validation messages.
+     *
+     * @return array<string, string>
+     */
+    public static function attributes(): array
+    {
+        return [
+{{ attributes }}
+        ];
+    }
+}

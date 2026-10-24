@@ -1,0 +1,54 @@
+{{ imports }}
+
+type Row = Modules.{{ Name }}.Data.{{ Name }}ListItemData;
+
+type Props = {
+    {{ plural }}: Yuan.AdminCore.Data.PaginatedData<Row>;
+    table: Yuan.AdminCore.Data.DataTableStateData;
+};
+
+/** The {{ lower_label }} list (generated from the approved pattern-index). */
+export default function Index({ {{ plural }}, table }: Props) {
+    const t = useT();
+    const { {{ permissions }} } = usePermission();
+{{ hooks }}
+    const columns: DataTableColumn<Row>[] = [
+{{ columns }}
+    ];
+
+    const rowActions = (row: Row): RowAction[] => [
+{{ row_actions }}
+    ];
+{{ create_button }}
+    return (
+        <>
+            <Head title={t('{{ slug }}.title')} />
+            <div className="flex flex-col gap-5">
+                <PageHeader
+                    title={t('{{ slug }}.title')}
+                    description={t('{{ slug }}.description')}
+{{ header_actions }}                />
+                <DataTable
+                    data={{{ plural }}}
+                    state={table}
+                    columns={columns}
+                    slug="{{ slug }}"
+                    label={t('{{ slug }}.list')}
+                    itemLabel={t('{{ slug }}.item')}
+                    rowLabel={(row) => {{ row_label }}}
+                    searchPlaceholder={t('{{ slug }}.search')}
+                    rowHref={{{ can_view }} ? (row) => show(row.id) : undefined}
+                    rowActions={rowActions}
+{{ table_props }}
+                    empty={{
+                        icon: {{ Icon }},
+                        title: t('{{ slug }}.empty_title'),
+                        description: t('{{ slug }}.empty_text'),
+{{ empty_action }}
+                    }}
+                />
+            </div>
+{{ delete_dialog }}
+        </>
+    );
+}

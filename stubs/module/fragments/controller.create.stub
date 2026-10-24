@@ -1,0 +1,18 @@
+    public function create(Request $request): Response
+    {
+        Gate::authorize('create', {{ Name }}::class);
+
+        return Inertia::render('{{ Name }}::Create', [
+{{ form_props_new }}            'breadcrumbs' => self::breadcrumbs(new BreadcrumbData(label: __('Tambah'), href: null)),
+        ]);
+    }
+
+    public function store(Request $request, Store{{ Name }}Data $data): RedirectResponse
+    {
+        Gate::authorize('create', {{ Name }}::class);
+
+        ${{ variable }} = {{ store }};
+        Inertia::flash((new FlashData(success: __('{{ label }} dibuat.'), description: ${{ variable }}->auditLabel()))->toArray());
+
+        return to_route('{{ slug }}.show', ${{ variable }});
+    }

@@ -1,0 +1,62 @@
+{{ imports }}
+
+type Props = {
+    {{ variable }}: Modules.{{ Name }}.Data.{{ Name }}Data;
+{{ props }}
+    /** The Riwayat tab's optional prop; null without `audit-log.view`. */
+    history?: Yuan.AdminCore.Data.Audit.ActivityHistoryData | null;
+};
+
+/** One {{ lower_label }} (generated from the approved pattern-show). */
+export default function Show({ {{ variable }}, {{ destructure }}history }: Props) {
+    const t = useT();
+    const { can, isSuperAdmin } = usePermission();
+    const [tab, setTab] = useState('detail');
+{{ hooks }}
+    return (
+        <>
+            <Head title={ {{ title }} } />
+            <div className="flex flex-col gap-5">
+                <PageHeader
+                    title={ {{ title }} }
+                    backHref={index()}
+{{ header_actions }}                />
+                <Tabs
+                    label={t('detail.tabs')}
+                    value={tab}
+                    onChange={setTab}
+                    tabs={[
+                        {
+                            key: 'detail',
+                            label: t('detail.title'),
+                            content: (
+                                <section className="rounded bg-card p-6 text-card-foreground">
+                                    <DetailGrid
+                                        items={[
+{{ details }}
+                                        ]}
+                                    />
+                                </section>
+                            ),
+                        },
+{{ tabs }}
+                        ...(can('audit-log.view') || isSuperAdmin
+                            ? [
+                                  {
+                                      key: 'history',
+                                      label: t('history.tab'),
+                                      content: (
+                                          <section className="rounded bg-card px-6 py-4 text-card-foreground">
+                                              <ActivityHistory history={history} />
+                                          </section>
+                                      ),
+                                  },
+                              ]
+                            : []),
+                    ]}
+                />
+            </div>
+{{ delete_dialog }}
+        </>
+    );
+}

@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Http\Controllers;
+
+{{ imports }}
+
+final class {{ Name }}Controller
+{
+{{ methods }}
+
+    private static function breadcrumbs(BreadcrumbData ...$items): BreadcrumbsData
+    {
+        return BreadcrumbsData::of(new BreadcrumbData(label: __('{{ label }}'), href: route('{{ slug }}.index')), ...$items);
+    }
+}

@@ -1,0 +1,18 @@
+    public function data(Authenticatable $user, DashboardRange $range): SegmentWidgetData
+    {
+        /** @var array<string, int> $counts */
+        $counts = {{ Model }}::query()->visibleTo($user)
+            ->whereBetween('created_at', [$range->from, $range->to])
+            ->groupBy('{{ column }}')
+            ->selectRaw('{{ column }}, count(*) as total')
+            ->pluck('total', '{{ column }}')
+            ->map(fn (mixed $total): int => (int) $total)
+            ->all();
+
+        return new SegmentWidgetData(array_map(fn ({{ Enum }} $case): WidgetFigureData => new WidgetFigureData(
+            key: $case->value,
+            label: $case->label(),
+            value: $counts[$case->value] ?? 0,
+            href: route('{{ slug }}.index', ['filter' => ['{{ column }}' => $case->value]]),
+        ), {{ Enum }}::cases()));
+    }

@@ -1,0 +1,24 @@
+    public function edit(Request $request, int ${{ variable }}): Response
+    {
+        $model = {{ Name }}::query()->visibleTo($request->user()){{ with }}->findOrFail(${{ variable }});
+        Gate::authorize('update', $model);
+
+        return Inertia::render('{{ Name }}::Edit', [
+            '{{ variable }}' => {{ Name }}Data::fromModel($model),
+{{ form_props_model }}            'breadcrumbs' => self::breadcrumbs(
+                new BreadcrumbData(label: $model->auditLabel(), href: route('{{ slug }}.show', $model)),
+                new BreadcrumbData(label: __('Edit'), href: null),
+            ),
+        ]);
+    }
+
+    public function update(Request $request, Update{{ Name }}Data $data, int ${{ variable }}): RedirectResponse
+    {
+        $model = {{ Name }}::query()->visibleTo($request->user())->findOrFail(${{ variable }});
+        Gate::authorize('update', $model);
+
+        {{ update }}
+        Inertia::flash((new FlashData(success: __('Perubahan disimpan.'), description: $model->auditLabel()))->toArray());
+
+        return to_route('{{ slug }}.show', $model);
+    }

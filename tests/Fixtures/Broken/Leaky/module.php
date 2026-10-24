@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 use Yuan\AdminCore\Tests\Fixtures\Broken\Leaky\Widgets\Duplicate;
-use Yuan\AdminCore\Tests\Fixtures\Broken\Leaky\Widgets\Misnamed;
-use Yuan\AdminCore\Tests\Fixtures\Broken\Leaky\Widgets\NotAWidget;
+use Yuan\AdminCore\Tests\Fixtures\Broken\Leaky\Widgets\Unsynced;
 
 // Breaks one contract rule per file, for the negative contract tests.
 return [
@@ -19,8 +18,7 @@ return [
     'menu' => true,
     'actions' => ['view', 'approve'],
     'widgets' => [
-        Misnamed::class,
-        NotAWidget::class,
+        Unsynced::class,
         Duplicate::class,
     ],
 ];

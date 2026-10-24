@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Models;
+
+{{ imports }}
+
+/**
+{{ properties }}
+ */
+#[UseFactory({{ Name }}Factory::class)]
+final class {{ Name }} extends Model implements DataTableModel
+{
+    /** @use HasFactory<{{ Name }}Factory> */
+    use {{ traits }};
+{{ body }}
+    public function dataTableSearch(): array
+    {
+        return [{{ search }}];
+    }
+
+    public function dataTableSorts(): array
+    {
+        return [{{ sorts }}];
+    }
+
+    public function dataTableFilters(): array
+    {
+        return [{{ filters }}];
+    }
+
+    protected function casts(): array
+    {
+        return [
+{{ casts }}
+        ];
+    }
+}

@@ -1,0 +1,41 @@
+{{ imports }}
+
+/** The form's state: the input Data's fields (without `lock_version`), each empty until filled in. */
+export type {{ Name }}FormValues = {
+    [Key in Exclude<keyof Modules.{{ Name }}.Data.{{ input }}, 'lock_version'>]:
+        | Modules.{{ Name }}.Data.{{ input }}[Key]
+        | null;
+};
+
+type Props = {
+    /** The page's `useForm`; the edit form carries `lock_version` too, which no field touches. */
+    form: Pick<InertiaFormProps<{{ Name }}FormValues>, 'data' | 'errors' | 'setData'>;
+    /** The record on edit (labels of its relations). */
+    record?: Modules.{{ Name }}.Data.{{ Name }}Data;
+{{ props }}
+};
+
+/** Fields of the {{ lower_label }} create and edit pages. */
+export function {{ Name }}Form({ {{ destructure }} }: Props) {
+    const t = useT();
+    const { data, errors } = form;
+
+    return (
+        <div className="flex flex-col gap-5">
+            <FormErrorSummary errors={errors} />
+            <Section title={t('{{ slug }}.section_main')}>
+{{ fields }}
+            </Section>
+{{ sections }}
+        </div>
+    );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+    return (
+        <section className="flex flex-col gap-4 rounded bg-card p-6 text-card-foreground">
+            <h2 className="m-0 text-section">{title}</h2>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">{children}</div>
+        </section>
+    );
+}

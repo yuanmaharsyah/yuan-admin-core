@@ -1,0 +1,7 @@
+    public function data(Authenticatable $user, DashboardRange $range): StatWidgetData
+    {
+        return new StatWidgetData(
+            value: {{ Model }}::query()->visibleTo($user)->whereBetween('created_at', [$range->from, $range->to])->count(),
+            icon: '{{ icon }}',
+        );
+    }

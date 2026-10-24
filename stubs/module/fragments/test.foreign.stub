@@ -1,0 +1,6 @@
+it('links only a {{ target_label }} the user may see', function (): void {
+    {{ acting_create }};
+
+    ModuleAssertions::assertScopedToUser({{ Target }}::class, 'post', '{{ base }}', {{ input_fn }}());
+    post('{{ base }}', {{ input_fn }}(['{{ field }}' => {{ Target }}::factory()->trashed()->create()->id]))->assertSessionHasErrors('{{ field }}');
+});

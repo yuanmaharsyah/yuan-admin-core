@@ -1,0 +1,12 @@
+import type { ModuleDictionary } from '@admin-core/lib/i18n';
+
+/* Strings of the {{ Name }} module; every key starts with `{{ slug }}.`. `en.ts` must have exactly the same keys. */
+export const id = {
+{{ strings }}
+} as const satisfies ModuleDictionary<'{{ slug }}'>;
+
+declare module '@admin-core/lib/i18n' {
+    interface Dictionaries {
+        '{{ slug }}': typeof id;
+    }
+}

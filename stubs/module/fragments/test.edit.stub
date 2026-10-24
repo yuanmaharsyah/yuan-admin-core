@@ -1,0 +1,24 @@
+it('updates a {{ lower_label }} and audits the change', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    {{ acting_edit }};
+
+    AssertableInertia::fromTestResponse(get("{{ base }}/{${{ variable }}->id}/edit")->assertOk())
+        ->component('{{ Name }}::Edit')
+        ->where('{{ variable }}.lock_version', 0);
+
+    put("{{ base }}/{${{ variable }}->id}", {{ input_fn }}(['lock_version' => ${{ variable }}->lock_version]))
+        ->assertSessionHasNoErrors()
+        ->assertRedirect("{{ base }}/{${{ variable }}->id}");
+
+    ModuleAssertions::assertAudited(${{ variable }}, 'updated'{{ masked }});
+});
+
+it('gives the second of two saves from the same form a 409 and keeps the first', function (): void {
+    ${{ variable }} = {{ Name }}::factory()->create();
+    {{ acting_edit }};
+
+    put("{{ base }}/{${{ variable }}->id}", {{ input_fn }}(['lock_version' => 0]))->assertRedirect();
+    put("{{ base }}/{${{ variable }}->id}", {{ input_fn }}(['lock_version' => 0]))->assertStatus(409);
+
+    expect(${{ variable }}->fresh()?->lock_version)->toBe(1);
+});

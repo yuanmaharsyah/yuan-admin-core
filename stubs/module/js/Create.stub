@@ -1,0 +1,36 @@
+import { FormFooter } from '@admin-core/components/admin/FormFooter';
+import { PageHeader } from '@admin-core/components/admin/PageHeader';
+import { UnsavedChangesGuard } from '@admin-core/components/admin/UnsavedChangesGuard';
+import { useAdminForm } from '@admin-core/hooks/useAdminForm';
+import { useT } from '@admin-core/lib/i18n';
+import { Head } from '@inertiajs/react';
+import { index, store } from '@/routes/{{ slug }}';
+import { {{ Name }}Form } from '../components/{{ Name }}Form';
+import type { {{ Name }}FormValues } from '../components/{{ Name }}Form';
+
+{{ props_type }}/** A new {{ lower_label }} (generated from the approved pattern-form). */
+export default function Create({{ signature }}) {
+    const t = useT();
+    const { form, submit } = useAdminForm<{{ Name }}FormValues>({
+{{ initial }}
+    });
+
+    return (
+        <>
+            <Head title={t('{{ slug }}.create_title')} />
+            <form
+                noValidate
+                className="flex flex-col gap-5"
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    submit(store());
+                }}
+            >
+                <PageHeader title={t('{{ slug }}.create_title')} backHref={index()} />
+                <{{ Name }}Form form={form} {{ form_props }} />
+                <FormFooter cancelHref={index()} processing={form.processing} dirty={form.isDirty} />
+            </form>
+            <UnsavedChangesGuard when={form.isDirty && !form.processing} />
+        </>
+    );
+}

@@ -1,0 +1,6 @@
+import type { id } from './id';
+
+/* English fallback; tsc fails on a missing or an extra key. Generated with the Indonesian text: translate it. */
+export const en: Record<keyof typeof id, string> = {
+{{ strings }}
+};

@@ -10,12 +10,12 @@ use Yuan\AdminCore\Dashboard\Widget;
 use Yuan\AdminCore\Dashboard\WidgetType;
 use Yuan\AdminCore\Data\Widgets\StatWidgetData;
 
-/** The same key as Misnamed. */
+/** The same key as Unsynced. */
 final class Duplicate extends Widget
 {
     public function key(): string
     {
-        return 'other.total';
+        return 'leaky.total';
     }
 
     public function label(): string

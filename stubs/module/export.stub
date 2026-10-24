@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{ Name }}\Exports;
+
+{{ imports }}
+
+/**
+ * The {{ lower_label }} list as a spreadsheet, with the list's current search,
+ * filters and sort; the base class neutralizes formula-like text.
+ *
+ * @extends ModuleExport<{{ Name }}>
+ */
+final class {{ Name }}Export extends ModuleExport
+{
+    /**
+     * @return DataTableBuilder<{{ Name }}>
+     */
+    protected function baseQuery(): DataTableBuilder
+    {
+        return {{ Name }}::query()->visibleTo($this->user){{ with }};
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function headings(): array
+    {
+        return [{{ headings }}];
+    }
+
+    /**
+     * @param  {{ Name }}  $row
+     * @return list<string|int|float|bool|null>
+     */
+    protected function row(Model $row): array
+    {
+        return [
+{{ cells }}
+        ];
+    }
+}
