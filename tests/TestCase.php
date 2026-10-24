@@ -42,6 +42,9 @@ abstract class TestCase extends Orchestra
             $config->set('view.paths', [self::FIXTURES.'/views']);
             $config->set('admin-core.pages', ['overrides' => [], 'core_path' => self::FIXTURES.'/CorePages']);
             $config->set('auth.providers.users.model', User::class);
+            // Production's time zone (Testbench's config pins UTC), so day boundaries are tested as they run.
+            $config->set('app.timezone', 'Asia/Jakarta');
+            date_default_timezone_set('Asia/Jakarta');
             // Like a real store: cached values are serialized, and no object comes back.
             $config->set('cache.stores.array.serialize', true);
             $config->set('cache.serializable_classes', false);

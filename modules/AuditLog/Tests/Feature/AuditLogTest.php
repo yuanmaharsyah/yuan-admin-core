@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -288,4 +289,22 @@ it('prunes rows past the retention only when one is set, leaving one audit_prune
         ->and($pruned->properties?->get('meta'))->toMatchArray(['retention_days' => 30])
         ->and($pruned->properties?->get('meta')['rows'] ?? null)->toBe($total - $recent)
         ->and(ImmutableActivity::query()->count())->toBe($recent + 1);
+});
+
+it('counts and lists an event at 23:30 WIB on that day, not the next UTC one', function (): void {
+    expect(config('app.timezone'))->toBe('Asia/Jakarta');
+    // The only row of 24 Oktober: everything else is set up after midnight.
+    travelTo(CarbonImmutable::parse('2026-10-24 23:30:00', 'Asia/Jakarta'));
+    Audit::record(AuditEvent::LoginFailed, meta: ['username' => 'malam']);
+    travelTo(CarbonImmutable::parse('2026-10-25 00:10:00', 'Asia/Jakarta'));
+    $viewer = auditStaff('Pengamat');
+    Cache::flush();
+
+    $days = collect(app(AuditSummary::class)->for(AuditFilterData::from(['range' => '7d']), $viewer)->by_day)->pluck('value', 'key');
+    $listed = fn (string $day): bool => AuditQuery::events(AuditFilterData::from(['range' => 'custom', 'from' => $day, 'to' => $day]), $viewer)->where('event', 'login_failed')->exists();
+
+    expect($days['2026-10-24'])->toBe(1)
+        ->and($days->keys()->last())->toBe('2026-10-25')
+        ->and($listed('2026-10-24'))->toBeTrue()
+        ->and($listed('2026-10-25'))->toBeFalse();
 });
