@@ -83,8 +83,9 @@ final class AuditSummary
     }
 
     /**
-     * Every additive figure of the query: rows per event and per day (one
-     * grouped query) and the exported row total.
+     * Every additive figure of the query from one grouped query, which the
+     * (created_on, event, export_rows) index covers: rows per event and per
+     * day, and the exported row total.
      *
      * @param  Builder<ImmutableActivity>  $query
      * @return Figures
@@ -93,17 +94,15 @@ final class AuditSummary
     {
         $events = [];
         $days = [];
+        $exported = 0;
 
-        foreach ((clone $query)->toBase()->selectRaw('created_on as day, event, count(*) as total')->groupBy('created_on', 'event')->get() as $row) {
+        foreach ((clone $query)->toBase()->selectRaw('created_on as day, event, count(*) as total, sum(export_rows) as export_rows')->groupBy('created_on', 'event')->get() as $row) {
             $events[(string) $row->event] = ($events[(string) $row->event] ?? 0) + (int) $row->total;
             $days[(string) $row->day] = ($days[(string) $row->day] ?? 0) + (int) $row->total;
+            $exported += (int) $row->export_rows;
         }
 
-        return [
-            'events' => $events,
-            'days' => $days,
-            'rows_downloaded' => (int) (clone $query)->where('event', AuditEvent::Exported->value)->sum('properties->meta->rows'),
-        ];
+        return ['events' => $events, 'days' => $days, 'rows_downloaded' => $exported];
     }
 
     /**
