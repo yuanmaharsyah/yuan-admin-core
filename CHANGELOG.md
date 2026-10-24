@@ -107,6 +107,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.
 
 ### Fixed
+- Shell: on a page taller than the window (the Log Aktivitas), the window itself scrolled and left an empty band under the shell: the charts' screen-reader tables are absolutely positioned and had no positioned ancestor inside the scrolling main area. `<main>` is now `relative`.
 - The audit summary and cached Beranda widgets failed on a real cache store ("__PHP_Incomplete_Class returned"): Laravel's `cache.serializable_classes => false` lets no object come back from the cache. Both now cache the Data's array form and rebuild it. The test suites' array cache serializes like a real store, so object caching fails in tests too.
 - Shell: following a one-item rail group's link to the page already open (e.g. Keuangan on `/admin/invoices` after viewing Master Data) left the panel showing the other group; the link now clears the viewed group, the overlay panel and the mobile sheet.
 - `LogsModuleActivity` no longer stores attributes with an `encrypted` cast; the trait read them decrypted, so they reached `attribute_changes` in plain text.

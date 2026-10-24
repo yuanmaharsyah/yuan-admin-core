@@ -247,7 +247,8 @@ export function AdminLayout({
                     {auth.user && <UserMenu user={auth.user} links={links} />}
                 </header>
                 <MaintenanceBanner access={app.site_access} />
-                <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pt-2 pb-4 lg:px-8 lg:pt-4 lg:pb-8">
+                {/* `relative`: absolutely positioned content (screen-reader tables) scrolls with the page instead of stretching the window. */}
+                <main className="relative flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pt-2 pb-4 lg:px-8 lg:pt-4 lg:pb-8">
                     {children}
                 </main>
             </div>
