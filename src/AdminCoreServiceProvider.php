@@ -24,6 +24,7 @@ use Yuan\AdminCore\Audit\Masker;
 use Yuan\AdminCore\Audit\WriteActivity;
 use Yuan\AdminCore\Auth\PasswordRules;
 use Yuan\AdminCore\Console\AccessCommand;
+use Yuan\AdminCore\Console\AttachmentsSweepCommand;
 use Yuan\AdminCore\Console\AuditPruneCommand;
 use Yuan\AdminCore\Console\CreateSuperAdminCommand;
 use Yuan\AdminCore\Console\DoctorCommand;
@@ -89,7 +90,7 @@ final class AdminCoreServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ModulesCacheCommand::class, ModulesClearCommand::class, ModulesListCommand::class, DoctorCommand::class,
-                PermissionsSyncCommand::class, CreateSuperAdminCommand::class, AuditPruneCommand::class, AccessCommand::class,
+                PermissionsSyncCommand::class, CreateSuperAdminCommand::class, AuditPruneCommand::class, AccessCommand::class, AttachmentsSweepCommand::class,
             ]);
             $this->optimizes(optimize: 'modules:cache', clear: 'modules:clear', key: 'modules');
         }

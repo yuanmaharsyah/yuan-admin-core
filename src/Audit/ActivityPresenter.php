@@ -258,6 +258,7 @@ final readonly class ActivityPresenter
             'by_admin' => self::say('Oleh admin'),
             'before' => self::say('Sebelum tanggal'),
             'retention_days' => self::say('Retensi (hari)'),
+            'files' => self::say('Berkas dihapus'),
             'added' => self::say('Ditambahkan'),
             'removed' => self::say('Dicabut'),
             'name' => self::say('Nama berkas'),

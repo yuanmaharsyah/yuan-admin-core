@@ -139,8 +139,8 @@ final class AttachmentUploads
             throw $exception;
         }
 
-        // ponytail: a rollback after save() returns leaves these files (random
-        // names, no row links them); a sweep of row-less files is the upgrade.
+        // A rollback after save() returns leaves these files without rows;
+        // admin:attachments-sweep removes them a day later.
     }
 
     /**

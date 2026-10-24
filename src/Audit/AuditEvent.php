@@ -31,6 +31,7 @@ enum AuditEvent: string
     case PermissionsUpdated = 'permissions_updated';
     case SettingsUpdated = 'settings_updated';
     case AuditPruned = 'audit_pruned';
+    case AttachmentsSwept = 'attachments_swept';
 
     public function label(): string
     {
@@ -56,6 +57,7 @@ enum AuditEvent: string
             self::PermissionsUpdated => 'Hak akses diubah',
             self::SettingsUpdated => 'Pengaturan diubah',
             self::AuditPruned => 'Log dibersihkan',
+            self::AttachmentsSwept => 'Berkas tanpa data dibersihkan',
         };
     }
 
@@ -92,7 +94,7 @@ enum AuditEvent: string
     {
         return match ($this) {
             self::Login, self::Logout, self::LoginFailed, self::LoginLocked => 'auth',
-            self::AuditPruned => 'system',
+            self::AuditPruned, self::AttachmentsSwept => 'system',
             default => null,
         };
     }
