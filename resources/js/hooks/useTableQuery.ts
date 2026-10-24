@@ -17,9 +17,10 @@ const DEFAULT_PER_PAGE = 25;
  * The list's URL state (frontend-behavior §5). Every change is an Inertia GET
  * of the current path with `preserveState`, `preserveScroll` and `replace`;
  * search is debounced 300ms; a search or filter change goes back to page 1.
- * `loading` drives the skeleton rows, `failed` the inline error.
+ * `loading` drives the skeleton rows, `failed` the inline error. `only`
+ * limits each visit to the list's props (a partial reload).
  */
-export function useTableQuery(state: State, page: number) {
+export function useTableQuery(state: State, page: number, only?: string[]) {
     const [loading, setLoading] = useState(false);
     const [failed, setFailed] = useState(false);
     const [search, setSearch] = useState(state.search ?? '');
@@ -37,26 +38,31 @@ export function useTableQuery(state: State, page: number) {
         window.clearTimeout(timer.current);
         const next = { ...current, ...changes };
 
-        router.get(window.location.pathname, toParams(next), {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-            onStart: () => {
-                setLoading(true);
-                setFailed(false);
-            },
-            onFinish: () => setLoading(false),
-            onHttpException: () => {
-                setFailed(true);
+        router.get(
+            window.location.pathname,
+            { ...state.params, ...toParams(next) },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+                only,
+                onStart: () => {
+                    setLoading(true);
+                    setFailed(false);
+                },
+                onFinish: () => setLoading(false),
+                onHttpException: () => {
+                    setFailed(true);
 
-                return false;
-            },
-            onNetworkError: () => {
-                setFailed(true);
+                    return false;
+                },
+                onNetworkError: () => {
+                    setFailed(true);
 
-                return false;
+                    return false;
+                },
             },
-        });
+        );
     };
 
     const filtered =
@@ -110,11 +116,14 @@ export function useTableQuery(state: State, page: number) {
         download: (href: string, onFinish?: () => void) =>
             router.get(
                 href,
-                toParams({
-                    search: state.search,
-                    sort: state.sort,
-                    filter: state.filter,
-                }),
+                {
+                    ...state.params,
+                    ...toParams({
+                        search: state.search,
+                        sort: state.sort,
+                        filter: state.filter,
+                    }),
+                },
                 {
                     preserveState: true,
                     preserveScroll: true,

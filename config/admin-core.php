@@ -64,6 +64,9 @@ return [
             'no_hp' => 'full',
             'alamat' => 'full',
         ],
+        // Days of audit rows to keep; `admin:audit-prune` (scheduled daily)
+        // deletes older ones and logs one audit_pruned row. Null keeps everything.
+        'retention_days' => env('ADMIN_AUDIT_RETENTION_DAYS'),
     ],
 
     'seed' => [

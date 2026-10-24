@@ -30,7 +30,7 @@ final class ExportManager
     public const array FORMATS = ['xlsx' => ExcelWriter::XLSX, 'csv' => ExcelWriter::CSV];
 
     /**
-     * @param  class-string<ModuleExport<*>>  $export
+     * @param  class-string<ListExport<*>>  $export
      */
     public static function for(string $export, Request $request): Response
     {
@@ -48,7 +48,7 @@ final class ExportManager
 
         $slug = app(ModuleRegistry::class)->forClass($export)->slug ?? throw new LogicException("{$export} is not in a module.");
         $format = array_key_exists($request->string('format')->toString(), self::FORMATS) ? $request->string('format')->toString() : 'xlsx';
-        $params = array_intersect_key($request->query(), array_flip(['search', 'filter', 'sort']));
+        $params = array_intersect_key($request->query(), array_flip($export::params()));
         $rows = (new $export($user, $params))->query()->count();
 
         if ($rows <= config()->integer('admin-core.exports.queue_threshold')) {

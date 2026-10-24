@@ -73,6 +73,18 @@ enum AuditEvent: string
         };
     }
 
+    /** The Log Aktivitas segment it counts under. */
+    public function category(): AuditCategory
+    {
+        return match ($this) {
+            self::Created, self::UserActivated => AuditCategory::Created,
+            self::Updated, self::Restored, self::LevelChanged, self::PermissionsUpdated, self::SettingsUpdated, self::UserDeactivated => AuditCategory::Updated,
+            self::Deleted, self::ForceDeleted => AuditCategory::Deleted,
+            self::Login, self::Logout, self::LoginFailed, self::LoginLocked, self::PasswordChanged, self::PasswordReset => AuditCategory::Auth,
+            default => AuditCategory::Other,
+        };
+    }
+
     /**
      * The fixed `log_name` of events that don't belong to a module.
      */

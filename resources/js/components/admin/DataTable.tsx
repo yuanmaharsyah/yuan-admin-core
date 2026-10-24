@@ -69,6 +69,8 @@ type Props<T extends Row> = {
     searchPlaceholder?: string;
     /** Row click opens this (pass it only when `view` is allowed). */
     rowHref?: (row: T) => Href;
+    /** Row click runs this instead of a visit (e.g. opens a drawer); give keyboard users the same through `rowActions`. */
+    onRowClick?: (row: T) => void;
     /** The `⋯` menu; return only the permitted actions. */
     rowActions?: (row: T) => RowAction[];
     /**
@@ -81,6 +83,8 @@ type Props<T extends Row> = {
     empty: EmptyStateProps;
     /** The module's download route (pass it only when `download` is allowed); sends the current search, filters and sort. */
     download?: Href;
+    /** Props a list visit reloads (partial reload); every prop when omitted. */
+    only?: string[];
 };
 
 const INTERACTIVE =
@@ -101,15 +105,17 @@ export function DataTable<T extends Row>({
     rowLabel,
     searchPlaceholder,
     rowHref,
+    onRowClick,
     rowActions,
     bulkDelete,
     empty,
     download,
+    only,
 }: Props<T>) {
     const t = useT();
     const deleting = useAction();
     const downloading = useAction();
-    const query = useTableQuery(state, data.meta.current_page);
+    const query = useTableQuery(state, data.meta.current_page, only);
     const [hidden, setHidden] = useHiddenColumns(slug);
     // Selection belongs to the page it was made on: new data (paging, filtering,
     // a delete) starts with nothing selected.
@@ -126,7 +132,13 @@ export function DataTable<T extends Row>({
     const select = (ids: number[]) => setSelection({ data, ids });
 
     const openRow = (event: MouseEvent<HTMLTableRowElement>, row: T) => {
-        if (rowHref && !(event.target as HTMLElement).closest(INTERACTIVE)) {
+        if ((event.target as HTMLElement).closest(INTERACTIVE)) {
+            return;
+        }
+
+        if (onRowClick) {
+            onRowClick(row);
+        } else if (rowHref) {
             router.visit(rowHref(row));
         }
     };
@@ -350,7 +362,7 @@ export function DataTable<T extends Row>({
                                                   className={cn(
                                                       'h-row border-b border-border hover:bg-muted has-[[aria-expanded=true]]:bg-muted',
                                                       checked && 'bg-muted/60',
-                                                      rowHref &&
+                                                      (rowHref || onRowClick) &&
                                                           'cursor-pointer',
                                                   )}
                                               >

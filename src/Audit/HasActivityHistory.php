@@ -10,7 +10,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * The "Riwayat" of a record (spec §7.1): its events, newest first, 20 per
- * page, with the SA visibility rule. Who may see the tab is the page's check.
+ * page (`history_page`), with the SA visibility rule. Show pages send it
+ * through `ActivityHistory::prop()`, which also checks who may see the tab.
  *
  * @mixin Model
  */
@@ -21,6 +22,6 @@ trait HasActivityHistory
      */
     public function activityHistory(Authenticatable $viewer): LengthAwarePaginator
     {
-        return ImmutableActivity::query()->forSubject($this)->visibleTo($viewer)->latest('id')->paginate(20);
+        return ActivityHistory::paginate($this, $viewer);
     }
 }

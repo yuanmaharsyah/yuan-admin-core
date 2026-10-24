@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yuan\AdminCore\Data\Users;
 
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 use Yuan\AdminCore\Data\OptionData;
 
@@ -22,6 +23,7 @@ final class ExtraFieldData extends Data
     public function __construct(
         public string $name,
         public string $label,
+        #[LiteralTypeScriptType("'text' | 'number' | 'select'")]
         public string $type,
         public bool $required = false,
         public ?string $help = null,

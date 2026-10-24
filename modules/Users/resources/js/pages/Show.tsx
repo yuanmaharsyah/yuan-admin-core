@@ -1,7 +1,9 @@
+import { ActivityHistory } from '@admin-core/components/admin/ActivityHistory';
 import { ConfirmDialog } from '@admin-core/components/admin/ConfirmDialog';
 import { DetailGrid } from '@admin-core/components/admin/DetailGrid';
 import { PageHeader } from '@admin-core/components/admin/PageHeader';
 import { StatusBadge } from '@admin-core/components/admin/StatusBadge';
+import { Tabs } from '@admin-core/components/admin/Tabs';
 import { Button } from '@admin-core/components/ui/button';
 import { useAction } from '@admin-core/hooks/useAction';
 import { usePermission } from '@admin-core/hooks/usePermission';
@@ -17,13 +19,15 @@ import { TemporaryPasswordDialog } from '../components/TemporaryPasswordDialog';
 type Props = {
     user: Yuan.AdminCore.Modules.Users.Data.UserData;
     options: Yuan.AdminCore.Modules.Users.Data.UserFormOptionsData;
+    /** The Riwayat tab's optional prop; null without `audit-log.view`. */
+    history?: Yuan.AdminCore.Data.Audit.ActivityHistoryData | null;
 };
 
 /**
  * A user (approved show pattern). Reset password, activate / deactivate and
  * delete are hidden on your own account (frontend-behavior §8.1).
  */
-export default function Show({ user, options }: Props) {
+export default function Show({ user, options, history }: Props) {
     const t = useT();
     const activating = useAction();
     const confirming = useAction();
@@ -35,9 +39,66 @@ export default function Show({ user, options }: Props) {
         'reset' | 'deactivate' | 'delete' | null
     >(null);
     const [shownSecret, setShownSecret] = useState<string | null>(null);
+    const [tab, setTab] = useState('detail');
     const secret =
         flash.secret && flash.secret !== shownSecret ? flash.secret : null;
     const manage = can('users.edit') && !user.is_self;
+
+    const detail = (
+        <section
+            aria-label={t('detail.title')}
+            className="rounded bg-card p-6 text-card-foreground"
+        >
+            <DetailGrid
+                items={[
+                    {
+                        label: t('users.username'),
+                        value: user.username,
+                    },
+                    { label: t('users.email'), value: user.email },
+                    {
+                        label: t('users.level'),
+                        value: user.level_label,
+                    },
+                    {
+                        label: t('users.status'),
+                        value: (
+                            <StatusBadge
+                                label={
+                                    user.is_active
+                                        ? t('users.active')
+                                        : t('users.inactive')
+                                }
+                                tone={user.is_active ? 'success' : 'neutral'}
+                            />
+                        ),
+                    },
+                    {
+                        label: t('users.last_login'),
+                        value: user.last_login_at
+                            ? formatDateTime(user.last_login_at, app.timezone)
+                            : t('users.never'),
+                    },
+                    {
+                        label: t('users.created'),
+                        value:
+                            user.created_at &&
+                            formatDateTime(user.created_at, app.timezone),
+                    },
+                    {
+                        label: t('users.must_change'),
+                        value: user.must_change_password
+                            ? t('users.yes')
+                            : t('users.no'),
+                    },
+                    ...user.extra.map((field) => ({
+                        label: field.label,
+                        value: field.display,
+                    })),
+                ]}
+            />
+        </section>
+    );
 
     return (
         <>
@@ -115,69 +176,31 @@ export default function Show({ user, options }: Props) {
                         </>
                     }
                 />
-                <section
-                    aria-label={t('detail.title')}
-                    className="rounded bg-card p-6 text-card-foreground"
-                >
-                    <DetailGrid
-                        items={[
+                {can('audit-log.view') ? (
+                    <Tabs
+                        label={t('detail.tabs')}
+                        value={tab}
+                        onChange={setTab}
+                        tabs={[
                             {
-                                label: t('users.username'),
-                                value: user.username,
-                            },
-                            { label: t('users.email'), value: user.email },
-                            {
-                                label: t('users.level'),
-                                value: user.level_label,
+                                key: 'detail',
+                                label: t('detail.title'),
+                                content: detail,
                             },
                             {
-                                label: t('users.status'),
-                                value: (
-                                    <StatusBadge
-                                        label={
-                                            user.is_active
-                                                ? t('users.active')
-                                                : t('users.inactive')
-                                        }
-                                        tone={
-                                            user.is_active
-                                                ? 'success'
-                                                : 'neutral'
-                                        }
-                                    />
+                                key: 'history',
+                                label: t('history.tab'),
+                                content: (
+                                    <section className="rounded bg-card px-6 py-4 text-card-foreground">
+                                        <ActivityHistory history={history} />
+                                    </section>
                                 ),
                             },
-                            {
-                                label: t('users.last_login'),
-                                value: user.last_login_at
-                                    ? formatDateTime(
-                                          user.last_login_at,
-                                          app.timezone,
-                                      )
-                                    : t('users.never'),
-                            },
-                            {
-                                label: t('users.created'),
-                                value:
-                                    user.created_at &&
-                                    formatDateTime(
-                                        user.created_at,
-                                        app.timezone,
-                                    ),
-                            },
-                            {
-                                label: t('users.must_change'),
-                                value: user.must_change_password
-                                    ? t('users.yes')
-                                    : t('users.no'),
-                            },
-                            ...user.extra.map((field) => ({
-                                label: field.label,
-                                value: field.display,
-                            })),
                         ]}
                     />
-                </section>
+                ) : (
+                    detail
+                )}
             </div>
             <ResetPasswordDialog
                 open={dialog === 'reset'}

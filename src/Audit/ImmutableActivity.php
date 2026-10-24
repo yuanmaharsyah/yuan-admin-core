@@ -41,25 +41,62 @@ final class ImmutableActivity extends Activity
             return;
         }
 
+        $morph = self::userMorph();
+
+        foreach (['causer', 'subject'] as $side) {
+            $query->where(fn (Builder $rows) => $rows
+                ->whereNull("{$side}_id")
+                ->orWhere("{$side}_type", '!=', $morph)
+                ->orWhereNotIn("{$side}_id", fn (QueryBuilder $ids) => self::superAdminQuery($ids, $morph)));
+        }
+    }
+
+    /**
+     * The rows `visibleTo()` hides from a non-SA viewer: caused by or about
+     * one of these user accounts (`superAdminIds()`). A row with both sides
+     * matching is still one row, so subtracting these counts is exact.
+     *
+     * @param  Builder<self>  $query
+     * @param  list<int>  $userIds
+     */
+    #[Scope]
+    protected function involvingUsers(Builder $query, array $userIds): void
+    {
+        $morph = self::userMorph();
+
+        $query->where(fn (Builder $rows) => $rows
+            ->where(fn (Builder $causer) => $causer->where('causer_type', $morph)->whereIn('causer_id', $userIds))
+            ->orWhere(fn (Builder $subject) => $subject->where('subject_type', $morph)->whereIn('subject_id', $userIds)));
+    }
+
+    /**
+     * The ids of the current Super Admin accounts.
+     *
+     * @return list<int>
+     */
+    public static function superAdminIds(): array
+    {
+        return array_values(array_map(intval(...), self::superAdminQuery((new self)->getConnection()->query(), self::userMorph())->pluck('model_has_roles.model_id')->all()));
+    }
+
+    public static function userMorph(): string
+    {
         $model = app(config()->string('auth.providers.users.model'));
 
         if (! $model instanceof Model) {
             throw new LogicException('auth.providers.users.model must be an Eloquent model for the SA visibility rule.');
         }
 
-        $morph = $model->getMorphClass();
-        $superAdmins = fn (QueryBuilder $ids) => $ids->select('model_has_roles.model_id')
+        return $model->getMorphClass();
+    }
+
+    private static function superAdminQuery(QueryBuilder $ids, string $morph): QueryBuilder
+    {
+        return $ids->select('model_has_roles.model_id')
             ->from('model_has_roles')
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
             ->where('roles.is_protected', true)
             ->where('model_has_roles.model_type', $morph);
-
-        foreach (['causer', 'subject'] as $side) {
-            $query->where(fn (Builder $rows) => $rows
-                ->whereNull("{$side}_id")
-                ->orWhere("{$side}_type", '!=', $morph)
-                ->orWhereNotIn("{$side}_id", $superAdmins));
-        }
     }
 
     /**

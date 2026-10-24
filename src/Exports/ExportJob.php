@@ -30,7 +30,7 @@ final class ExportJob implements ShouldQueue
     use Queueable;
 
     /**
-     * @param  class-string<ModuleExport<*>>  $export
+     * @param  class-string<ListExport<*>>  $export
      */
     public function __construct(
         public QueuedExport $queued,

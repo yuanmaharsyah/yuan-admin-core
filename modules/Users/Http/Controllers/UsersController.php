@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\LaravelData\Optional;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Yuan\AdminCore\Audit\ActivityHistory;
 use Yuan\AdminCore\Data\BreadcrumbData;
 use Yuan\AdminCore\Data\BreadcrumbsData;
 use Yuan\AdminCore\Data\FlashData;
@@ -75,6 +76,7 @@ final class UsersController
         return Inertia::render('Users::Show', [
             'user' => UserData::fromModel($model),
             'options' => UserFormOptionsData::make(),
+            'history' => ActivityHistory::prop($model, $request->user()),
             'breadcrumbs' => self::breadcrumbs(new BreadcrumbData(label: $model->name, href: null)),
         ]);
     }
