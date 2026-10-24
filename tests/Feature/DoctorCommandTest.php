@@ -20,6 +20,20 @@ function nodeModules(array $versions): void
     }
 
     app()->setBasePath($base);
+    storageLink($base);
+}
+
+/** `public/storage` in the temp base path, pointing at its storage/app/public. */
+function storageLink(string $base, bool $create = true): void
+{
+    mkdir("{$base}/public", recursive: true);
+    mkdir("{$base}/storage/app/public", recursive: true);
+
+    if ($create) {
+        symlink("{$base}/storage/app/public", "{$base}/public/storage");
+    }
+
+    config(['filesystems.links' => ["{$base}/public/storage" => "{$base}/storage/app/public"]]);
 }
 
 /**
@@ -78,4 +92,18 @@ it('fails on debug mode or a sync queue in production', function (): void {
         ->and(Artisan::output())
         ->toContain('must be false in production')
         ->toContain('must not be sync in production');
+});
+
+it('fails while public/storage is missing, so branding files would 404', function (): void {
+    nodeModules(healthyVersions());
+    $base = temporaryRoot();
+    storageLink($base, create: false);
+
+    expect(Artisan::call('admin:doctor'))->toBe(1)
+        ->and(Artisan::output())->toContain('missing: run php artisan storage:link');
+
+    symlink(sys_get_temp_dir(), "{$base}/public/storage");
+
+    expect(Artisan::call('admin:doctor'))->toBe(1)
+        ->and(Artisan::output())->toContain('points elsewhere');
 });

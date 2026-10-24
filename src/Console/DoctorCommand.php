@@ -12,7 +12,7 @@ final class DoctorCommand extends Command
 {
     protected $signature = 'admin:doctor';
 
-    protected $description = 'Check npm dependencies, the module cache and environment settings';
+    protected $description = 'Check npm dependencies, the module cache, the storage links and environment settings';
 
     private int $failures = 0;
 
@@ -20,6 +20,7 @@ final class DoctorCommand extends Command
     {
         $this->checkNpmDependencies();
         $this->checkModuleCache($registry);
+        $this->checkStorageLinks();
         $this->checkEnvironment();
 
         return $this->failures === 0 ? self::SUCCESS : self::FAILURE;
@@ -47,6 +48,23 @@ final class DoctorCommand extends Command
             $registry->cachedEntries() != $registry->scan() => $this->failed('Module cache', 'stale: run php artisan modules:cache'),
             default => $this->passed('Module cache', 'up to date'),
         };
+    }
+
+    /**
+     * The links of `filesystems.links` (`public/storage`): without it the
+     * Settings branding files (favicon, logos) answer 404.
+     */
+    private function checkStorageLinks(): void
+    {
+        foreach (config()->array('filesystems.links') as $link => $target) {
+            $name = 'Link '.str_replace($this->laravel->basePath().'/', '', (string) $link);
+
+            match (true) {
+                ! file_exists((string) $link) => $this->failed($name, 'missing: run php artisan storage:link'),
+                realpath((string) $link) !== realpath((string) $target) => $this->failed($name, 'points elsewhere: expected '.$target),
+                default => $this->passed($name, 'ok'),
+            };
+        }
     }
 
     private function checkEnvironment(): void

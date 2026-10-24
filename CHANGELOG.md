@@ -91,6 +91,8 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Named attachment slots: core migration `add_collection_to_attachments_table` (`collection`, default `lampiran`); `HasAttachments::attachmentSlots()` and `attachments(?slot)`; `AttachmentSlot` (single / multiple, required, mimes, max KB); `AttachmentUploads` (`rules()`, `attributes()`, `saveWith()`, `save()`); `AttachmentSlotData`; components `FileField`, `AttachmentFields`, `AttachmentSlots`. Audit meta of attachment events carries the `slot`.
 - `admin:attachments-sweep` (`AttachmentSweeper`, scheduled daily in the skeleton): deletes files under `attachments/` on the attachments disk that no row points at and that are older than 24 hours; one `attachments_swept` row (`log_name` `system`, meta `files`) per run.
 
+- `admin:doctor` checks the `filesystems.links` (`public/storage`): without it the Settings branding files answer 404.
+
 ### Changed
 - Breaking: files are uploaded with the record's form (`files.{slot}` in the input Data, `AttachmentUploads::saveWith()`), not one by one to `{slug}.attachments.store`: that route, `UploadAttachmentData`, `HasAttachments::attachmentRules()` and the `FileUpload` component are gone. `AttachmentsData` is now `slots: AttachmentSlotData[]`. `AttachmentController::routes()` no longer needs `edit` (the delete route is added only when the module declares it). Models without `attachmentSlots()` get one `lampiran` slot with the old limits.
 - `admin-core.routes.home` is gone: error pages, the password change and sign-in go to `/home` (set Fortify `home` to `/home`). The starter kit's `/dashboard` route and page are removed.
