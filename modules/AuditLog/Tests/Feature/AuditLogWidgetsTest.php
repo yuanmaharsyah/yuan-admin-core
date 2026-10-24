@@ -9,6 +9,7 @@ use Yuan\AdminCore\Audit\Audit;
 use Yuan\AdminCore\Audit\AuditEvent;
 use Yuan\AdminCore\Audit\ImmutableActivity;
 use Yuan\AdminCore\Dashboard\DashboardRange;
+use Yuan\AdminCore\Data\Widgets\StatWidgetData;
 use Yuan\AdminCore\Modules\AuditLog\Widgets\ActivityByDay;
 use Yuan\AdminCore\Modules\AuditLog\Widgets\FailedLogins;
 use Yuan\AdminCore\Permissions\Level;
@@ -75,4 +76,15 @@ it('stays within the widget time budget on 20 000 rows', function (): void {
 
     ModuleAssertions::assertWidgetWithinBudget(FailedLogins::class);
     ModuleAssertions::assertWidgetWithinBudget(ActivityByDay::class);
+});
+
+it('serves a cached widget as its Data object (the cache returns arrays, never objects)', function (): void {
+    $viewer = ModuleAssertions::actingAsLevelWith(['dashboard.view', 'audit-log.view']);
+    Audit::record(AuditEvent::LoginFailed, meta: ['username' => 'tidak.ada']);
+
+    $first = app(FailedLogins::class)->resolve($viewer, new DashboardRange('7d'));
+    $cached = app(FailedLogins::class)->resolve($viewer, new DashboardRange('7d'));
+
+    expect($cached)->toBeInstanceOf(StatWidgetData::class)
+        ->and($cached->toArray())->toBe($first->toArray());
 });

@@ -35,7 +35,8 @@ final class AuditSummary
         $superAdmin = method_exists($viewer, 'isSuperAdmin') && $viewer->isSuperAdmin();
         $key = 'admin-core:audit-summary:'.implode('|', [$from->toDateString(), $to->toDateString(), $filters->user() ?? '-', $filters->module() ?? '-', $superAdmin ? 'sa' : 'other']);
 
-        return Cache::remember($key, 300, fn (): AuditSummaryData => $this->compute($filters, $viewer, $superAdmin, $from, $to));
+        // The cache keeps arrays only: it unserializes no objects (cache.serializable_classes).
+        return AuditSummaryData::from(Cache::remember($key, 300, fn (): array => $this->compute($filters, $viewer, $superAdmin, $from, $to)->toArray()));
     }
 
     private function compute(AuditFilterData $filters, Authenticatable $viewer, bool $superAdmin, CarbonImmutable $from, CarbonImmutable $to): AuditSummaryData

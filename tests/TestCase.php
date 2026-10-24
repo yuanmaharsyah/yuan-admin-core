@@ -42,6 +42,9 @@ abstract class TestCase extends Orchestra
             $config->set('view.paths', [self::FIXTURES.'/views']);
             $config->set('admin-core.pages', ['overrides' => [], 'core_path' => self::FIXTURES.'/CorePages']);
             $config->set('auth.providers.users.model', User::class);
+            // Like a real store: cached values are serialized, and no object comes back.
+            $config->set('cache.stores.array.serialize', true);
+            $config->set('cache.serializable_classes', false);
         });
     }
 

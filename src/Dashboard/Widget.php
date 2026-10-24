@@ -125,6 +125,9 @@ abstract class Widget
 
         $owner = $this->sharedCache() && method_exists($user, 'level') ? 'level:'.($user->level()?->getKey() ?? 'none') : 'user:'.$user->getAuthIdentifier();
 
-        return Cache::remember(implode(':', ['admin-core:widget', $this->key(), $this->usesRange() ? $range->key : '-', $owner]), $this->cacheSeconds(), $compute);
+        // The cache keeps arrays only: it unserializes no objects (cache.serializable_classes).
+        $cached = Cache::remember(implode(':', ['admin-core:widget', $this->key(), $this->usesRange() ? $range->key : '-', $owner]), $this->cacheSeconds(), fn (): array => $compute()->toArray());
+
+        return $this->type()->dataClass()::from($cached);
     }
 }

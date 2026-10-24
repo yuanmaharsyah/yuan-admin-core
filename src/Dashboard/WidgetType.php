@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yuan\AdminCore\Dashboard;
 
+use Spatie\LaravelData\Data;
 use Yuan\AdminCore\Data\Widgets\BarChartWidgetData;
 use Yuan\AdminCore\Data\Widgets\SegmentWidgetData;
 use Yuan\AdminCore\Data\Widgets\StatStackWidgetData;
@@ -20,7 +21,7 @@ enum WidgetType: string
     case Table = 'table';
 
     /**
-     * @return class-string
+     * @return class-string<Data>
      */
     public function dataClass(): string
     {
