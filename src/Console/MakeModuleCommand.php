@@ -33,6 +33,7 @@ final class MakeModuleCommand extends Command
         {--path= : the folder to write into (default: the project module root)}
         {--migration-date= : the migration file prefix (default: now, Y_m_d_His)}
         {--no-post : skip permissions:sync and the generators}
+        {--no-sync : skip permissions:sync only (it writes to the database of the current .env)}
         {--allow-registered : skip the unique name / slug check (to regenerate a registered module elsewhere, e.g. the golden module check)}';
 
     protected $description = 'Generate a module with its full contract (DEVELOPER.md R1)';
@@ -126,7 +127,7 @@ final class MakeModuleCommand extends Command
     private function postRun(ModuleBlueprint $module): void
     {
         $steps = [
-            ...($module->superadminOnly ? [] : [['permissions:sync']]),
+            ...($module->superadminOnly || $this->option('no-sync') ? [] : [['permissions:sync']]),
             ['modules:clear'],
             ['typescript:transform'],
             ['wayfinder:generate', '--with-form'],
@@ -151,6 +152,7 @@ final class MakeModuleCommand extends Command
             'Review the migration (indexes, onDelete), then: php artisan migrate',
             "Adjust the validation in Data/Store{$module->name}Data.php and Update{$module->name}Data.php",
             'Adjust the list columns in resources/js/pages/Index.tsx and the texts in resources/js/lang/*.ts',
+            ...($this->option('no-sync') && ! $module->superadminOnly ? ['Create its permissions: php artisan permissions:sync'] : []),
             $module->superadminOnly ? 'Only Super Admin opens it (superadmin_only)' : 'Give a level access: Levels → Hak Akses',
         ]);
     }
