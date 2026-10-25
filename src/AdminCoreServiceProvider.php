@@ -6,6 +6,7 @@ namespace Yuan\AdminCore;
 
 use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
@@ -44,9 +45,47 @@ use Yuan\AdminCore\Settings\Settings;
 
 final class AdminCoreServiceProvider extends ServiceProvider
 {
+    /**
+     * The package defaults under the project's config/admin-core.php, merged
+     * deeply (mergeConfigFrom only merges the top level): a published file
+     * keeps every nested default it doesn't set, so keys added by later
+     * versions arrive. Lists (middleware, mimes, rules, roots) are replaced
+     * whole; merged by index, a project's `mimes => ['pdf']` would silently
+     * keep the other default types.
+     */
+    public static function mergeConfig(Repository $config): void
+    {
+        /** @var array<string, mixed> $defaults */
+        $defaults = require __DIR__.'/../config/admin-core.php';
+        /** @var array<string, mixed> $project */
+        $project = $config->get('admin-core', []);
+
+        $config->set('admin-core', self::mergeDeep($defaults, $project));
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $defaults
+     * @param  array<array-key, mixed>  $overrides
+     * @return array<array-key, mixed>
+     */
+    private static function mergeDeep(array $defaults, array $overrides): array
+    {
+        foreach ($overrides as $key => $value) {
+            $default = $defaults[$key] ?? null;
+
+            $defaults[$key] = is_array($value) && is_array($default) && ! array_is_list($value) && ! array_is_list($default)
+                ? self::mergeDeep($default, $value)
+                : $value;
+        }
+
+        return $defaults;
+    }
+
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/admin-core.php', 'admin-core');
+        if (! $this->app->configurationIsCached()) {
+            self::mergeConfig($this->app->make('config'));
+        }
 
         $this->app->singleton(ModuleRegistry::class, fn (): ModuleRegistry => ModuleRegistry::fromConfig(config()));
         $this->app->singleton(PageResolver::class);
