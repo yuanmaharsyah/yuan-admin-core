@@ -54,7 +54,7 @@ final readonly class ModuleBlueprint
         $custom = array_diff($actions, ModuleDefinition::STANDARD_ACTIONS);
 
         if ($custom !== []) {
-            throw new InvalidArgumentException('Custom actions ('.implode(', ', $custom).') need real behaviour: generate the standard ones, then follow DEVELOPER.md R3.');
+            throw new InvalidArgumentException('Custom actions ('.implode(', ', $custom).') need real behaviour: generate the standard ones, then follow the admin-custom-action skill.');
         }
 
         $definitions = array_map(FieldDefinition::parse(...), array_values(array_filter(array_map(trim(...), preg_split('/,(?![^(]*\))/', $fields) ?: []), fn (string $spec): bool => $spec !== '')));
@@ -239,7 +239,7 @@ final readonly class ModuleBlueprint
             }
 
             if (! Route::has("{$found->slug}.lookup")) {
-                throw new InvalidArgumentException("Field [{$field->name}]: module {$found->slug} has no lookup route for the RelationSelect. Add `GET lookup` (name `lookup`, permission:{$found->slug}.view, answering LookupData) to that module first (DEVELOPER.md R19 step 4).");
+                throw new InvalidArgumentException("Field [{$field->name}]: module {$found->slug} has no lookup route for the RelationSelect. Add `GET lookup` (name `lookup`, permission:{$found->slug}.view, answering LookupData) to that module first (admin-relation-field skill).");
             }
 
             $targets[$field->name] = $found;

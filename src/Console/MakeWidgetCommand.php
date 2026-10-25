@@ -29,7 +29,7 @@ final class MakeWidgetCommand extends Command
         {--size=sm : sm, md, lg or full}
         {--path= : the module root to find the module in (default: the project module root)}';
 
-    protected $description = 'Generate a Beranda widget for a module (DEVELOPER.md R16)';
+    protected $description = 'Generate a Beranda widget for a module (admin-dashboard-widget skill)';
 
     public function handle(Filesystem $files): int
     {

@@ -36,7 +36,7 @@ final class MakeModuleCommand extends Command
         {--no-sync : skip permissions:sync only (it writes to the database of the current .env)}
         {--allow-registered : skip the unique name / slug check (to regenerate a registered module elsewhere, e.g. the golden module check)}';
 
-    protected $description = 'Generate a module with its full contract (DEVELOPER.md R1)';
+    protected $description = 'Generate a module with its full contract (admin-make-module skill)';
 
     public function handle(Filesystem $files): int
     {
@@ -145,7 +145,7 @@ final class MakeModuleCommand extends Command
     private function nextSteps(ModuleBlueprint $module): void
     {
         foreach ($module->unmaskedPersonalFields() as $field) {
-            $this->components->warn("[{$field}] looks like personal data: add it to admin-core.audit.masked_fields (DEVELOPER.md R15).");
+            $this->components->warn("[{$field}] looks like personal data: add it to admin-core.audit.masked_fields (admin-audit skill).");
         }
 
         $this->components->bulletList([
