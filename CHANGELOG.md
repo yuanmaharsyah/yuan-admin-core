@@ -97,6 +97,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `make:widget`: a widget of one of the five types with working code through `visibleTo()`, its test, and its line in `module.php`.
 - `ModuleDefinition` rejects at boot a listed widget that isn't a `Widget` or whose key doesn't start with the module slug (spec §3.1); `assertWidgetContract()` keeps the unique-key and permission checks.
 
+- `README.md`: new project with `bin/new-project`, access to the private repository over SSH (developer keys, read-only deploy keys on servers); `UPGRADE.md` links to it.
 ### Changed
 - Breaking: files are uploaded with the record's form (`files.{slot}` in the input Data, `AttachmentUploads::saveWith()`), not one by one to `{slug}.attachments.store`: that route, `UploadAttachmentData`, `HasAttachments::attachmentRules()` and the `FileUpload` component are gone. `AttachmentsData` is now `slots: AttachmentSlotData[]`. `AttachmentController::routes()` no longer needs `edit` (the delete route is added only when the module declares it). Models without `attachmentSlots()` get one `lampiran` slot with the old limits.
 - `admin-core.routes.home` is gone: error pages, the password change and sign-in go to `/home` (set Fortify `home` to `/home`). The starter kit's `/dashboard` route and page are removed.

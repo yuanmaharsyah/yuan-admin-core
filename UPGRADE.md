@@ -1,5 +1,9 @@
 # Upgrade Guide
 
+## Access
+
+`composer update` reads the private repository over SSH: a developer's own key, or the server's read-only deploy key. Setup and the `~/.ssh/config` alias for servers: [README.md → Access](README.md#access). Never commit `auth.json`.
+
 ## Standard steps (every upgrade)
 
 Run in the project root:
@@ -11,3 +15,7 @@ Run in the project root:
 5. `composer check`
 
 Version-specific steps are listed below, newest first.
+
+## 1.0.0
+
+First release. Nothing to do.
