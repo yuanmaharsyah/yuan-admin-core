@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yuan\AdminCore;
 
 use Illuminate\Auth\Events\Login;
+use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,7 @@ use Yuan\AdminCore\Console\ModulesCacheCommand;
 use Yuan\AdminCore\Console\ModulesClearCommand;
 use Yuan\AdminCore\Console\ModulesListCommand;
 use Yuan\AdminCore\Console\PermissionsSyncCommand;
+use Yuan\AdminCore\Console\WayfinderPaths;
 use Yuan\AdminCore\Http\Middleware\EnsureSuperAdmin;
 use Yuan\AdminCore\Http\Middleware\EnsureUserIsActive;
 use Yuan\AdminCore\Permissions\Level;
@@ -165,6 +167,11 @@ final class AdminCoreServiceProvider extends ServiceProvider
         Event::listen(JobProcessing::class, fn (JobProcessing $event) => $this->app->make(AuditContext::class)->startJob($event->job->resolveName()));
         Event::listen([JobProcessed::class, JobFailed::class], fn () => $this->app->make(AuditContext::class)->endJob());
         Event::listen(CommandStarting::class, fn (CommandStarting $event) => $this->app->make(AuditContext::class)->startCommand((string) $event->command));
+        Event::listen(CommandFinished::class, function (CommandFinished $event): void {
+            if ($event->command === 'wayfinder:generate') {
+                WayfinderPaths::normalize($this->app->basePath());
+            }
+        });
     }
 
     /**
