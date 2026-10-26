@@ -4,6 +4,8 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-26
+
 ### Added
 - Package scaffold: Testbench test suite on in-memory SQLite, Pest 5 with arch hygiene rules, Larastan level 8 (no baseline) and Pint with strict types.
 - Package auto-discovery (`AdminCoreServiceProvider`) and `config/admin-core.php`.
