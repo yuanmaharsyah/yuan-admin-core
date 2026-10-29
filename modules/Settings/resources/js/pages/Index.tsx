@@ -60,7 +60,13 @@ export default function Index({
                         label: item.label,
                         content:
                             item.key === active.key ? (
-                                <SettingsForm key={item.key} tab={item} />
+                                // A save redirects back here: the new lock_version
+                                // remounts the form from the saved values, so it
+                                // isn't dirty and its next save isn't stale.
+                                <SettingsForm
+                                    key={`${item.key}:${item.lock_version}`}
+                                    tab={item}
+                                />
                             ) : null,
                     }))}
                 />
