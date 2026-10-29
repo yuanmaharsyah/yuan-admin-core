@@ -8,6 +8,8 @@ type Props = FieldProps<number | null> & {
     /** `Rp` in front, whole rupiah only. */
     currency?: boolean;
     maximumFractionDigits?: number;
+    /** Thousands marks (`1.250`); off for a year or a code. */
+    grouping?: boolean;
 };
 
 /**
@@ -27,10 +29,11 @@ export function NumberField({
     disabled,
     currency = false,
     maximumFractionDigits = 2,
+    grouping = true,
 }: Props) {
     const digits = currency ? 0 : maximumFractionDigits;
     const show = (number: number | null) =>
-        number === null ? '' : formatNumber(number, digits);
+        number === null ? '' : formatNumber(number, digits, grouping);
     const [text, setText] = useState(() => show(value));
     const read = (input: string) => {
         const parsed = parseNumber(input, digits > 0);

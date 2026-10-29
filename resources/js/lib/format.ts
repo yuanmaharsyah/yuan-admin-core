@@ -27,10 +27,15 @@ export function formatDateTime(value: DateInput, timeZone: string): string {
     }).format(new Date(value));
 }
 
-export function formatNumber(value: number, maximumFractionDigits = 2): string {
-    return new Intl.NumberFormat(LOCALE, { maximumFractionDigits }).format(
-        value,
-    );
+export function formatNumber(
+    value: number,
+    maximumFractionDigits = 2,
+    useGrouping = true,
+): string {
+    return new Intl.NumberFormat(LOCALE, {
+        maximumFractionDigits,
+        useGrouping,
+    }).format(value);
 }
 
 export function formatCurrency(value: number): string {

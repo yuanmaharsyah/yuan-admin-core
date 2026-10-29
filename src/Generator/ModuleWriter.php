@@ -244,7 +244,7 @@ final readonly class ModuleWriter
             $null = $field->nullable ? '|null' : '';
             [$type, $cast] = match ($field->type) {
                 FieldType::String, FieldType::Text => ['string', null],
-                FieldType::Integer, FieldType::Currency => ['int', "'integer'"],
+                FieldType::Integer, FieldType::Year, FieldType::Currency => ['int', "'integer'"],
                 FieldType::Decimal => ['string', "'decimal:3'"],
                 FieldType::Boolean => ['bool', "'boolean'"],
                 FieldType::Date => ['CarbonImmutable', "'immutable_date'"],
@@ -385,7 +385,7 @@ final readonly class ModuleWriter
                     break;
                 default:
                     [$type, $value] = match ($field->type) {
-                        FieldType::Integer, FieldType::Currency => ['int', "{$model}->{$n}"],
+                        FieldType::Integer, FieldType::Year, FieldType::Currency => ['int', "{$model}->{$n}"],
                         FieldType::Decimal => ['float', $field->nullable ? "{$model}->{$n} === null ? null : (float) {$model}->{$n}" : "(float) {$model}->{$n}"],
                         FieldType::Boolean => ['bool', "{$model}->{$n}"],
                         FieldType::Date => ['string', "{$access}->toDateString()"],
@@ -423,6 +423,7 @@ final readonly class ModuleWriter
                 FieldType::String => ['string', "'string', 'max:255'"],
                 FieldType::Text => ['string', "'string', 'max:5000'"],
                 FieldType::Integer => ['int', "'integer'"],
+                FieldType::Year => ['int', "'integer', 'between:1900,2100'"],
                 FieldType::Decimal => ['float', "'numeric'"],
                 FieldType::Currency => ['int', "'integer', 'min:0'"],
                 FieldType::Boolean => ['bool', null],
@@ -567,6 +568,7 @@ final readonly class ModuleWriter
                 FieldType::String => "string('{$n}'){$nullable}{$index};",
                 FieldType::Text => "text('{$n}'){$nullable};",
                 FieldType::Integer => "integer('{$n}'){$nullable}{$index};",
+                FieldType::Year => "unsignedSmallInteger('{$n}'){$nullable}{$index};",
                 FieldType::Decimal => "decimal('{$n}', 15, 3){$nullable}{$index};",
                 FieldType::Currency => "unsignedBigInteger('{$n}'){$nullable}{$index};",
                 FieldType::Boolean => "boolean('{$n}')->default(false);",
@@ -596,6 +598,7 @@ final readonly class ModuleWriter
                 FieldType::String => 'fake()->words(3, true)',
                 FieldType::Text => 'fake()->sentence()',
                 FieldType::Integer => 'fake()->numberBetween(1, 1000)',
+                FieldType::Year => 'fake()->numberBetween(1990, now()->year)',
                 FieldType::Decimal => 'fake()->randomFloat(3, 0, 1000)',
                 FieldType::Currency => 'fake()->numberBetween(1, 10_000) * 1000',
                 FieldType::Boolean => 'fake()->boolean()',
@@ -894,6 +897,7 @@ final readonly class ModuleWriter
                 FieldType::String => "'Contoh {$field->label()}'",
                 FieldType::Text => "'Catatan contoh'",
                 FieldType::Integer => '12',
+                FieldType::Year => '2024',
                 FieldType::Decimal => '2.5',
                 FieldType::Currency => '150000',
                 FieldType::Boolean => 'true',
@@ -1237,6 +1241,7 @@ final readonly class ModuleWriter
                 FieldType::String => $text('TextField'),
                 FieldType::Text => '<div className="md:col-span-2">'.$text('TextareaField').'</div>',
                 FieldType::Integer => $number('NumberField', ' maximumFractionDigits={0}'),
+                FieldType::Year => $number('NumberField', ' maximumFractionDigits={0} grouping={false}'),
                 FieldType::Decimal => $number('NumberField', ' maximumFractionDigits={3}'),
                 FieldType::Currency => $number('CurrencyField'),
                 FieldType::Date => $number('DateField'),
@@ -1249,7 +1254,7 @@ final readonly class ModuleWriter
             $component = match ($field->type) {
                 FieldType::String => ['TextField', 'TextField'],
                 FieldType::Text => ['TextareaField', 'TextareaField'],
-                FieldType::Integer, FieldType::Decimal => ['NumberField', 'NumberField'],
+                FieldType::Integer, FieldType::Year, FieldType::Decimal => ['NumberField', 'NumberField'],
                 FieldType::Currency => ['NumberField', 'CurrencyField'],
                 FieldType::Date, FieldType::DateTime => ['DateField', 'DateField'],
                 FieldType::Boolean => ['SwitchField', 'SwitchField'],

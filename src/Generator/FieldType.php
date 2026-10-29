@@ -14,6 +14,7 @@ enum FieldType: string
     case String = 'string';
     case Text = 'text';
     case Integer = 'integer';
+    case Year = 'year';
     case Decimal = 'decimal';
     case Currency = 'currency';
     case Boolean = 'boolean';
@@ -38,7 +39,7 @@ enum FieldType: string
     /** Sortable in the list (and so indexed). */
     public function sortable(): bool
     {
-        return in_array($this, [self::String, self::Integer, self::Decimal, self::Currency, self::Date, self::DateTime], true);
+        return in_array($this, [self::String, self::Integer, self::Year, self::Decimal, self::Currency, self::Date, self::DateTime], true);
     }
 
     /** Searched by the list's search box. */

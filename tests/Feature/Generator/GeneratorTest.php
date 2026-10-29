@@ -12,7 +12,7 @@ use Yuan\AdminCore\Generator\ModuleWriter;
 // write / refuse / --force behaviour. The golden module in the skeleton
 // proves the output passes every gate.
 
-const EVERY_FIELD = 'nama:string,kode:string?,catatan:text?,jumlah:integer,berat:decimal?,harga:currency,aktif:boolean,mulai:date,selesai:datetime?,status:enum(draf,aktif),berkas:file(single,required,pdf|jpg,2048),lampiran:file';
+const EVERY_FIELD = 'nama:string,kode:string?,catatan:text?,jumlah:integer,tahun:year,berat:decimal?,harga:currency,aktif:boolean,mulai:date,selesai:datetime?,status:enum(draf,aktif),berkas:file(single,required,pdf|jpg,2048),lampiran:file';
 
 /**
  * @param  array<mixed>  $actions
@@ -27,7 +27,7 @@ it('parses every field type, nullable fields and their arguments', function (): 
     $field = fn (string $name): FieldDefinition => $fields->get($name) ?? throw new LogicException("No field {$name}.");
 
     expect($fields->map(fn (FieldDefinition $field): string => $field->type->value)->all())->toBe([
-        'nama' => 'string', 'kode' => 'string', 'catatan' => 'text', 'jumlah' => 'integer', 'berat' => 'decimal', 'harga' => 'currency',
+        'nama' => 'string', 'kode' => 'string', 'catatan' => 'text', 'jumlah' => 'integer', 'tahun' => 'year', 'berat' => 'decimal', 'harga' => 'currency',
         'aktif' => 'boolean', 'mulai' => 'date', 'selesai' => 'datetime', 'status' => 'enum', 'berkas' => 'file', 'lampiran' => 'file',
     ])
         ->and($field('kode')->nullable)->toBeTrue()
@@ -38,6 +38,18 @@ it('parses every field type, nullable fields and their arguments', function (): 
         ->and(FieldDefinition::parse('customer_id:foreign(customers)')->table)->toBe('customers')
         ->and(FieldDefinition::parse('customer_id:foreign(customers)')->label())->toBe('Customer')
         ->and(FieldDefinition::parse('tanggal_mulai:date')->label())->toBe('Tanggal mulai');
+});
+
+it('writes a year as a plain year: column, range, real factory years, no thousands mark', function (): void {
+    $files = (new ModuleWriter(blueprint('nama:string,tahun:year'), '2026_10_24_000000'))->files();
+    $migration = (string) collect($files)->first(fn (string $contents, string $path): bool => str_contains($path, 'Migrations/'));
+
+    expect($migration)->toContain("unsignedSmallInteger('tahun')->index();")
+        ->and($files['Data/StoreBarangData.php'])->toContain("'tahun' => ['required', 'integer', 'between:1900,2100']")
+        ->and($files['Database/Factories/BarangFactory.php'])->toContain("'tahun' => fake()->numberBetween(1990, now()->year)")
+        ->and($files['resources/js/components/BarangForm.tsx'])->toContain('grouping={false}')
+        ->and($files['resources/js/pages/Index.tsx'])->not->toContain('formatNumber(row.tahun')
+        ->and($files['resources/js/pages/Show.tsx'])->not->toContain('formatNumber(');
 });
 
 it('names the module from its class name', function (): void {

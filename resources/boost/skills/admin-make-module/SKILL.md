@@ -11,13 +11,13 @@ Never write a module by hand: `make:module` writes the whole contract (model, po
 
 ```bash
 php artisan make:module Kendaraan \
-  --fields="plat_nomor:string,merk:string,tahun:integer,tanggal_pajak:date?,status:enum(aktif,dijual),catatan:text?,scan_stnk:file(single,required,pdf|jpg,2048)" \
+  --fields="plat_nomor:string,merk:string,tahun:year,tanggal_pajak:date?,status:enum(aktif,dijual),catatan:text?,scan_stnk:file(single,required,pdf|jpg,2048)" \
   --actions=view,create,edit,delete,download \
   --group=master --icon=car
 ```
 
 - `Name` is singular PascalCase; the slug defaults to its plural kebab form (`--slug`, `--label` override).
-- Field types: `string, text, integer, decimal, currency, boolean, date, datetime, enum(a,b), foreign(table), file(...)`; a trailing `?` makes a field nullable. Name fields in Indonesian snake_case: labels come from the names (`tanggal_mulai` → "Tanggal mulai"). The first `string` field is the record's label (list, title, audit label).
+- Field types: `string, text, integer, year, decimal, currency, boolean, date, datetime, enum(a,b), foreign(table), file(...)`; `year` is a year (1900–2100, shown without a thousands mark, real years in the factory); a trailing `?` makes a field nullable. Name fields in Indonesian snake_case: labels come from the names (`tanggal_mulai` → "Tanggal mulai"). The first `string` field is the record's label (list, title, audit label).
 - `file(single|multiple, required, pdf|jpg, 2048)`: an attachment slot (skill `admin-attachments`), options in any order.
 - `foreign(table)` needs a module whose model uses that table and has a `lookup` route (skill `admin-relation-field`); otherwise the generator stops and says so.
 - `--actions`: only the five standard actions; custom ones afterwards (skill `admin-custom-action`). `--superadmin-only`: no permissions, only Super Admin.
