@@ -1,8 +1,31 @@
 {
-    "name": "yuan/admin-core",
-    "description": "Reusable Laravel admin core: modules, RBAC, audit, type bridge.",
+    "name": "yuanmaharsyah/admin-core",
+    "description": "Laravel 13 admin core: modules, level-based RBAC, a tamper-resistant audit log, a module generator and the Inertia + React UI.",
+    "keywords": [
+        "laravel",
+        "admin",
+        "admin-panel",
+        "boilerplate",
+        "inertia",
+        "react",
+        "rbac",
+        "audit-log",
+        "laravel-data"
+    ],
+    "homepage": "https://github.com/yuanmaharsyah/admin-boilerplate",
     "type": "library",
-    "license": "proprietary",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yuan Maharsyah",
+            "homepage": "https://github.com/yuanmaharsyah"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/yuanmaharsyah/admin-boilerplate/issues",
+        "source": "https://github.com/yuanmaharsyah/admin-boilerplate",
+        "security": "https://github.com/yuanmaharsyah/admin-boilerplate/security/policy"
+    },
     "require": {
         "php": "^8.4",
         "composer/semver": "^3.4",

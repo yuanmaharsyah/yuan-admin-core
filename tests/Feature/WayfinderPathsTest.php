@@ -6,7 +6,7 @@ use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Filesystem\Filesystem;
 use Yuan\AdminCore\Console\WayfinderPaths;
 
-// Generated Wayfinder files name the package as vendor/yuan/admin-core/…,
+// Generated Wayfinder files name the package as vendor/yuanmaharsyah/admin-core/…,
 // whether it is installed in vendor/ or symlinked there (the boilerplate repo).
 
 /**
@@ -20,17 +20,17 @@ function wayfinderProject(bool $symlinked): array
     $root = sys_get_temp_dir().'/wayfinder-'.bin2hex(random_bytes(6));
     $base = "{$root}/project";
     $files = new Filesystem;
-    $files->ensureDirectoryExists("{$base}/vendor/yuan");
+    $files->ensureDirectoryExists("{$base}/vendor/yuanmaharsyah");
     $files->ensureDirectoryExists("{$base}/resources/js/actions/Yuan");
 
     if ($symlinked) {
         $files->ensureDirectoryExists("{$root}/packages/admin-core");
-        symlink("{$root}/packages/admin-core", "{$base}/vendor/yuan/admin-core");
+        symlink("{$root}/packages/admin-core", "{$base}/vendor/yuanmaharsyah/admin-core");
     } else {
-        $files->ensureDirectoryExists("{$base}/vendor/yuan/admin-core");
+        $files->ensureDirectoryExists("{$base}/vendor/yuanmaharsyah/admin-core");
     }
 
-    $package = (string) realpath("{$base}/vendor/yuan/admin-core");
+    $package = (string) realpath("{$base}/vendor/yuanmaharsyah/admin-core");
     $files->put("{$base}/resources/js/actions/Yuan/HomeController.ts", '/** @see '.ltrim($package, '/')."/src/Http/HomeController.php:20 */\n");
 
     register_shutdown_function(fn () => $files->deleteDirectory($root));
@@ -43,7 +43,7 @@ it('rewrites the resolved package path of a symlinked package', function (): voi
 
     expect(WayfinderPaths::normalize($base))->toBe(1)
         ->and(file_get_contents("{$base}/resources/js/actions/Yuan/HomeController.ts"))
-        ->toBe("/** @see vendor/yuan/admin-core/src/Http/HomeController.php:20 */\n");
+        ->toBe("/** @see vendor/yuanmaharsyah/admin-core/src/Http/HomeController.php:20 */\n");
 });
 
 it('leaves a package installed in vendor alone', function (): void {
@@ -52,7 +52,7 @@ it('leaves a package installed in vendor alone', function (): void {
 
     expect(WayfinderPaths::normalize($base))->toBe(0)
         ->and(file_get_contents("{$base}/resources/js/actions/Yuan/HomeController.ts"))->toBe($before)
-        ->and($package)->toEndWith('/project/vendor/yuan/admin-core');
+        ->and($package)->toEndWith('/project/vendor/yuanmaharsyah/admin-core');
 });
 
 it('runs after every wayfinder:generate', function (): void {

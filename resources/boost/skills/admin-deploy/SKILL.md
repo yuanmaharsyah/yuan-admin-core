@@ -13,7 +13,7 @@ php artisan admin:doctor
 sudo supervisorctl restart all
 ```
 
-- The server reads the private `yuan/admin-core` repository with a read-only deploy key (`vendor/yuan/admin-core/README.md` → Access).
+- `composer install` gets `yuanmaharsyah/admin-core` from Packagist. A private fork over SSH needs a read-only deploy key on the server (`vendor/yuanmaharsyah/admin-core/README.md` → Private forks over SSH).
 - Production: `APP_DEBUG=false`, a real queue driver with a supervised worker, the scheduler in cron (`php artisan schedule:run` every minute), `ADMIN_SEED_PASSWORD` set before the first seed, or no seeder and `php artisan admin:create-superadmin`.
 - `php artisan admin:doctor` checks the npm dependencies, the module cache, the storage link and the environment.
 - Public pages can be closed during maintenance with `php artisan admin:access maintenance --message="..."` and reopened with `php artisan admin:access open`.

@@ -1,5 +1,5 @@
 /*
- * Theme of yuan/admin-core (ui-design §1, reconciled with the design source).
+ * Theme of yuanmaharsyah/admin-core (ui-design §1, reconciled with the design source).
  * Projects import this file from resources/css/app.css after Tailwind and
  * override only --highlight (branding). Components use the token utilities
  * (bg-card, shadow-dialog, text-title, h-control…), never raw values.

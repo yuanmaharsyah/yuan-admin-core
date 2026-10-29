@@ -10,7 +10,7 @@ return [
         'roots' => [
             [
                 'name' => 'core',
-                'path' => base_path('vendor/yuan/admin-core/modules'),
+                'path' => base_path('vendor/yuanmaharsyah/admin-core/modules'),
                 'namespace' => 'Yuan\\AdminCore\\Modules\\',
             ],
             [
@@ -80,7 +80,7 @@ return [
 
         // Folder of the package's own `Core::` pages (auth, errors), as seen
         // from the project, so Vite entries are relative to the project root.
-        'core_path' => base_path('vendor/yuan/admin-core/resources/js/pages'),
+        'core_path' => base_path('vendor/yuanmaharsyah/admin-core/resources/js/pages'),
     ],
 
     // Password rules (spec §8), applied as Password::defaults(): min length,

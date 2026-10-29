@@ -1,25 +1,32 @@
-# yuan/admin-core
+# yuanmaharsyah/admin-core
 
-The reusable core of the Laravel 13 admin boilerplate: modules, RBAC (one Level per user), the audit log, Beranda widgets, settings, exports, attachments and the TypeScript type bridge, with the React frontend the projects build against.
+The core of [Admin Boilerplate](https://github.com/yuanmaharsyah/admin-boilerplate), a Laravel 13 + Inertia 3 + React 19 admin panel: modules declared in `module.php`, level-based RBAC with a permission matrix, a tamper-resistant audit log with personal-data masking, a module generator, settings, exports and attachments.
 
-This repository is a read-only split of `packages/admin-core` in the boilerplate monorepo. Changes are made there and released with `composer release`; never commit here directly.
+**Documentation, issues and contributions: [github.com/yuanmaharsyah/admin-boilerplate](https://github.com/yuanmaharsyah/admin-boilerplate).** This repository is a read-only split of `packages/admin-core` there, published on every release; don't open pull requests here.
 
-## A new project
+## Install
 
-From the boilerplate monorepo:
+You don't require this package by hand. Start a project from the skeleton, which requires it:
 
 ```bash
-bin/new-project ../client-x --db=client_x --name="Client X"
+composer create-project yuanmaharsyah/admin-skeleton my-app
 ```
 
-It copies the skeleton at the newest release tag, requires this package of the same version, removes the demo modules, runs `composer setup` (databases `client_x` and `client_x_test`, seeded Super Admins, built assets) and commits the result in a new git repository. `--dry-run` shows the steps.
+Then follow the [Getting Started](https://github.com/yuanmaharsyah/admin-boilerplate#getting-started) guide. Upgrading: [UPGRADE.md](UPGRADE.md); changes: [CHANGELOG.md](CHANGELOG.md).
 
-## Access
+## Private forks over SSH
 
-The repository is private. Composer reads it over SSH (`"no-api": true` in the project's `repositories.admin-core`), so no GitHub token is needed.
+If you run your own fork of the package in a private repository, point your project at it instead of Packagist:
 
-- **Developers:** your own SSH key, on a GitHub account with read access to this repository. Check with `ssh -T git@github.com`.
-- **Production servers:** a read-only [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) on this repository, one per server (`ssh-keygen -t ed25519 -f ~/.ssh/admin-core`). A server that already uses a key for its own project repository gets a host alias in `~/.ssh/config`:
+```bash
+composer config repositories.admin-core '{"type": "vcs", "url": "git@github.com:<you>/<your-admin-core>.git", "no-api": true}'
+composer require yuanmaharsyah/admin-core:^1.0
+```
+
+`"no-api": true` makes Composer use plain git over SSH, so no GitHub token is needed:
+
+- **Developers:** your own SSH key, on an account with read access. Check with `ssh -T git@github.com`.
+- **Production servers:** a read-only [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) on that repository, one per server (`ssh-keygen -t ed25519 -f ~/.ssh/admin-core`). If the server already uses another key for github.com, add a host alias in `~/.ssh/config`:
 
   ```
   Host github-admin-core
@@ -28,13 +35,13 @@ The repository is private. Composer reads it over SSH (`"no-api": true` in the p
       IdentitiesOnly yes
   ```
 
-  and git rewrites this repository's URL to the alias, so the project's `composer.json` stays the same everywhere:
+  and let git rewrite the URL, so the project's `composer.json` stays the same everywhere:
 
   ```bash
-  git config --global url."git@github-admin-core:yuanmaharsyah/yuan-admin-core.git".insteadOf "git@github.com:yuanmaharsyah/yuan-admin-core.git"
+  git config --global url."git@github-admin-core:<you>/<your-admin-core>.git".insteadOf "git@github.com:<you>/<your-admin-core>.git"
   ```
 - **Never commit `auth.json`** or a token (the skeleton's `.gitignore` already ignores `auth.json`).
 
-## Upgrading
+## License
 
-See [UPGRADE.md](UPGRADE.md) and [CHANGELOG.md](CHANGELOG.md).
+MIT. See [LICENSE](LICENSE).

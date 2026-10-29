@@ -1,12 +1,14 @@
 # Changelog
 
-All notable changes to `yuan/admin-core` are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the package uses [SemVer](https://semver.org/).
+All notable changes to `yuanmaharsyah/admin-core` are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the package uses [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
 ## [1.0.0] - 2026-10-26
 
 ### Added
+- Published as `yuanmaharsyah/admin-core` on Packagist (MIT): `LICENSE`, Packagist metadata (keywords, homepage, support), a package README that points to the main repository; private forks over SSH documented there.
+- New projects start with `composer create-project yuanmaharsyah/admin-skeleton my-app`; `bin/release` publishes the skeleton to `yuanmaharsyah/admin-skeleton` with every release.
 - Package scaffold: Testbench test suite on in-memory SQLite, Pest 5 with arch hygiene rules, Larastan level 8 (no baseline) and Pint with strict types.
 - Package auto-discovery (`AdminCoreServiceProvider`) and `config/admin-core.php`.
 - Module registry (`Yuan\AdminCore\Registry`): discovers the core and project module roots, validates every `module.php` (spec §3.1), fails boot on duplicate slugs or names, registers module providers, migrations and routes (`/admin/{slug}`, `{slug}.`, configured base middleware; `superadmin_only` routes require `admin-core.superadmin`).
@@ -37,7 +39,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `Testing\ContractAssertions`: the runtime contract checks of spec §9.1, run over the current app's modules (projects call them from `tests/Feature/ContractTest.php`).
 - `Testing\ModuleAssertions`: module test helpers `actingAsLevelWith()`, `actingAsSuperAdmin()`, `assertGuestRedirected()`, `assertForbiddenWithout()`, `assertAudited()` (with masked-field checks) and `assertNotVisibleToNonSuperAdmin()`.
 - `Audit\NotAudited` attribute: the opt-out from `LogsModuleActivity`, with a required reason.
-- PHPStan rules for controllers, registered by `extension.neon` (projects include `vendor/yuan/admin-core/extension.neon`): `InertiaPropsRule` (Inertia props must be Data objects, scalars or Inertia prop wrappers of those; identifier `adminCore.inertiaProps`) and `RequestInputRule` (no `all()`, `validated()` or key-less `input()`; identifier `adminCore.requestInput`).
+- PHPStan rules for controllers, registered by `extension.neon` (projects include `vendor/yuanmaharsyah/admin-core/extension.neon`): `InertiaPropsRule` (Inertia props must be Data objects, scalars or Inertia prop wrappers of those; identifier `adminCore.inertiaProps`) and `RequestInputRule` (no `all()`, `validated()` or key-less `input()`; identifier `adminCore.requestInput`).
 - Auth pages `Core::Auth/{Login,ForgotPassword,ResetPassword,ChangePassword}` with `AuthLayout`, `AuthCard`, `FormField`, `PasswordInput` and their Data objects (`Data\Auth\*`); `ResetPasswordData`, `UpdatePasswordData`.
 - `Auth\PasswordRules`: spec §8 rules (min 10, mixed case, number; `admin-core.passwords`) set as `Password::defaults()`, with a hint text.
 - `Http\ErrorPages`: 403 / 404 / 419 / 500 / 503 as `Core::Errors/Show` (`ErrorPageData`); `admin-core.routes.home`.
@@ -102,6 +104,7 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - `README.md`: new project with `bin/new-project`, access to the private repository over SSH (developer keys, read-only deploy keys on servers); `UPGRADE.md` links to it.
 - AI docs for projects through Laravel Boost: `resources/boost/guidelines/core.blade.php` (the project rules, a condensed AGENTS.md) and 14 skills in `resources/boost/skills` (`admin-make-module`, `admin-add-field`, `admin-custom-action`, `admin-relation-field`, `admin-downloadable-list`, `admin-attachments`, `admin-add-setting`, `admin-customize-core`, `admin-test-module`, `admin-audit`, `admin-dashboard-widget`, `admin-translate`, `admin-upgrade-core`, `admin-deploy`). Projects with `laravel/boost` get them in `CLAUDE.md` and `.claude/skills` on `boost:install` / `boost:update`.
 ### Changed
+- The package is renamed `yuanmaharsyah/admin-core` (was `yuan/admin-core`, whose Packagist vendor belongs to someone else): it installs under `vendor/yuanmaharsyah/admin-core`. The PHP namespace `Yuan\AdminCore` is unchanged.
 - `make:module` / `make:widget` messages and descriptions name the Boost skills (`admin-audit`, `admin-relation-field`…) instead of DEVELOPER.md recipes, which projects don't have.
 - The package config is merged deeply under the project's `config/admin-core.php` (was Laravel's top-level `mergeConfigFrom`): a published file keeps every nested default it doesn't set, so nested keys added by later versions arrive. Associative arrays merge; lists (`routes.middleware`, `attachments.mimes`, `rules`, `modules.roots`) are replaced whole. A project therefore adds or overrides settings tabs, fields and menu groups but can no longer drop a default one by leaving it out.
 - Breaking: files are uploaded with the record's form (`files.{slot}` in the input Data, `AttachmentUploads::saveWith()`), not one by one to `{slug}.attachments.store`: that route, `UploadAttachmentData`, `HasAttachments::attachmentRules()` and the `FileUpload` component are gone. `AttachmentsData` is now `slots: AttachmentSlotData[]`. `AttachmentController::routes()` no longer needs `edit` (the delete route is added only when the module declares it). Models without `attachmentSlots()` get one `lampiran` slot with the old limits.
@@ -119,7 +122,8 @@ All notable changes to `yuan/admin-core` are documented here. The format follows
 - Base admin route middleware is now `web, auth, active`; superadmin_only modules use the `superadmin` middleware instead of `can:admin-core.superadmin`.
 
 ### Fixed
-- Generated Wayfinder files named the package by its absolute path when `vendor/yuan/admin-core` is a symlink (the boilerplate repo), so they differed per machine; after every `wayfinder:generate` the package rewrites them to `vendor/yuan/admin-core/…` (`Console\WayfinderPaths`), as a project with the package installed gets anyway.
+- Pengaturan: after a save the tab's form stayed "unsaved" (a leave-page warning for changes already saved) and kept the old `lock_version`, so a second save on the same tab without reloading failed as a stale update (409). The form now starts over from the saved values.
+- Generated Wayfinder files named the package by its absolute path when `vendor/yuanmaharsyah/admin-core` is a symlink (the boilerplate repo), so they differed per machine; after every `wayfinder:generate` the package rewrites them to `vendor/yuanmaharsyah/admin-core/…` (`Console\WayfinderPaths`), as a project with the package installed gets anyway.
 - Shell: on a page taller than the window (the Log Aktivitas), the window itself scrolled and left an empty band under the shell: the charts' screen-reader tables are absolutely positioned and had no positioned ancestor inside the scrolling main area. `<main>` is now `relative`.
 - The audit summary and cached Beranda widgets failed on a real cache store ("__PHP_Incomplete_Class returned"): Laravel's `cache.serializable_classes => false` lets no object come back from the cache. Both now cache the Data's array form and rebuild it. The test suites' array cache serializes like a real store, so object caching fails in tests too.
 - Shell: following a one-item rail group's link to the page already open (e.g. Keuangan on `/admin/invoices` after viewing Master Data) left the panel showing the other group; the link now clears the viewed group, the overlay panel and the mobile sheet.

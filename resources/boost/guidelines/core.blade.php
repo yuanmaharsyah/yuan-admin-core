@@ -1,6 +1,6 @@
-## yuan/admin-core
+## yuanmaharsyah/admin-core
 
-This project is a Laravel 13 + Inertia 3 + React 19 + TypeScript admin panel built on the `yuan/admin-core` package. Every feature is a **module** in `modules/{Name}` with a `module.php`; routes, menu, command palette and permissions come from that file. Each user has exactly one **Level**; a level holds permissions `{slug}.{action}`. Every change is written to the audit log automatically. The `admin-*` skills hold the step-by-step recipes: use them.
+This project is a Laravel 13 + Inertia 3 + React 19 + TypeScript admin panel built on the `yuanmaharsyah/admin-core` package. Every feature is a **module** in `modules/{Name}` with a `module.php`; routes, menu, command palette and permissions come from that file. Each user has exactly one **Level**; a level holds permissions `{slug}.{action}`. Every change is written to the audit log automatically. The `admin-*` skills hold the step-by-step recipes: use them.
 
 ### Workflow
 

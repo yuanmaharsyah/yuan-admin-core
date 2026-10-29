@@ -1,6 +1,6 @@
 ---
 name: admin-make-module
-description: "Use when creating a new admin module (a new feature, CRUD screen, master data or list of records) in a yuan/admin-core project. Runs php artisan make:module and finishes what it wrote."
+description: "Use when creating a new admin module (a new feature, CRUD screen, master data or list of records) in a yuanmaharsyah/admin-core project. Runs php artisan make:module and finishes what it wrote."
 ---
 
 # Create a module

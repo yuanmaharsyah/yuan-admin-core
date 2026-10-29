@@ -17,7 +17,7 @@ export function resolvePage<T>(
         : ['App', name];
     const suffix =
         namespace === 'Core'
-            ? `/vendor/yuan/admin-core/resources/js/pages/${page}.tsx`
+            ? `/vendor/yuanmaharsyah/admin-core/resources/js/pages/${page}.tsx`
             : `/modules/${namespace}/resources/js/pages/${page}.tsx`;
     const key =
         namespace === 'App'

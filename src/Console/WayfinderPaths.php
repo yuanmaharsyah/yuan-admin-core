@@ -8,10 +8,10 @@ use Illuminate\Filesystem\Filesystem;
 
 /**
  * Wayfinder writes each controller's file as `@see {path}`, relative to the
- * project. In the boilerplate repo vendor/yuan/admin-core is a symlink to
+ * project. In the boilerplate repo vendor/yuanmaharsyah/admin-core is a symlink to
  * packages/admin-core, PHP reports the resolved path, and the package's
  * files land as absolute paths (machine-specific, so the generated files
- * differ per checkout). This rewrites them to `vendor/yuan/admin-core/`,
+ * differ per checkout). This rewrites them to `vendor/yuanmaharsyah/admin-core/`,
  * which is what a project with the package installed gets anyway.
  */
 final class WayfinderPaths
@@ -21,7 +21,7 @@ final class WayfinderPaths
 
     public static function normalize(string $basePath): int
     {
-        $package = realpath("{$basePath}/vendor/yuan/admin-core");
+        $package = realpath("{$basePath}/vendor/yuanmaharsyah/admin-core");
 
         // Inside the (resolved) project: a real vendor folder, nothing to do.
         if ($package === false || str_starts_with($package, rtrim((string) realpath($basePath), '/').'/')) {
@@ -41,7 +41,7 @@ final class WayfinderPaths
                 $contents = $file->getContents();
 
                 if (str_contains($contents, $from)) {
-                    $files->put($file->getPathname(), str_replace($from, '@see vendor/yuan/admin-core/', $contents));
+                    $files->put($file->getPathname(), str_replace($from, '@see vendor/yuanmaharsyah/admin-core/', $contents));
                     $changed++;
                 }
             }
