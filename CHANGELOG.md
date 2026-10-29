@@ -7,6 +7,7 @@ All notable changes to `yuanmaharsyah/admin-core` are documented here. The forma
 ## [1.0.0] - 2026-10-26
 
 ### Added
+- `make:module` field type `year`: an `unsignedSmallInteger` column, validated `between:1900,2100`, shown without a thousands mark in the list, detail and form (`NumberField` `grouping={false}`; `formatNumber()` takes `useGrouping`), real years in the factory. The `Sample` golden module uses it.
 - Published as `yuanmaharsyah/admin-core` on Packagist (MIT): `LICENSE`, Packagist metadata (keywords, homepage, support), a package README that points to the main repository; private forks over SSH documented there.
 - New projects start with `composer create-project yuanmaharsyah/admin-skeleton my-app`; `bin/release` publishes the skeleton to `yuanmaharsyah/admin-skeleton` with every release.
 - Package scaffold: Testbench test suite on in-memory SQLite, Pest 5 with arch hygiene rules, Larastan level 8 (no baseline) and Pint with strict types.
@@ -104,6 +105,7 @@ All notable changes to `yuanmaharsyah/admin-core` are documented here. The forma
 - `README.md`: new project with `bin/new-project`, access to the private repository over SSH (developer keys, read-only deploy keys on servers); `UPGRADE.md` links to it.
 - AI docs for projects through Laravel Boost: `resources/boost/guidelines/core.blade.php` (the project rules, a condensed AGENTS.md) and 14 skills in `resources/boost/skills` (`admin-make-module`, `admin-add-field`, `admin-custom-action`, `admin-relation-field`, `admin-downloadable-list`, `admin-attachments`, `admin-add-setting`, `admin-customize-core`, `admin-test-module`, `admin-audit`, `admin-dashboard-widget`, `admin-translate`, `admin-upgrade-core`, `admin-deploy`). Projects with `laravel/boost` get them in `CLAUDE.md` and `.claude/skills` on `boost:install` / `boost:update`.
 ### Changed
+- `AdminCoreSeeder`: a new Operator level gets `dashboard.view` and the `view` permission of the project's own (non-core) modules only, never Users, Levels or the activity log (was every `view` permission). Existing levels are never changed by a re-seed.
 - The package is renamed `yuanmaharsyah/admin-core` (was `yuan/admin-core`, whose Packagist vendor belongs to someone else): it installs under `vendor/yuanmaharsyah/admin-core`. The PHP namespace `Yuan\AdminCore` is unchanged.
 - `make:module` / `make:widget` messages and descriptions name the Boost skills (`admin-audit`, `admin-relation-field`…) instead of DEVELOPER.md recipes, which projects don't have.
 - The package config is merged deeply under the project's `config/admin-core.php` (was Laravel's top-level `mergeConfigFrom`): a published file keeps every nested default it doesn't set, so nested keys added by later versions arrive. Associative arrays merge; lists (`routes.middleware`, `attachments.mimes`, `rules`, `modules.roots`) are replaced whole. A project therefore adds or overrides settings tabs, fields and menu groups but can no longer drop a default one by leaving it out.
