@@ -26,7 +26,7 @@ function rowCounts(): array
         ->all();
 }
 
-it('seeds the levels, two Super Admins and a view-only Operator, and is idempotent', function (): void {
+it('seeds the levels, two Super Admins and an Operator that views the project modules, and is idempotent', function (): void {
     seed(AdminCoreSeeder::class);
     $first = rowCounts();
     seed(AdminCoreSeeder::class);
@@ -35,7 +35,7 @@ it('seeds the levels, two Super Admins and a view-only Operator, and is idempote
     expect(rowCounts())->toBe($first)
         ->and($first)->toMatchArray(['users' => 2, 'roles' => 2, 'permissions' => 5, 'model_has_permissions' => 0])
         ->and(User::query()->get()->every(fn (User $user): bool => $user->isSuperAdmin() && $user->is_active))->toBeTrue()
-        ->and($operator->permissions()->orderBy('name')->pluck('name')->all())->toBe(['demo.view', 'hidden.view', 'notes.view']);
+        ->and($operator->permissions()->orderBy('name')->pluck('name')->all())->toBe(['demo.view', 'hidden.view']); // notes is a core module: not for Operator
 });
 
 it('keeps matrix edits and passwords on a re-seed', function (): void {

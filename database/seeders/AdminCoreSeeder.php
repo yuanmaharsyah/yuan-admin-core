@@ -12,10 +12,13 @@ use Spatie\Permission\Models\Permission;
 use Yuan\AdminCore\Modules\Users\Models\User;
 use Yuan\AdminCore\Permissions\Level;
 use Yuan\AdminCore\Permissions\PermissionSynchronizer;
+use Yuan\AdminCore\Registry\ModuleDefinition;
+use Yuan\AdminCore\Registry\ModuleRegistry;
 
 /**
  * Idempotent: syncs permissions, ensures the Super Admin and Operator levels
- * and two Super Admin accounts. Existing rows are never changed, so a re-seed
+ * and two Super Admin accounts. A new Operator may open Beranda and view the
+ * project's own modules; never Users or the activity log (core modules). Existing rows are never changed, so a re-seed
  * keeps every matrix edit and password.
  */
 final class AdminCoreSeeder extends Seeder
@@ -25,7 +28,7 @@ final class AdminCoreSeeder extends Seeder
         ['name' => 'Super Admin 2', 'username' => 'superadmin2', 'email' => 'superadmin2@example.test'],
     ];
 
-    public function run(PermissionSynchronizer $synchronizer): void
+    public function run(PermissionSynchronizer $synchronizer, ModuleRegistry $registry): void
     {
         $synchronizer->sync();
         $superAdmin = Level::superAdmin();
@@ -33,7 +36,11 @@ final class AdminCoreSeeder extends Seeder
         $operator = Level::query()->firstOrCreate(['name' => 'operator'], ['label' => 'Operator', 'description' => 'Hanya dapat melihat data.']);
 
         if ($operator->wasRecentlyCreated) {
-            $operator->syncPermissions(Permission::query()->where('action', 'view')->pluck('name')->all());
+            $viewable = ['dashboard.view', ...array_map(
+                fn (ModuleDefinition $module): string => "{$module->slug}.view",
+                array_filter($registry->enabled(), fn (ModuleDefinition $module): bool => ! $module->core),
+            )];
+            $operator->syncPermissions(Permission::query()->whereIn('name', $viewable)->pluck('name')->all());
         }
 
         /** @var class-string<Model> $model */
