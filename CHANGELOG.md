@@ -4,7 +4,7 @@ All notable changes to `yuanmaharsyah/admin-core` are documented here. The forma
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-26
+## [1.0.0] - 2026-10-29
 
 ### Added
 - `make:module` field type `year`: an `unsignedSmallInteger` column, validated `between:1900,2100`, shown without a thousands mark in the list, detail and form (`NumberField` `grouping={false}`; `formatNumber()` takes `useGrouping`), real years in the factory. The `Sample` golden module uses it.
