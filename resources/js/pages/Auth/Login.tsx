@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { AuthCard } from '../../components/admin/AuthCard';
+import { AuthSocial } from '../../components/admin/AuthSocial';
 import { fieldMessageId, FormField } from '../../components/admin/FormField';
 import { PasswordInput } from '../../components/admin/PasswordInput';
 import { Alert, AlertDescription } from '../../components/ui/alert';
@@ -37,6 +38,7 @@ export default function Login(props: Yuan.AdminCore.Data.Auth.LoginPageData) {
                 description={t('auth.login_desc')}
                 onSubmit={submit}
             >
+                <AuthSocial providers={props.social} />
                 {props.status && (
                     <Alert variant="success">
                         <CircleCheck />
@@ -120,9 +122,21 @@ export default function Login(props: Yuan.AdminCore.Data.Auth.LoginPageData) {
                     )}
                 </Button>
             </AuthCard>
-            <p className="m-0 text-table text-pretty text-muted-foreground">
-                {t('auth.login_note')}
-            </p>
+            {props.register_href ? (
+                <p className="m-0 text-pretty text-muted-foreground">
+                    {t('auth.no_account')}{' '}
+                    <Link
+                        href={props.register_href}
+                        className="font-medium text-foreground"
+                    >
+                        {t('auth.register_link')}
+                    </Link>
+                </p>
+            ) : (
+                <p className="m-0 text-table text-pretty text-muted-foreground">
+                    {t('auth.login_note')}
+                </p>
+            )}
         </>
     );
 }

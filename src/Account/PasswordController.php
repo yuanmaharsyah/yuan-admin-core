@@ -44,6 +44,7 @@ final class PasswordController
     public function update(Request $request, UpdatePasswordData $data): RedirectResponse
     {
         $user = self::user($request);
+        $forced = $user->must_change_password;
 
         DB::transaction(function () use ($user, $data): void {
             $user->forceFill(['password' => $data->password, 'must_change_password' => false])->save();
@@ -51,7 +52,8 @@ final class PasswordController
         });
         Inertia::flash((new FlashData(success: __('Kata sandi berhasil diubah.')))->toArray());
 
-        return redirect()->to(HomeController::url());
+        // The forced change (RequirePasswordChange) goes on to the panel; Akun → Profil stays there.
+        return $forced ? redirect()->to(HomeController::url()) : to_route('account.profile.edit');
     }
 
     private static function user(Request $request): User

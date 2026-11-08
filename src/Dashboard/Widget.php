@@ -50,6 +50,12 @@ abstract class Widget
         return $this->slug().'.view';
     }
 
+    /** A `stat` shown inside Beranda's welcome card (at most two are shown there). */
+    public function highlight(): bool
+    {
+        return false;
+    }
+
     public function usesRange(): bool
     {
         return true;
@@ -92,6 +98,10 @@ abstract class Widget
 
     final public function meta(): WidgetMetaData
     {
+        if ($this->highlight() && $this->type() !== WidgetType::Stat) {
+            throw new LogicException(static::class.': only a stat widget can be a highlight.');
+        }
+
         return new WidgetMetaData(
             key: $this->key(),
             prop: $this->prop(),
@@ -102,6 +112,7 @@ abstract class Widget
             uses_range: $this->usesRange(),
             href: $this->href(),
             empty: $this->emptyText(),
+            highlight: $this->highlight(),
         );
     }
 

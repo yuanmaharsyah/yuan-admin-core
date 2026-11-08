@@ -17,3 +17,4 @@ sudo supervisorctl restart all
 - Production: `APP_DEBUG=false`, a real queue driver with a supervised worker, the scheduler in cron (`php artisan schedule:run` every minute), `ADMIN_SEED_PASSWORD` set before the first seed, or no seeder and `php artisan admin:create-superadmin`.
 - `php artisan admin:doctor` checks the npm dependencies, the module cache, the storage link and the environment.
 - Public pages can be closed during maintenance with `php artisan admin:access maintenance --message="..."` and reopened with `php artisan admin:access open`.
+- PHP down (deploy restart, crashed FPM): the web server answers itself, so point it at the static page in the server block, `error_page 502 504 /errors/502.html;` (the file is `public/errors/502.html`, styled like the app's error pages). Laravel renders every other error page itself.

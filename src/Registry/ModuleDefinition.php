@@ -9,6 +9,9 @@ use Yuan\AdminCore\Dashboard\Widget;
 
 /**
  * A validated `module.php` (spec §3.1).
+ *
+ * @phpstan-type SubmenuLeaf array{label: string, route: string, action: string, badge: ?string, submenu: array{}}
+ * @phpstan-type SubmenuItem array{label: string, route: ?string, action: string, badge: ?string, submenu: list<SubmenuLeaf>}
  */
 final readonly class ModuleDefinition
 {
@@ -22,9 +25,13 @@ final readonly class ModuleDefinition
 
     private const string KEBAB = '/^[a-z0-9]+(?:-[a-z0-9]+)*$/';
 
+    /** Longest menu badge, in characters (spec §3.1). */
+    public const int BADGE_MAX = 24;
+
     /**
      * @param  list<string>  $actions
      * @param  list<class-string>  $widgets
+     * @param  list<SubmenuItem>  $submenu  Children of the menu item (spec §3.1): a link (`route` relative to the module, `index` = `{slug}.index`) or a parent of links (`route` null, its own `submenu`).
      */
     public function __construct(
         public string $name,
@@ -42,6 +49,8 @@ final readonly class ModuleDefinition
         public string $path,
         public string $root,
         public string $namespace,
+        public ?string $badge = null,
+        public array $submenu = [],
     ) {}
 
     /**
@@ -75,6 +84,7 @@ final readonly class ModuleDefinition
         $slug = self::string($config, 'slug', $file, self::KEBAB, 'must be lowercase kebab-case');
         $core = self::bool($config, 'core', $file);
         $enabled = self::bool($config, 'enabled', $file);
+        $actions = self::actions($config['actions'], $file);
 
         if ($core && ! $enabled) {
             throw InvalidModuleDefinition::rule($file, 'enabled', 'cannot be false for a core module');
@@ -91,11 +101,13 @@ final readonly class ModuleDefinition
             core: $core,
             superadminOnly: self::bool($config, 'superadmin_only', $file),
             menu: self::bool($config, 'menu', $file),
-            actions: self::actions($config['actions'], $file),
+            actions: $actions,
             widgets: self::widgets($config['widgets'], $file, $slug),
             path: dirname($file),
             root: $root,
             namespace: $namespace,
+            badge: self::badge($config['badge'] ?? null, $file, 'badge'),
+            submenu: self::submenu($config['submenu'] ?? [], $file, $actions),
         );
     }
 
@@ -200,6 +212,127 @@ final readonly class ModuleDefinition
         }
 
         return $list;
+    }
+
+    /** Optional short pill text next to a menu item (translation key allowed). */
+    private static function badge(mixed $badge, string $file, string $key): ?string
+    {
+        if ($badge === null) {
+            return null;
+        }
+
+        if (! is_string($badge) || trim($badge) === '' || mb_strlen($badge) > self::BADGE_MAX) {
+            throw InvalidModuleDefinition::rule($file, $key, 'must be null or a short text (1 to '.self::BADGE_MAX.' characters)');
+        }
+
+        return $badge;
+    }
+
+    /**
+     * The menu children (spec §3.1), two levels deep: a child is a link (a
+     * relative `route`, its `action`) or, on the second level only, a parent
+     * with its own `submenu` and no route.
+     *
+     * @param  list<string>  $actions
+     * @return list<SubmenuItem>
+     */
+    private static function submenu(mixed $submenu, string $file, array $actions): array
+    {
+        $children = [];
+
+        foreach (self::entries($submenu, $file, 'submenu') as $key => $child) {
+            if (! array_key_exists('submenu', $child)) {
+                $children[] = self::leaf($child, $file, $key, $actions);
+
+                continue;
+            }
+
+            if (array_diff(array_keys($child), ['label', 'badge', 'submenu']) !== []) {
+                throw InvalidModuleDefinition::rule($file, $key, 'with a "submenu" is only a parent: "label", "badge" and "submenu", no "route" or "action"');
+            }
+
+            $leaves = [];
+
+            foreach (self::entries($child['submenu'], $file, "{$key}.submenu") as $path => $grandchild) {
+                $leaves[] = self::leaf($grandchild, $file, $path, $actions);
+            }
+
+            if ($leaves === []) {
+                throw InvalidModuleDefinition::rule($file, "{$key}.submenu", 'must not be empty');
+            }
+
+            $children[] = [
+                'label' => self::label($child, $file, $key),
+                'route' => null,
+                'action' => 'view',
+                'badge' => self::badge($child['badge'] ?? null, $file, "{$key}.badge"),
+                'submenu' => $leaves,
+            ];
+        }
+
+        return $children;
+    }
+
+    /**
+     * @return array<string, array<mixed>> path => entry
+     */
+    private static function entries(mixed $list, string $file, string $path): array
+    {
+        if (! is_array($list) || ! array_is_list($list)) {
+            throw InvalidModuleDefinition::rule($file, $path, 'must be a list');
+        }
+
+        $entries = [];
+
+        foreach ($list as $index => $entry) {
+            if (! is_array($entry)) {
+                throw InvalidModuleDefinition::rule($file, "{$path}.{$index}", 'must be an array with "label" and "route"');
+            }
+
+            $entries["{$path}.{$index}"] = $entry;
+        }
+
+        return $entries;
+    }
+
+    /**
+     * A link: label, relative route, action, badge. Links can't nest (three levels at most).
+     *
+     * @param  array<mixed>  $child
+     * @param  list<string>  $actions
+     * @return SubmenuLeaf
+     */
+    private static function leaf(array $child, string $file, string $key, array $actions): array
+    {
+        if (array_diff(array_keys($child), ['label', 'route', 'action', 'badge']) !== []) {
+            throw InvalidModuleDefinition::rule($file, $key, 'may only have "label", "route", "action" and "badge" (a "submenu" only on the second level: three levels at most)');
+        }
+
+        $label = self::label($child, $file, $key);
+
+        if (! is_string($child['route'] ?? null) || preg_match('/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/', $child['route']) !== 1) {
+            throw InvalidModuleDefinition::rule($file, "{$key}.route", 'must be a route name relative to the module (e.g. "index")');
+        }
+
+        $action = $child['action'] ?? 'view';
+
+        if (! is_string($action) || ! in_array($action, $actions, true)) {
+            throw InvalidModuleDefinition::rule($file, "{$key}.action", 'must be one of the module\'s actions ('.implode(', ', $actions).')');
+        }
+
+        return ['label' => $label, 'route' => $child['route'], 'action' => $action, 'badge' => self::badge($child['badge'] ?? null, $file, "{$key}.badge"), 'submenu' => []];
+    }
+
+    /**
+     * @param  array<mixed>  $child
+     */
+    private static function label(array $child, string $file, string $key): string
+    {
+        if (! is_string($child['label'] ?? null) || trim($child['label']) === '') {
+            throw InvalidModuleDefinition::rule($file, "{$key}.label", 'must not be empty');
+        }
+
+        return $child['label'];
     }
 
     /**

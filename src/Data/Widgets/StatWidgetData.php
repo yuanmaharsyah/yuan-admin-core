@@ -8,7 +8,7 @@ use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
-/** A `stat` widget: one KPI (`StatTile`); `icon` is a lucide name, `badge` a warning next to the value. */
+/** A `stat` widget: one KPI (`StatTile`); `icon` is a lucide name, `badge` a warning next to the value, `change` the percent against the previous range, `caption` a short text after it. */
 #[TypeScript]
 final class StatWidgetData extends Data
 {
@@ -18,5 +18,7 @@ final class StatWidgetData extends Data
         #[LiteralTypeScriptType("'number' | 'currency'")]
         public string $format = 'number',
         public ?string $badge = null,
+        public ?float $change = null,
+        public ?string $caption = null,
     ) {}
 }

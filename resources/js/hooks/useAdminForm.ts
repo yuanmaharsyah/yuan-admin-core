@@ -1,6 +1,6 @@
 import { router, useForm } from '@inertiajs/react';
 import type { FormDataType } from '@inertiajs/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAction } from './useAction';
 
 type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -15,7 +15,22 @@ type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 export function useAdminForm<T extends FormDataType<T>>(initial: T) {
     const form = useForm<T>(initial);
     const [stale, setStale] = useState(false);
+    // Bumped on each validation error; the effect runs after the render that
+    // shows the errors, so the invalid fields exist when it looks for them.
+    const [failedSubmits, setFailedSubmits] = useState(0);
     const sending = useAction();
+
+    useEffect(() => {
+        if (failedSubmits === 0) {
+            return;
+        }
+
+        const invalid = document.querySelector<HTMLElement>(
+            '[aria-invalid="true"]',
+        );
+        invalid?.focus();
+        invalid?.scrollIntoView({ block: 'center' });
+    }, [failedSubmits]);
 
     const dirtyData = Object.fromEntries(
         Object.entries(form.data).filter(
@@ -40,14 +55,7 @@ export function useAdminForm<T extends FormDataType<T>>(initial: T) {
                 form.submit(route.method, route.url, {
                     preserveScroll: true,
                     onFinish: done,
-                    onError: () =>
-                        window.requestAnimationFrame(() => {
-                            const invalid = document.querySelector<HTMLElement>(
-                                '[aria-invalid="true"]',
-                            );
-                            invalid?.focus();
-                            invalid?.scrollIntoView({ block: 'center' });
-                        }),
+                    onError: () => setFailedSubmits((count) => count + 1),
                     onHttpException: (response) => {
                         if (response.status !== 409) {
                             return;

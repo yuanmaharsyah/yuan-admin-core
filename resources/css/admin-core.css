@@ -1,5 +1,5 @@
 /*
- * Theme of yuanmaharsyah/admin-core (ui-design §1, reconciled with the design source).
+ * Theme of yuanmaharsyah/admin-core (ui-design §1): shadcn/ui neutral values, 8px radius.
  * Projects import this file from resources/css/app.css after Tailwind and
  * override only --highlight (branding). Components use the token utilities
  * (bg-card, shadow-dialog, text-title, h-control…), never raw values.
@@ -39,12 +39,12 @@
     --color-info-foreground: var(--info-foreground);
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
-    --color-rail: var(--rail);
-    --color-rail-foreground: var(--rail-foreground);
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-active: var(--sidebar-active);
-    --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
@@ -53,9 +53,11 @@
     --color-chart-5: var(--chart-5);
     --color-overlay: var(--overlay);
 
-    --radius-sm: var(--radius);
-    --radius-md: var(--radius);
+    /* `rounded` = --radius (controls, 8px); nav items md (6px); cards and the inset main xl (12px). */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
 
     --shadow-popover: var(--shadow-popover);
     --shadow-dialog: var(--shadow-dialog);
@@ -63,29 +65,29 @@
     --shadow-drawer: var(--shadow-drawer);
 
     /* Type steps (ui-design §1 "Scale"): size, line-height, weight, tracking. */
-    --text-title: 1.75rem;
-    --text-title--line-height: 1.15;
-    --text-title--font-weight: 700;
+    --text-title: 1.5rem;
+    --text-title--line-height: 1.33;
+    --text-title--font-weight: 600;
     --text-section: 1.25rem;
     --text-section--line-height: 1.3;
-    --text-section--font-weight: 700;
-    --text-kpi: 1.375rem;
-    --text-kpi--line-height: 1.2;
-    --text-kpi--font-weight: 700;
+    --text-section--font-weight: 600;
+    --text-kpi: 1.5rem;
+    --text-kpi--line-height: 1.33;
+    --text-kpi--font-weight: 500;
     --text-card-title: 1.125rem;
-    --text-card-title--line-height: 1.35;
-    --text-card-title--font-weight: 600;
+    --text-card-title--line-height: 1.55;
+    --text-card-title--font-weight: 500;
     --text-brand: 1.125rem;
     --text-brand--line-height: 1.2;
-    --text-brand--font-weight: 700;
+    --text-brand--font-weight: 600;
     --text-body: 0.875rem;
     --text-body--line-height: 1.5;
     --text-table: 0.8125rem;
     --text-table--line-height: 1.4;
     --text-label: 0.75rem;
     --text-label--line-height: 1.35;
-    --text-label--font-weight: 500;
-    --text-label--letter-spacing: 0.04em;
+    --text-label--font-weight: 600;
+    --text-label--letter-spacing: 0.02em;
 
     /* Control heights (ui-design §1 "Control heights"): h-control, h-row… */
     --spacing-control: 2.25rem;
@@ -93,30 +95,31 @@
     --spacing-control-compact: 1.875rem;
     --spacing-control-auth: 2.5rem;
     --spacing-row: 2.75rem;
-    --spacing-topbar: 3rem;
-    --spacing-rail: 3.5rem;
-    --spacing-panel: 13.75rem;
+    --spacing-topbar: 3.5rem;
+    --spacing-sidebar: 15rem;
+    --spacing-sidebar-icon: 3.5rem;
 }
 
 :root {
-    --background: oklch(0.955 0 0);
-    --foreground: oklch(0.205 0 0);
-    --card: oklch(0.99 0.004 106);
-    --card-foreground: oklch(0.205 0 0);
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.922 0 0);
-    --muted-foreground: oklch(0.439 0 0);
-    --secondary: oklch(0.922 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
-    --accent: oklch(0.922 0 0);
+    --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
-    --border: oklch(0.87 0 0);
-    --input: oklch(0.87 0 0);
-    --rule: oklch(0.205 0 0);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    /* Kept for the screens not restyled yet: a plain divider now, no longer an ink rule. */
+    --rule: oklch(0.922 0 0);
     --primary: oklch(0.205 0 0);
     --primary-foreground: oklch(0.985 0 0);
-    --ring: oklch(0.205 0 0);
+    --ring: oklch(0.708 0 0);
     --highlight: oklch(0.905 0.182 98.111);
     --highlight-foreground: oklch(0.205 0 0);
     --success: oklch(0.508 0.118 165.612);
@@ -127,19 +130,19 @@
     --info-foreground: oklch(1 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(1 0 0);
-    --rail: oklch(0.87 0 0);
-    --rail-foreground: oklch(0.205 0 0);
-    --sidebar: oklch(0.922 0 0);
-    --sidebar-foreground: oklch(0.371 0 0);
-    --sidebar-active: oklch(0.97 0 0);
-    --sidebar-active-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.87 0 0);
-    --chart-1: oklch(0.905 0.182 98.111);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --chart-1: var(--highlight);
     --chart-2: oklch(0.205 0 0);
     --chart-3: oklch(0.556 0 0);
     --chart-4: oklch(0.708 0 0);
-    --chart-5: oklch(0.87 0 0);
-    --radius: 0.25rem;
+    --chart-5: oklch(0.439 0 0);
+    --radius: 0.5rem;
     --overlay: oklch(0.145 0 0 / 0.45);
     --shadow-popover: 0 8px 24px oklch(0 0 0 / 0.12);
     --shadow-dialog: 0 16px 48px oklch(0 0 0 / 0.2);
@@ -149,23 +152,23 @@
 
 .dark {
     --background: oklch(0.145 0 0);
-    --foreground: oklch(0.97 0 0);
+    --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.97 0 0);
+    --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.97 0 0);
+    --popover-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
     --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
     --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.97 0 0);
-    --border: oklch(0.32 0 0);
-    --input: oklch(0.371 0 0);
-    --rule: oklch(0.97 0 0);
-    --primary: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --rule: oklch(1 0 0 / 10%);
+    --primary: oklch(0.922 0 0);
     --primary-foreground: oklch(0.205 0 0);
-    --ring: oklch(0.87 0 0);
+    --ring: oklch(0.556 0 0);
     --highlight: oklch(0.905 0.182 98.111);
     --highlight-foreground: oklch(0.205 0 0);
     --success: oklch(0.765 0.177 163.223);
@@ -176,18 +179,18 @@
     --info-foreground: oklch(0.145 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --destructive-foreground: oklch(0.145 0 0);
-    --rail: oklch(0.12 0 0);
-    --rail-foreground: oklch(0.97 0 0);
-    --sidebar: oklch(0.175 0 0);
-    --sidebar-foreground: oklch(0.708 0 0);
-    --sidebar-active: oklch(0.269 0 0);
-    --sidebar-active-foreground: oklch(0.97 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --chart-1: oklch(0.905 0.182 98.111);
-    --chart-2: oklch(0.97 0 0);
+    --sidebar: oklch(0.145 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.922 0 0);
+    --sidebar-primary-foreground: oklch(0.205 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --chart-1: var(--highlight);
+    --chart-2: oklch(0.922 0 0);
     --chart-3: oklch(0.708 0 0);
     --chart-4: oklch(0.556 0 0);
-    --chart-5: oklch(0.371 0 0);
+    --chart-5: oklch(0.439 0 0);
     /* A shadow alone vanishes on a near-black page: a 1px light ring plus a deeper shadow. */
     --overlay: oklch(0 0 0 / 0.65);
     --shadow-popover: 0 0 0 1px oklch(1 0 0 / 0.1), 0 8px 24px oklch(0 0 0 / 0.5);
@@ -209,7 +212,70 @@
         @apply outline-2 outline-offset-2 outline-ring;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            transition-duration: 0s !important;
+            animation-duration: 0s !important;
+        }
+    }
+
     input::placeholder {
         @apply text-muted-foreground;
+    }
+}
+
+/*
+ * List rows fade up one after another when they mount (a new page, a new
+ * search): 20px, 500ms ease-out, 250ms apart; rows after the 8th share the
+ * last delay so long pages don't keep the user waiting. Reduced motion turns
+ * it off (base layer rule).
+ */
+@keyframes rows-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+@layer components {
+    [data-rows-in] > tr {
+        animation: rows-in 500ms ease-out both;
+    }
+
+    [data-rows-in] > tr:nth-child(2) {
+        animation-delay: 250ms;
+    }
+    [data-rows-in] > tr:nth-child(3) {
+        animation-delay: 500ms;
+    }
+    [data-rows-in] > tr:nth-child(4) {
+        animation-delay: 750ms;
+    }
+    [data-rows-in] > tr:nth-child(5) {
+        animation-delay: 1000ms;
+    }
+    [data-rows-in] > tr:nth-child(6) {
+        animation-delay: 1250ms;
+    }
+    [data-rows-in] > tr:nth-child(7) {
+        animation-delay: 1500ms;
+    }
+    [data-rows-in] > tr:nth-child(8) {
+        animation-delay: 1750ms;
+    }
+    [data-rows-in] > tr:nth-child(n + 9) {
+        animation-delay: 1750ms;
+    }
+}
+
+/* The auth showcase's soft grid (AuthShowcase), from the border token. */
+@layer components {
+    .auth-grid {
+        background-image:
+            linear-gradient(to right, var(--border) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+        background-size: 48px 48px;
     }
 }

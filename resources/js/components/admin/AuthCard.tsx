@@ -7,7 +7,7 @@ type Props = {
     children: ReactNode;
 };
 
-/** The auth card: title over the 2px ink rule, optional description, then the form body. */
+/** The auth form: title (24px/600) and muted description, then the fields; it sits in AuthLayout's card. */
 export function AuthCard({ title, description, onSubmit, children }: Props) {
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -19,13 +19,10 @@ export function AuthCard({ title, description, onSubmit, children }: Props) {
             noValidate
             aria-labelledby="auth-card-title"
             onSubmit={submit}
-            className="flex flex-col gap-4 rounded bg-card p-6 text-card-foreground"
+            className="flex flex-col gap-5"
         >
-            <div className="flex flex-col gap-2">
-                <h1
-                    id="auth-card-title"
-                    className="m-0 border-b-2 border-rule pb-2.5 text-card-title"
-                >
+            <div className="flex flex-col gap-1">
+                <h1 id="auth-card-title" className="m-0 text-title">
                     {title}
                 </h1>
                 {description && (

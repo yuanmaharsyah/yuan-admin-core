@@ -146,6 +146,15 @@ trait HasLevel
     }
 
     /**
+     * "Keluar dari perangkat lain" (Akun → Keamanan): every other session of
+     * this user ends; the current one stays signed in.
+     */
+    public function signOutOtherSessions(): void
+    {
+        $this->revokeSessions();
+    }
+
+    /**
      * Revokes every session of this user: raises `session_version` atomically
      * (a stale in-memory copy can't write an old number back) and rotates the
      * remember token so a remember-me cookie can't sign back in. The current

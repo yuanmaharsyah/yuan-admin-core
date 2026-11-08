@@ -1,5 +1,5 @@
 import { FileText, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import { formatFileSize } from '../../lib/format';
 import { useT } from '../../lib/i18n';
@@ -76,17 +76,21 @@ export function FileField({ name, slot, value, onChange, error }: Props) {
             name={name}
             label={slot.label}
             required={required}
-            help={t('attachments.rules', {
-                types: slot.accept
-                    .map((extension) => extension.toUpperCase())
-                    .join(', '),
-                size: formatFileSize(slot.max_kb * 1024),
-            })}
             error={error}
         >
             <div className="flex flex-col gap-2">
                 {slot.items.length > 0 && <AttachmentList items={slot.items} />}
                 <div
+                    role="button"
+                    tabIndex={0}
+                    aria-describedby={`${name}-drop-hint`}
+                    onClick={() => input.current?.click()}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            input.current?.click();
+                        }
+                    }}
                     onDragOver={(event) => {
                         event.preventDefault();
                         setDragging(true);
@@ -94,30 +98,43 @@ export function FileField({ name, slot, value, onChange, error }: Props) {
                     onDragLeave={() => setDragging(false)}
                     onDrop={onDrop}
                     className={cn(
-                        'flex flex-col items-center gap-2 rounded border border-dashed px-6 py-5 text-center text-table',
+                        'flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors duration-150 hover:bg-muted/50',
                         dragging ? 'border-primary bg-muted' : 'border-border',
                         error && 'border-destructive',
                     )}
                 >
-                    <Upload
+                    <span
                         aria-hidden="true"
-                        className="size-5 text-muted-foreground"
-                    />
-                    <p className="m-0">
-                        {t(
-                            !slot.multiple && slot.items.length > 0
-                                ? 'attachments.drop_replace'
-                                : 'attachments.drop',
-                        )}{' '}
-                        <Button
-                            type="button"
-                            variant="link"
-                            className="h-auto p-0 text-table font-semibold underline underline-offset-3"
-                            onClick={() => input.current?.click()}
+                        className={cn(
+                            'flex size-12 items-center justify-center rounded-full bg-muted transition-transform duration-200',
+                            dragging && 'scale-110',
+                        )}
+                    >
+                        <Upload className="size-5" />
+                    </span>
+                    <span className="flex flex-col gap-1">
+                        <span className="font-medium">
+                            {t(
+                                !slot.multiple && slot.items.length > 0
+                                    ? 'attachments.drop_replace'
+                                    : 'attachments.drop',
+                            )}{' '}
+                            <span className="underline underline-offset-3">
+                                {t('attachments.browse')}
+                            </span>
+                        </span>
+                        <span
+                            id={`${name}-drop-hint`}
+                            className="text-table text-muted-foreground"
                         >
-                            {t('attachments.browse')}
-                        </Button>
-                    </p>
+                            {t('attachments.rules', {
+                                types: slot.accept
+                                    .map((extension) => extension.toUpperCase())
+                                    .join(', '),
+                                size: formatFileSize(slot.max_kb * 1024),
+                            })}
+                        </span>
+                    </span>
                     <input
                         ref={input}
                         id={name}
@@ -138,41 +155,31 @@ export function FileField({ name, slot, value, onChange, error }: Props) {
                         className="m-0 flex list-none flex-col gap-2 p-0"
                         aria-live="polite"
                     >
-                        {value.map((file, index) => (
-                            <li
-                                key={`${file.name}-${index}`}
-                                className="flex items-center gap-3 rounded border border-border px-3 py-2 text-table"
-                            >
-                                <FileText
-                                    aria-hidden="true"
-                                    className="size-4 shrink-0 text-muted-foreground"
-                                />
-                                <span className="min-w-0 flex-1 truncate font-medium">
-                                    {file.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground tabular-nums">
-                                    {formatFileSize(file.size)}
-                                </span>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="size-8"
-                                    aria-label={t('attachments.remove', {
-                                        name: file.name,
-                                    })}
-                                    onClick={() =>
-                                        onChange(
-                                            value.filter(
-                                                (_, at) => at !== index,
-                                            ),
-                                        )
-                                    }
-                                >
-                                    <X />
-                                </Button>
+                        {value.length > 0 && (
+                            <li>
+                                <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
+                                    {value.map((file, index) => (
+                                        <PickedFile
+                                            key={`${file.name}-${index}`}
+                                            file={file}
+                                            removeLabel={t(
+                                                'attachments.remove',
+                                                {
+                                                    name: file.name,
+                                                },
+                                            )}
+                                            onRemove={() =>
+                                                onChange(
+                                                    value.filter(
+                                                        (_, at) => at !== index,
+                                                    ),
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </ul>
                             </li>
-                        ))}
+                        )}
                         {rejected.map((file) => (
                             <li
                                 key={file.name}
@@ -263,4 +270,68 @@ export function AttachmentFields({
             />
         );
     });
+}
+
+/**
+ * A picked file before upload: an image shows its own thumbnail (a local
+ * object URL, revoked when it goes), anything else its type icon.
+ */
+function PickedFile({
+    file,
+    removeLabel,
+    onRemove,
+}: {
+    file: File;
+    removeLabel: string;
+    onRemove: () => void;
+}) {
+    const preview = useMemo(
+        () =>
+            file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+        [file],
+    );
+
+    useEffect(
+        () => () => {
+            if (preview !== null) {
+                URL.revokeObjectURL(preview);
+            }
+        },
+        [preview],
+    );
+
+    return (
+        <li className="group relative flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
+            <div className="flex aspect-[4/3] items-center justify-center bg-muted">
+                {preview ? (
+                    <img
+                        src={preview}
+                        alt=""
+                        className="size-full object-cover"
+                    />
+                ) : (
+                    <FileText
+                        aria-hidden="true"
+                        className="size-8 text-muted-foreground"
+                    />
+                )}
+            </div>
+            <div className="flex flex-col px-3 py-2 text-table">
+                <span className="truncate font-medium">{file.name}</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                    {formatFileSize(file.size)}
+                </span>
+            </div>
+            <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="absolute top-2 right-2 size-8 rounded-full"
+                aria-label={removeLabel}
+                onClick={onRemove}
+            >
+                <X />
+            </Button>
+        </li>
+    );
 }

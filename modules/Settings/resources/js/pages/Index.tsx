@@ -1,3 +1,13 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+    Download,
+    Globe,
+    LockKeyhole,
+    Phone,
+    Settings2,
+    Share2,
+} from 'lucide-react';
+import { CardHeading } from '@admin-core/components/admin/CardHeading';
 import { FormFooter } from '@admin-core/components/admin/FormFooter';
 import { ImageField } from '@admin-core/components/admin/ImageField';
 import { NumberField } from '@admin-core/components/admin/NumberField';
@@ -30,6 +40,16 @@ const INPUT_MODE: Partial<Record<Field['type'], 'tel' | 'numeric' | 'url'>> = {
  * per tab, rendered from the settings registry. Changing tab is a visit
  * (`?tab=`), so unsaved changes are guarded like any other navigation.
  */
+/** The tab bar's icons, by registry group (a project's own group falls back to the gear). */
+const ICONS: Record<string, LucideIcon> = {
+    umum: Settings2,
+    kontak: Phone,
+    sosial: Share2,
+    akses: Globe,
+    keamanan: LockKeyhole,
+    ekspor: Download,
+};
+
 export default function Index({
     tabs,
     tab,
@@ -47,6 +67,7 @@ export default function Index({
                 />
                 <Tabs
                     label={t('settings.tabs')}
+                    variant="segmented"
                     value={active.key}
                     onChange={(key) =>
                         router.get(
@@ -58,6 +79,7 @@ export default function Index({
                     tabs={tabs.map((item) => ({
                         key: item.key,
                         label: item.label,
+                        icon: ICONS[item.key] ?? Settings2,
                         content:
                             item.key === active.key ? (
                                 // A save redirects back here: the new lock_version
@@ -101,16 +123,27 @@ function SettingsForm({ tab }: { tab: Tab }) {
                 submit({ url: update.form(tab.key).action, method: 'post' });
             }}
         >
-            <section className="flex max-w-2xl flex-col gap-5 rounded bg-card p-6 text-card-foreground">
-                {tab.fields.map((field) => (
-                    <SettingInput
-                        key={field.name}
-                        field={field}
-                        value={form.data.values[field.name] ?? null}
-                        error={errors[`values.${field.name}`]}
-                        onChange={(value) => set(field.name, value)}
-                    />
-                ))}
+            <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 rounded-xl border border-border bg-card p-6 text-card-foreground">
+                <CardHeading title={tab.label} />
+                <div className="grid gap-x-6 gap-y-5 md:grid-cols-2">
+                    {tab.fields.map((field) => (
+                        <div
+                            key={field.name}
+                            className={
+                                field.type === 'image' || field.type === 'text'
+                                    ? 'md:col-span-2'
+                                    : undefined
+                            }
+                        >
+                            <SettingInput
+                                field={field}
+                                value={form.data.values[field.name] ?? null}
+                                error={errors[`values.${field.name}`]}
+                                onChange={(value) => set(field.name, value)}
+                            />
+                        </div>
+                    ))}
+                </div>
             </section>
             <FormFooter
                 cancelHref={index({ query: { tab: tab.key } })}

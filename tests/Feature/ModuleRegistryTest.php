@@ -48,6 +48,20 @@ it('turns off the core-root modules listed in admin-core.modules.disabled', func
         ->and($registry->find('downloads'))->not->toBeNull();
 });
 
+it('switches off the dev_only modules of any root in production only', function (): void {
+    config(['admin-core.modules.dev_only' => ['demo', 'notes']]);
+
+    config(['app.env' => 'local']);
+    expect(slugs(ModuleRegistry::fromConfig(config())->enabled()))->toContain('demo', 'notes');
+
+    config(['app.env' => 'production']);
+    $registry = ModuleRegistry::fromConfig(config());
+
+    expect(array_intersect(slugs($registry->enabled()), ['demo', 'notes']))->toBe([])
+        ->and(slugs($registry->enabled()))->toContain('admin-only')
+        ->and($registry->find('demo'))->not->toBeNull();
+});
+
 it('refuses to turn off a core module', function (): void {
     registry(fixtureRoots(), disabled: ['notes'])->all();
 })->throws(InvalidModuleDefinition::class, 'Module "notes" in ['.TestCase::FIXTURES.'/Core/Notes/module.php] is a core module');

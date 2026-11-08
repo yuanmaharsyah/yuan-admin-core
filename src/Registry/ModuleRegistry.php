@@ -20,12 +20,14 @@ final class ModuleRegistry
      * @param  list<array{name: string, path: string, namespace: string}>  $roots
      * @param  list<string>  $groups
      * @param  list<string>  $disabled
+     * @param  list<string>  $offInProduction  `admin-core.modules.dev_only` while the app runs in production.
      */
     public function __construct(
         private readonly array $roots,
         private readonly array $groups,
         private readonly array $disabled,
         private readonly string $cachePath,
+        private readonly array $offInProduction = [],
     ) {}
 
     public static function fromConfig(Repository $config): self
@@ -36,8 +38,16 @@ final class ModuleRegistry
         $groups = $config->get('admin-core.menu.groups', []);
         /** @var list<string> $disabled */
         $disabled = $config->get('admin-core.modules.disabled', []);
+        /** @var list<string> $devOnly */
+        $devOnly = $config->get('admin-core.modules.dev_only', []);
 
-        return new self($roots, array_keys($groups), $disabled, $config->string('admin-core.modules.cache_path'));
+        return new self(
+            $roots,
+            array_keys($groups),
+            $disabled,
+            $config->string('admin-core.modules.cache_path'),
+            $config->get('app.env') === 'production' ? $devOnly : [],
+        );
     }
 
     /**
@@ -62,7 +72,7 @@ final class ModuleRegistry
 
     public function isEnabled(ModuleDefinition $module): bool
     {
-        return $module->enabled && ! $this->isTurnedOff($module);
+        return $module->enabled && ! $this->isTurnedOff($module) && ! in_array($module->slug, $this->offInProduction, true);
     }
 
     public function find(string $slug): ?ModuleDefinition

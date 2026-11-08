@@ -1,0 +1,28 @@
+    public function data(Authenticatable $user, DashboardRange $range): AreaChartWidgetData
+    {
+        $created = fn (DashboardRange $window): int => {{ Model }}::query()->visibleTo($user)
+            ->whereBetween('created_at', [$window->from, $window->to])
+            ->count();
+        /** @var array<string, int> $counts */
+        $counts = {{ Model }}::query()->visibleTo($user)
+            ->whereBetween('created_at', [$range->from, $range->to])
+            ->groupByRaw('DATE(created_at)')
+            ->selectRaw('DATE(created_at) as day, count(*) as total')
+            ->pluck('total', 'day')
+            ->map(fn (mixed $total): int => (int) $total)
+            ->all();
+        $points = [];
+
+        for ($day = $range->from; $day <= $range->to; $day = $day->addDay()) {
+            $points[] = new WidgetFigureData(key: $day->toDateString(), label: $day->toDateString(), value: $counts[$day->toDateString()] ?? 0);
+        }
+
+        $total = $created($range);
+
+        return new AreaChartWidgetData(
+            value: $total,
+            points: $points,
+            change: DashboardRange::change($total, $created($range->previous())),
+            caption: __('dibanding periode sebelumnya'),
+        );
+    }

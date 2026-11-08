@@ -21,4 +21,10 @@ return [
         Unsynced::class,
         Duplicate::class,
     ],
+    // A child whose route is unprotected, and links (second and third level) whose routes don't exist.
+    'submenu' => [
+        ['label' => 'Daftar', 'route' => 'index'],
+        ['label' => 'Arsip', 'route' => 'archive'],
+        ['label' => 'Laporan', 'submenu' => [['label' => 'Bulanan', 'route' => 'reports.monthly']]],
+    ],
 ];

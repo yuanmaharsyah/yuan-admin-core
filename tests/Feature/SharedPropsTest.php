@@ -47,13 +47,13 @@ it('shares guest props', function (): void {
         ->where('app.settings', fn (Collection $settings): bool => $settings->has('kontak.whatsapp') && ! $settings->has('akses.mode'));
 });
 
-it('shares only id, name and email of the user, and their menu', function (): void {
+it('shares only id, name, email and the photo URL of the user, and their menu', function (): void {
     Gate::define('demo.view', fn (): bool => true);
 
     $user = user();
 
     AssertableInertia::fromTestResponse(actingAs($user)->get('/probe'))
-        ->where('auth.user', ['id' => $user->id, 'name' => 'Budi', 'email' => 'budi@example.test'])
+        ->where('auth.user', ['id' => $user->id, 'name' => 'Budi', 'email' => 'budi@example.test', 'avatar_url' => null])
         ->where('auth.is_super_admin', false)
         ->where('menu.0.key', 'master')
         ->where('menu.0.items.0.slug', 'demo')

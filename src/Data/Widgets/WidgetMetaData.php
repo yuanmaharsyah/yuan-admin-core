@@ -16,7 +16,7 @@ final class WidgetMetaData extends Data
         public string $key,
         public string $prop,
         public string $label,
-        #[LiteralTypeScriptType("'stat' | 'stat_stack' | 'segment' | 'bar_chart' | 'table'")]
+        #[LiteralTypeScriptType("'stat' | 'stat_stack' | 'segment' | 'bar_chart' | 'table' | 'area_chart' | 'donut' | 'list'")]
         public string $type,
         #[LiteralTypeScriptType("'sm' | 'md' | 'lg' | 'full'")]
         public string $size,
@@ -25,5 +25,7 @@ final class WidgetMetaData extends Data
         public ?string $href,
         // Shown when the data set is empty.
         public string $empty,
+        // A `stat` shown as a figure inside Beranda's welcome card instead of its own card.
+        public bool $highlight = false,
     ) {}
 }

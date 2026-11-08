@@ -1,8 +1,9 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useT } from '../../lib/i18n';
 import type { Href } from '../../lib/shell';
+import { Breadcrumbs } from './Breadcrumbs';
 
 type Props = {
     title: string;
@@ -11,18 +12,22 @@ type Props = {
     backHref?: Href;
 };
 
-/** Page title (28px/700), actions on the same line, then the 2px ink rule. */
+/** Breadcrumbs (from the page prop), then the title (24px/600) with its actions on the same line and the description. */
 export function PageHeader({ title, description, actions, backHref }: Props) {
     const t = useT();
+    const { breadcrumbs } = usePage().props;
 
     return (
-        <div className="flex flex-col gap-1.5 border-b-2 border-rule pb-4">
+        <div className="flex flex-col gap-1">
+            <div className="mb-1 hidden empty:hidden lg:block">
+                <Breadcrumbs breadcrumbs={breadcrumbs} />
+            </div>
             <div className="flex flex-wrap items-center gap-4">
                 {backHref && (
                     <Link
                         href={backHref}
                         aria-label={t('common.back')}
-                        className="flex size-control items-center justify-center rounded hover:bg-accent"
+                        className="flex size-control items-center justify-center rounded transition-colors duration-150 hover:bg-accent"
                     >
                         <ArrowLeft className="size-5" />
                     </Link>
@@ -33,7 +38,9 @@ export function PageHeader({ title, description, actions, backHref }: Props) {
                 )}
             </div>
             {description && (
-                <p className="m-0 text-muted-foreground">{description}</p>
+                <p className="m-0 text-body text-muted-foreground">
+                    {description}
+                </p>
             )}
         </div>
     );

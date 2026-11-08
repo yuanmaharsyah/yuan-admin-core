@@ -32,11 +32,6 @@ export function activeMenu(
     return {};
 }
 
-/** A group navigates directly when it has one item, or is Beranda. */
-export function navigatesDirectly(group: MenuGroup): boolean {
-    return group.key === 'beranda' || group.items.length === 1;
-}
-
 export function initials(name: string): string {
     return name
         .split(/\s+/)

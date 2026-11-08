@@ -153,6 +153,18 @@ it('adds a widget with its test and lists it in module.php', function (): void {
         ->and(Artisan::output())->toContain('counts by an enum column');
 });
 
+it('writes the area chart and list types, and refuses a donut without an enum column', function (): void {
+    $root = temporaryRoot();
+    Artisan::call('make:module', ['name' => 'Barang', '--fields' => 'nama:string', '--group' => 'master', '--icon' => 'box', '--path' => $root, '--no-post' => true]);
+
+    expect(Artisan::call('make:widget', ['module' => 'Barang', 'name' => 'Tren', '--type' => 'area_chart', '--path' => $root]))->toBe(0)
+        ->and(file_get_contents("{$root}/Barang/Widgets/Tren.php"))->toContain('): AreaChartWidgetData', 'DashboardRange::change(', 'use Yuan\\AdminCore\\Data\\Widgets\\WidgetFigureData;')
+        ->and(Artisan::call('make:widget', ['module' => 'Barang', 'name' => 'Terbaru', '--type' => 'list', '--path' => $root]))->toBe(0)
+        ->and(file_get_contents("{$root}/Barang/Widgets/Terbaru.php"))->toContain('): ListWidgetData', 'use Yuan\\AdminCore\\Data\\Widgets\\ListRowData;')
+        ->and(Artisan::call('make:widget', ['module' => 'Barang', 'name' => 'PerStatus', '--type' => 'donut', '--path' => $root]))->toBe(1)
+        ->and(Artisan::output())->toContain('A donut widget counts by an enum column');
+});
+
 it('refuses a widget for a superadmin_only module', function (): void {
     $root = temporaryRoot();
     Artisan::call('make:module', ['name' => 'Barang', '--fields' => 'nama:string', '--group' => 'master', '--icon' => 'box', '--superadmin-only' => true, '--path' => $root, '--no-post' => true]);

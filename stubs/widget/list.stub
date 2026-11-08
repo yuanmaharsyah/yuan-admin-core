@@ -1,0 +1,17 @@
+    public function data(Authenticatable $user, DashboardRange $range): ListWidgetData
+    {
+        return new ListWidgetData(array_values({{ Model }}::query()->visibleTo($user)->latest('id')->limit(ListWidgetData::MAX_ROWS)->get()
+            ->map(fn ({{ Model }} $record): ListRowData => new ListRowData(
+                key: (string) $record->getKey(),
+                title: $record->auditLabel(),
+                value: $record->created_at->toDateString(),
+                icon: '{{ icon }}',
+            ))
+            ->all()));
+    }
+
+    // The latest records don't depend on the range.
+    public function usesRange(): bool
+    {
+        return false;
+    }

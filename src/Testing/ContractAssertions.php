@@ -109,6 +109,51 @@ final class ContractAssertions
     }
 
     /**
+     * Every `submenu` child of an enabled module points at an existing route of
+     * that module, protected by the child's own action (`permission:{slug}.{action}`,
+     * or `superadmin` for a superadmin_only module), so the menu never shows a
+     * link the user can't open (spec §3.1).
+     */
+    public static function assertSubmenuRoutes(): void
+    {
+        $violations = [];
+        $routes = app('router')->getRoutes();
+        // Routes added after boot (module providers in tests) aren't indexed by name yet.
+        $routes->refreshNameLookups();
+
+        foreach (app(ModuleRegistry::class)->enabled() as $module) {
+            $links = [];
+
+            foreach ($module->submenu as $child) {
+                array_push($links, ...($child['route'] === null ? $child['submenu'] : [$child]));
+            }
+
+            foreach ($links as $child) {
+                $name = "{$module->slug}.{$child['route']}";
+                $route = $routes->getByName($name);
+
+                if ($route === null) {
+                    $violations[] = "{$module->name}: submenu route \"{$name}\" does not exist";
+
+                    continue;
+                }
+
+                if (! in_array('GET', $route->methods(), true) || $route->parameterNames() !== []) {
+                    $violations[] = "{$module->name}: submenu route \"{$name}\" must be a GET route without parameters";
+                }
+
+                $expected = $module->superadminOnly ? 'superadmin' : "permission:{$module->slug}.{$child['action']}";
+
+                if (! in_array($expected, $route->gatherMiddleware(), true)) {
+                    $violations[] = "{$module->name}: submenu route \"{$name}\" lacks {$expected}";
+                }
+            }
+        }
+
+        self::failOnViolations('Submenu routes (spec §3.1)', $violations);
+    }
+
+    /**
      * Every route under the admin prefix has `auth` and a `permission:` or
      * `superadmin` middleware (spec §8).
      */

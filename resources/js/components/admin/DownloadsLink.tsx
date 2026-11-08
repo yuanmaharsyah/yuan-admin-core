@@ -25,7 +25,7 @@ export function DownloadsLink({ href }: { href?: Href }) {
             {count > 0 && (
                 <span
                     aria-hidden="true"
-                    className="absolute top-0.5 right-0 h-4.5 min-w-4.5 rounded-full bg-primary px-1 text-center text-xs leading-4.5 font-semibold text-primary-foreground tabular-nums"
+                    className="absolute -top-1 -right-1 h-4.5 min-w-4.5 rounded-full bg-primary px-1 text-center text-xs leading-4.5 font-semibold text-primary-foreground tabular-nums"
                 >
                     {count}
                 </span>
@@ -33,7 +33,7 @@ export function DownloadsLink({ href }: { href?: Href }) {
         </>
     );
     const className =
-        'relative flex size-10 items-center justify-center rounded text-foreground hover:bg-accent';
+        'relative flex size-control items-center justify-center rounded-full text-foreground transition-colors duration-150 hover:bg-accent';
 
     return href ? (
         <Link

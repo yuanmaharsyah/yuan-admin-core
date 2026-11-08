@@ -25,6 +25,13 @@ return [
         // modules use 'enabled' in their own module.php.
         'disabled' => [],
 
+        // Development tools and generator samples (any root): switched off
+        // completely while APP_ENV=production (no menu, routes, widgets or
+        // permissions); on everywhere else. Demo modules aren't listed:
+        // `admin:remove-demo` deletes them from a real project. Add a
+        // project's own developer pages here.
+        'dev_only' => ['components', 'samples', 'sample-readonly', 'sample-admin'],
+
         // Written by `php artisan modules:cache`, removed by `modules:clear`.
         'cache_path' => base_path('bootstrap/cache/admin-modules.php'),
     ],
@@ -40,6 +47,7 @@ return [
             'beranda' => ['label' => 'Beranda', 'icon' => 'house', 'order' => 0],
             'master' => ['label' => 'Master Data', 'icon' => 'database', 'order' => 10],
             'keuangan' => ['label' => 'Keuangan', 'icon' => 'wallet', 'order' => 20],
+            'aplikasi' => ['label' => 'Aplikasi', 'icon' => 'layout-grid', 'order' => 30],
             'sistem' => ['label' => 'Sistem', 'icon' => 'settings', 'order' => 90],
         ],
     ],
@@ -55,6 +63,8 @@ return [
             'remember_token' => 'omit',
             '*_token' => 'omit',
             'secret' => 'omit',
+            'two_factor_secret' => 'omit',
+            'two_factor_recovery_codes' => 'omit',
             'nik' => 'partial',
             'no_kk' => 'partial',
             'npwp' => 'partial',
@@ -125,9 +135,20 @@ return [
         'url_ttl_minutes' => 5,
     ],
 
+    'auth' => [
+        // Social sign-in buttons on login and register ('google', 'github').
+        // Reserved room only: they link nowhere until Socialite is set up
+        // (restyle 03, owner's decision). [] hides them.
+        'social' => ['google', 'github'],
+        // The level a self-registered account gets (registration is off by
+        // default: Pengaturan → Keamanan). The account stays inactive until
+        // an admin activates it.
+        'register_level' => 'operator',
+    ],
+
     // Beranda (spec §7.2): at most this many widgets on the page.
     'dashboard' => [
-        'max_widgets' => 12,
+        'max_widgets' => 16,
     ],
 
     'branding' => [
@@ -171,6 +192,8 @@ return [
         ]],
         'keamanan' => ['label' => 'Keamanan', 'fields' => [
             'session_lifetime' => ['type' => 'integer', 'label' => 'Lama sesi (menit)', 'rules' => ['min:5', 'max:43200'], 'help' => 'Kosong: memakai SESSION_LIFETIME.'],
+            'registrasi' => ['type' => 'boolean', 'label' => 'Izinkan pendaftaran akun', 'default' => false, 'help' => 'Akun baru mendapat level dari admin-core.auth.register_level dan nonaktif sampai diaktifkan admin.'],
+            'wajib_2fa' => ['type' => 'boolean', 'label' => 'Wajibkan verifikasi dua langkah', 'default' => false, 'help' => 'Setiap pengguna harus mengaktifkannya di Akun → Keamanan sebelum memakai panel.'],
         ]],
         'ekspor' => ['label' => 'Ekspor', 'fields' => [
             'queue_threshold' => ['type' => 'integer', 'label' => 'Batas unduhan langsung (baris)', 'rules' => ['min:1', 'max:1000000'], 'help' => 'Di atas batas ini unduhan diantrekan. Kosong: memakai ADMIN_EXPORT_QUEUE_THRESHOLD.'],

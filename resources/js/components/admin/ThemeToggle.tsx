@@ -13,6 +13,7 @@ export function ThemeToggle() {
         <Button
             variant="ghost"
             size="icon"
+            className="rounded-full"
             aria-label={t('shell.theme')}
             aria-pressed={dark}
             onClick={() => updateAppearance(dark ? 'light' : 'dark')}

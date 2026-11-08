@@ -4,6 +4,41 @@ All notable changes to `yuanmaharsyah/admin-core` are documented here. The forma
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-08
+
+### Changed (breaking, visual)
+- Theme: the shadcn/ui neutral token values (light and dark), `--radius` 0.5rem (`rounded` 8px, `rounded-md` 6px, `rounded-xl` 12px), new `--sidebar-primary` / `--sidebar-accent` tokens; type steps `title` 24px/600, `kpi` 24px/500, `card-title` 18px/500, `label` 12px/600; `--chart-1` follows `--highlight`, `--chart-2` is ink. Reduced motion turns transitions and animations off.
+- Shell: one `AppSidebar` (every group as a labelled section) replaces the group rail and the item panel; `Ctrl+B` / the topbar toggle collapses it to a 56px icon strip with tooltips (cookie `admin_panel`, as before). The content sits in an inset panel; the topbar holds the sidebar toggle, the search field (opens the command palette), downloads, theme and the user menu.
+- `PageHeader`: the breadcrumbs move above the title (from the topbar); no 2px ink rule.
+- Beranda: welcome card header with a segmented range control; widget cards get a 1px border and 12px radius; `StatTile` shows the title with a round icon and takes an `action` (the widget's "Lihat semua →" button, which replaces the whole-card link); rounded chart bars; `StatusBadge` is a round pill.
+
+### Added (restyle 03)
+- `admin-core.modules.dev_only` (default `components`, `samples`, `sample-readonly`, `sample-admin`): those modules are switched off completely while `APP_ENV=production` (menu, routes, widgets, permissions), on everywhere else.
+- `KanbanBoard` (dnd-kit; move menu per card) and the chart list `ChartCards` (line, stacked bar, horizontal bar, pie / donut, radial, radar), both on Komponen. Menu group `aplikasi` (Aplikasi). Skeleton demo modules `Task` (Kanban: Papan + Daftar tugas, `PATCH kanban/board`) and `Ticket` (Tiket: KPI tiles, expanding message rows), removed by `admin:remove-demo`.
+- Akun: `/account/profile` is `Core::Account/Settings` (Profil / Notifikasi / Keamanan): profile photo (`avatar` attachment slot on the core User, `account.avatar.update` / `.destroy`, served by the signed `account.avatar.show`, shared as `UserData.avatar_url` and shown in the sidebar and user menu), the password card, reserved notification switches (save nothing), two-step set-up on Fortify's JSON endpoints, the signed-in browsers (database sessions) and `account.sessions.destroy` (current password; `HasLevel::signOutOtherSessions()`). Middleware `RequireTwoFactor` for `wajib_2fa`. `Tabs` `variant="segmented"` with icons; `ui/switch`; `lib/http.ts` (`sendJson`). Pengaturan uses the segmented tab bar and a two-column card.
+- DataTable: `expandable`, `stickyHeader`, `stickyFirstColumn`, `reorderColumns` (`dt_order:{slug}`), `onReorder`, column `edit` (inline editing); `DataTableParts` (`EditableCell`, `DragHandle`, `ExpandButton`, `ExpandedPanel`, `useColumnOrder`). Dependency `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` (in `admin-core.npm.json`; projects run `npm install`). The demo invoice list items carry `due_at`, `payment_method_label`, `notes` for the details panel.
+- Uploads: the drop zone restyled (whole zone is a button, drag-over state), picked files in a grid with local image thumbnails, a lightbox for saved images, `ImageField` with Unggah / Reset and `round`.
+- Auth pages in one split card (`AuthLayout` + our own `AuthShowcase`), `AuthCard` restyled, `AuthSocial` (Google / GitHub buttons as reserved room, `admin-core.auth.social`), pages `Core::Auth/Register`, `TwoFactorChallenge`, `ConfirmPassword` with `RegisterPageData`, `TwoFactorChallengePageData`, `ConfirmPasswordPageData`, input `RegisterData`; `LoginPageData.social` / `register_href`; config `admin-core.auth.register_level`; settings `keamanan.registrasi`, `keamanan.wajib_2fa`; audit events `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `registered`; `two_factor_secret` / `two_factor_recovery_codes` in `audit.masked_fields`.
+- Error pages on `ErrorPanel` (icon, large code, actions) for 403 / 404 / 419 / 500 / 503, no access and site access; the skeleton's static `public/errors/502.html` for the web server (`error_page 502 504`, deploy skill).
+- A third menu level: a `submenu` child may be a parent (`label`, `badge`, `submenu`, no route) of links; `MenuChildData.children`, nullable `href` / `route` on a parent; nested disclosures in the sidebar, a sub-menu in the collapsed flyout, "Item › Child › Link" in the palette; `assertSubmenuRoutes()` checks the third-level links. Example: Invoice → Laporan → Bulanan / Tahunan (demo report pages).
+
+### Added (restyle 02)
+- `module.php` optional keys `badge` (menu pill) and `submenu` (children: relative route, action, badge); `MenuItemData.badge` / `children` (`MenuChildData`); the sidebar renders parents with animated children (flyout when collapsed) and the palette lists the children. Contract `ContractAssertions::assertSubmenuRoutes()`.
+- Widget types `area_chart` (`AreaChartWidgetData`), `donut` (`DonutWidgetData`), `list` (`ListWidgetData` + `ListRowData` with tone, change and progress); `StatWidgetData.change` / `caption`; `BarChartWidgetData.negative`, `compare`, `series`, `compare_series`, `summary`; `Widget::highlight()` (a stat in the welcome card); `DashboardRange::previous()` / `::change()`; `make:widget` stubs for the new types. Components `AreaChartCard`, `DonutCard`, `ListCard`, `CardHeading`, `ChangePill`, `WidgetHighlights`, `ui/badge`.
+- DataTable house look and the row fade-up (`data-rows-in` on a `tbody`, keyframes in `admin-core.css`).
+- Core module **Komponen** (`components`, superadmin_only): the live component catalogue; Boost skill `admin-ui-components` (the same catalogue for AI agents).
+
+### Changed (restyle 02)
+- `admin-core.dashboard.max_widgets` defaults to 16 and counts cards only; highlights are capped at two on their own.
+- `StatusBadge` is built on `Badge`; `StatTile` shows `change` / `caption` and takes `action`; `BarChartCard` takes `tickFormat`, `aside`, `legend`.
+
+### Fixed
+- `useAdminForm` focuses the first invalid field after the render that shows the errors; it used to look for it one frame after the error event and sometimes found nothing (flaky `FormsTest`).
+
+### Removed
+- `Core::Account/Profile` (now `Core::Account/Settings`, `profile` prop moved to `account.profile`).
+- `AppRail`, `ItemPanel`, the `--rail*` and `--sidebar-active*` tokens, the `w-rail` / `w-panel` sizes, `navigatesDirectly()` and the `shell.rail` / `shell.panel*` strings. `--rule` stays for the screens not restyled yet, now a plain divider colour.
+
 ## [1.0.0] - 2026-10-29
 
 ### Added

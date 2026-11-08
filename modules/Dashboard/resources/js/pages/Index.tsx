@@ -1,7 +1,10 @@
 import { EmptyState } from '@admin-core/components/admin/EmptyState';
 import { Icon } from '@admin-core/components/admin/Icon';
 import { PageHeader } from '@admin-core/components/admin/PageHeader';
-import { WidgetGrid } from '@admin-core/components/admin/WidgetGrid';
+import {
+    WidgetGrid,
+    WidgetHighlights,
+} from '@admin-core/components/admin/WidgetGrid';
 import { Button } from '@admin-core/components/ui/button';
 import { useT } from '@admin-core/lib/i18n';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -27,7 +30,7 @@ function greeting(hour: number) {
 }
 
 /**
- * Beranda (ui-design §4.8, reference `beranda`): greeting, the range, and the
+ * Beranda (ui-design §4.8): a welcome card (greeting, the range), then the
  * permitted widgets. A range change reloads only the widgets that use it.
  */
 export default function Index({ dashboard }: { dashboard: Page }) {
@@ -41,43 +44,50 @@ export default function Index({ dashboard }: { dashboard: Page }) {
     return (
         <>
             <Head title={t('dashboard.title')} />
-            <div className="flex flex-col gap-5">
-                <PageHeader
-                    title={t('dashboard.title')}
-                    description={t(greeting(new Date().getHours()), { name })}
-                    actions={
-                        ranged.length > 0 && (
-                            <div
-                                role="group"
-                                aria-label={t('dashboard.range')}
-                                className="flex gap-1"
-                            >
-                                {RANGES.map(([key, days]) => (
-                                    <Button
-                                        key={key}
-                                        size="sm"
-                                        variant={
-                                            dashboard.range === key
-                                                ? 'default'
-                                                : 'outline'
-                                        }
-                                        aria-pressed={dashboard.range === key}
-                                        onClick={() =>
-                                            router.reload({
-                                                data: { range: key },
-                                                only: ['dashboard', ...ranged],
-                                            })
-                                        }
-                                    >
-                                        {t('dashboard.days', {
-                                            days: String(days),
-                                        })}
-                                    </Button>
-                                ))}
-                            </div>
-                        )
-                    }
-                />
+            <div className="flex flex-col gap-4 lg:gap-6">
+                <section className="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 text-card-foreground">
+                    <PageHeader
+                        title={t('dashboard.title')}
+                        description={t(greeting(new Date().getHours()), {
+                            name,
+                        })}
+                        actions={
+                            ranged.length > 0 && (
+                                <div
+                                    role="group"
+                                    aria-label={t('dashboard.range')}
+                                    className="flex gap-0.5 rounded border border-border bg-muted p-0.5"
+                                >
+                                    {RANGES.map(([key, days]) => (
+                                        <Button
+                                            key={key}
+                                            size="compact"
+                                            variant="ghost"
+                                            className="rounded-md px-3 text-muted-foreground aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-xs dark:aria-pressed:bg-input/30"
+                                            aria-pressed={
+                                                dashboard.range === key
+                                            }
+                                            onClick={() =>
+                                                router.reload({
+                                                    data: { range: key },
+                                                    only: [
+                                                        'dashboard',
+                                                        ...ranged,
+                                                    ],
+                                                })
+                                            }
+                                        >
+                                            {t('dashboard.days', {
+                                                days: String(days),
+                                            })}
+                                        </Button>
+                                    ))}
+                                </div>
+                            )
+                        }
+                    />
+                    <WidgetHighlights widgets={dashboard.widgets} />
+                </section>
                 {dashboard.widgets.length > 0 ? (
                     <WidgetGrid widgets={dashboard.widgets} />
                 ) : (

@@ -55,9 +55,9 @@ export function SegmentBar({
         <section
             aria-label={title}
             aria-busy={loading || undefined}
-            className="flex min-w-0 flex-col gap-5 rounded bg-card p-6 text-card-foreground"
+            className="flex min-w-0 flex-col gap-5 rounded-xl border border-border bg-card p-6 text-card-foreground"
         >
-            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b-2 border-rule pb-3">
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
                 <h2 className="flex-1 text-card-title">{title}</h2>
                 {action}
             </div>
@@ -74,7 +74,7 @@ export function SegmentBar({
                             </div>
                         ))}
                     </div>
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-2.5 w-full rounded-full" />
                 </>
             ) : (
                 <>
@@ -101,7 +101,7 @@ export function SegmentBar({
                                 <span
                                     aria-hidden="true"
                                     className={cn(
-                                        'w-0.75 shrink-0 self-stretch',
+                                        'mt-2 size-2 shrink-0 rounded-full',
                                         MARKS[index % MARKS.length],
                                         index % MARKS.length === 4 &&
                                             'outline outline-border',
@@ -111,7 +111,7 @@ export function SegmentBar({
                                     <span className="text-section tabular-nums">
                                         {formatNumber(segment.value)}
                                     </span>
-                                    <span className="text-label text-muted-foreground uppercase">
+                                    <span className="text-body text-muted-foreground">
                                         {segment.label}
                                     </span>
                                 </span>
@@ -120,7 +120,7 @@ export function SegmentBar({
                     </div>
                     <svg
                         aria-hidden="true"
-                        className="h-10 w-full overflow-hidden rounded"
+                        className="h-2.5 w-full overflow-hidden rounded-full"
                         viewBox={`0 0 ${Math.max(total, 1)} 40`}
                         preserveAspectRatio="none"
                     >

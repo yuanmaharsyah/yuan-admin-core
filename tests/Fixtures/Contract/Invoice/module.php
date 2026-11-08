@@ -15,4 +15,8 @@ return [
     'menu' => true,
     'actions' => ['view', 'create', 'edit', 'delete', 'download', 'approve'],
     'widgets' => [],
+    'badge' => 'Baru',
+    'submenu' => [
+        ['label' => 'Daftar', 'route' => 'index', 'badge' => 'Baru'],
+    ],
 ];

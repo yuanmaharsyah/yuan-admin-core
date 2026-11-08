@@ -87,15 +87,16 @@ final class MakeWidgetCommand extends Command
             'Yuan\AdminCore\Dashboard\WidgetSize',
             'Yuan\AdminCore\Dashboard\WidgetType',
             'Yuan\AdminCore\Data\Widgets\\'.class_basename($type->dataClass()),
-            ...($type === WidgetType::StatStack || $type === WidgetType::Segment || $type === WidgetType::BarChart ? ['Yuan\AdminCore\Data\Widgets\WidgetFigureData'] : []),
+            ...(in_array($type, [WidgetType::StatStack, WidgetType::Segment, WidgetType::BarChart, WidgetType::AreaChart, WidgetType::Donut], true) ? ['Yuan\AdminCore\Data\Widgets\WidgetFigureData'] : []),
+            ...($type === WidgetType::List ? ['Yuan\AdminCore\Data\Widgets\ListRowData'] : []),
             ...($type === WidgetType::Table ? ['Yuan\AdminCore\Data\OptionData'] : []),
         ];
 
-        if ($type === WidgetType::Segment) {
+        if ($type === WidgetType::Segment || $type === WidgetType::Donut) {
             $enum = $this->firstEnum("Modules\\{$module}\\Models\\{$module}");
 
             if ($enum === null) {
-                return $this->refuse("A segment widget counts by an enum column; {$module} has none.");
+                return $this->refuse("A {$type->value} widget counts by an enum column; {$module} has none.");
             }
 
             [$column, $enumClass] = $enum;
@@ -111,6 +112,9 @@ final class MakeWidgetCommand extends Command
             WidgetType::Segment => "{$label}: {$values['unit']} created in the range, per ".($values['column'] ?? ''),
             WidgetType::BarChart => "{$label}: {$values['unit']} created per day of the range",
             WidgetType::Table => "{$label}: the latest {$values['unit']}",
+            WidgetType::AreaChart => "{$label}: {$values['unit']} created per day of the range, with the change against the previous range",
+            WidgetType::Donut => "{$label}: {$values['unit']} created in the range, per ".($values['column'] ?? ''),
+            WidgetType::List => "{$label}: the latest {$values['unit']}",
         };
         $values['body'] = rtrim(StubRenderer::render("widget/{$type->value}", $values));
 

@@ -10,6 +10,9 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 final class MenuItemData extends Data
 {
+    /**
+     * @param  list<MenuChildData>  $children  `module.php` → `submenu`, permission-filtered.
+     */
     public function __construct(
         public string $slug,
         public string $label,
@@ -17,5 +20,7 @@ final class MenuItemData extends Data
         public string $href,
         // The `{slug}.create` URL when that route exists and the user may create.
         public ?string $create_href = null,
+        public ?string $badge = null,
+        public array $children = [],
     ) {}
 }

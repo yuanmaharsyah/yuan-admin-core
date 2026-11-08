@@ -1,7 +1,7 @@
-import { cn } from '../../lib/utils';
 import { controlProps, fieldMessageId } from './FormField';
 import type { FieldProps } from './FormField';
 import { Label } from '../ui/label';
+import { Switch } from '../ui/switch';
 
 /** An on/off setting: a switch button with its label beside it. */
 export function SwitchField({
@@ -16,25 +16,11 @@ export function SwitchField({
     return (
         <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-3">
-                <button
-                    type="button"
-                    role="switch"
-                    aria-checked={value}
+                <Switch
+                    checked={value}
+                    onCheckedChange={onChange}
                     {...controlProps({ name, error, disabled })}
-                    onClick={() => onChange(!value)}
-                    className={cn(
-                        'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors disabled:opacity-50',
-                        value ? 'bg-primary' : 'bg-input',
-                    )}
-                >
-                    <span
-                        aria-hidden="true"
-                        className={cn(
-                            'block size-4 rounded-full bg-background transition-transform',
-                            value ? 'translate-x-4' : 'translate-x-0.5',
-                        )}
-                    />
-                </button>
+                />
                 <Label htmlFor={name}>{label}</Label>
             </div>
             <div id={fieldMessageId(name)} className="flex flex-col gap-0.5">

@@ -1,11 +1,12 @@
 import { router, usePage } from '@inertiajs/react';
-import { Download, FileText, Trash2 } from 'lucide-react';
+import { Download, Eye, FileText, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { formatDateTime, formatFileSize } from '../../lib/format';
 import { useAction } from '../../hooks/useAction';
 import { useT } from '../../lib/i18n';
 import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyState } from './EmptyState';
 
@@ -14,17 +15,22 @@ type File = Yuan.AdminCore.Data.AttachmentData;
 /**
  * A record's files (frontend-behavior §8.5): name, size · uploader · date,
  * download (a fresh signed URL is asked for on click, since they expire) and
- * delete when allowed.
+ * delete when allowed. An image opens in a lightbox through the same
+ * audited signed URL (one `attachment_downloaded` row per deliberate view).
  */
 export function AttachmentList({ items }: { items: File[] }) {
     const t = useT();
     const { app } = usePage().props;
     const [deleting, setDeleting] = useState<File | null>(null);
     const [fetching, setFetching] = useState<number | null>(null);
+    const [viewing, setViewing] = useState<{
+        name: string;
+        url: string;
+    } | null>(null);
     const fetchingUrl = useAction();
     const removing = useAction();
 
-    const download = (file: File) =>
+    const download = (file: File, view = false) =>
         fetchingUrl.run((done) => {
             setFetching(file.id);
             fetch(file.url_href, { headers: { Accept: 'application/json' } })
@@ -33,7 +39,11 @@ export function AttachmentList({ items }: { items: File[] }) {
                         ? (response.json() as Promise<Yuan.AdminCore.Data.SignedUrlData>)
                         : Promise.reject(response),
                 )
-                .then((signed) => window.location.assign(signed.url))
+                .then((signed) =>
+                    view
+                        ? setViewing({ name: file.name, url: signed.url })
+                        : window.location.assign(signed.url),
+                )
                 .catch(() => toast.error(t('attachments.download_failed')))
                 .finally(() => {
                     setFetching(null);
@@ -72,6 +82,20 @@ export function AttachmentList({ items }: { items: File[] }) {
                                 })}
                             </span>
                         </div>
+                        {file.mime.startsWith('image/') && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-8"
+                                aria-label={t('attachments.view', {
+                                    name: file.name,
+                                })}
+                                disabled={fetching === file.id}
+                                onClick={() => download(file, true)}
+                            >
+                                <Eye />
+                            </Button>
+                        )}
                         <Button
                             variant="ghost"
                             size="icon"
@@ -100,6 +124,26 @@ export function AttachmentList({ items }: { items: File[] }) {
                     </li>
                 ))}
             </ul>
+            <Dialog
+                open={viewing !== null}
+                onOpenChange={(open) => !open && setViewing(null)}
+            >
+                <DialogContent
+                    className="max-w-4xl gap-3 p-3"
+                    aria-describedby={undefined}
+                >
+                    <DialogTitle className="truncate px-1 text-body font-medium">
+                        {viewing?.name}
+                    </DialogTitle>
+                    {viewing && (
+                        <img
+                            src={viewing.url}
+                            alt={viewing.name}
+                            className="max-h-[75dvh] w-full rounded-lg bg-muted object-contain"
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
             <ConfirmDialog
                 open={deleting !== null}
                 onOpenChange={(open) => !open && setDeleting(null)}

@@ -32,6 +32,10 @@ enum AuditEvent: string
     case SettingsUpdated = 'settings_updated';
     case AuditPruned = 'audit_pruned';
     case AttachmentsSwept = 'attachments_swept';
+    case TwoFactorEnabled = 'two_factor_enabled';
+    case TwoFactorDisabled = 'two_factor_disabled';
+    case TwoFactorFailed = 'two_factor_failed';
+    case Registered = 'registered';
 
     public function label(): string
     {
@@ -58,6 +62,10 @@ enum AuditEvent: string
             self::SettingsUpdated => 'Pengaturan diubah',
             self::AuditPruned => 'Log dibersihkan',
             self::AttachmentsSwept => 'Berkas tanpa data dibersihkan',
+            self::TwoFactorEnabled => 'Verifikasi dua langkah aktif',
+            self::TwoFactorDisabled => 'Verifikasi dua langkah mati',
+            self::TwoFactorFailed => 'Kode verifikasi salah',
+            self::Registered => 'Mendaftar',
         };
     }
 
@@ -67,10 +75,10 @@ enum AuditEvent: string
     public function badge(): string
     {
         return match ($this) {
-            self::Created, self::UserActivated => 'success',
+            self::Created, self::UserActivated, self::TwoFactorEnabled, self::Registered => 'success',
             self::Updated, self::Restored, self::LevelChanged, self::PermissionsUpdated, self::SettingsUpdated => 'info',
             self::Deleted, self::ForceDeleted => 'destructive',
-            self::LoginFailed, self::LoginLocked, self::UserDeactivated => 'warning',
+            self::LoginFailed, self::LoginLocked, self::UserDeactivated, self::TwoFactorDisabled, self::TwoFactorFailed => 'warning',
             default => 'neutral',
         };
     }
@@ -82,7 +90,7 @@ enum AuditEvent: string
             self::Created, self::UserActivated => AuditCategory::Created,
             self::Updated, self::Restored, self::LevelChanged, self::PermissionsUpdated, self::SettingsUpdated, self::UserDeactivated => AuditCategory::Updated,
             self::Deleted, self::ForceDeleted => AuditCategory::Deleted,
-            self::Login, self::Logout, self::LoginFailed, self::LoginLocked, self::PasswordChanged, self::PasswordReset => AuditCategory::Auth,
+            self::Login, self::Logout, self::LoginFailed, self::LoginLocked, self::PasswordChanged, self::PasswordReset, self::TwoFactorEnabled, self::TwoFactorDisabled, self::TwoFactorFailed, self::Registered => AuditCategory::Auth,
             default => AuditCategory::Other,
         };
     }
@@ -93,7 +101,7 @@ enum AuditEvent: string
     public function logName(): ?string
     {
         return match ($this) {
-            self::Login, self::Logout, self::LoginFailed, self::LoginLocked => 'auth',
+            self::Login, self::Logout, self::LoginFailed, self::LoginLocked, self::TwoFactorEnabled, self::TwoFactorDisabled, self::TwoFactorFailed, self::Registered => 'auth',
             self::AuditPruned, self::AttachmentsSwept => 'system',
             default => null,
         };

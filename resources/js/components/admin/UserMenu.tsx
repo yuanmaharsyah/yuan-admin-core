@@ -28,9 +28,17 @@ export function UserMenu({
         <DropdownMenu>
             <DropdownMenuTrigger
                 aria-label={t('shell.user_menu', { name: user.name })}
-                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-label text-foreground"
+                className="ml-1 flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-accent"
             >
-                {initials(user.name)}
+                {user.avatar_url ? (
+                    <img
+                        src={user.avatar_url}
+                        alt=""
+                        className="size-full rounded-full object-cover"
+                    />
+                ) : (
+                    initials(user.name)
+                )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="flex flex-col font-normal">

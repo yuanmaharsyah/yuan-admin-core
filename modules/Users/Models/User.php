@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Yuan\AdminCore\Attachments\AttachmentSlot;
+use Yuan\AdminCore\Attachments\HasAttachments;
 use Yuan\AdminCore\Audit\HasActivityHistory;
 use Yuan\AdminCore\Audit\LogsModuleActivity;
 use Yuan\AdminCore\Concurrency\PreventsStaleUpdates;
@@ -46,7 +48,7 @@ use Yuan\AdminCore\Users\UserExtension;
  */
 class User extends Authenticatable implements DataTableModel
 {
-    use HasActivityHistory, HasDataTable, HasLevel, HasVisibilityScope, LogsModuleActivity, Notifiable, PreventsStaleUpdates, SoftDeletes;
+    use HasActivityHistory, HasAttachments, HasDataTable, HasLevel, HasVisibilityScope, LogsModuleActivity, Notifiable, PreventsStaleUpdates, SoftDeletes;
 
     protected $table = 'users';
 
@@ -113,6 +115,16 @@ class User extends Authenticatable implements DataTableModel
         if (! self::isSuperAdminViewer($user)) {
             $query->whereDoesntHave('roles', fn (Builder $roles) => $roles->where('is_protected', true));
         }
+    }
+
+    /**
+     * The profile photo (Akun → Profil), on the private disk like every file.
+     *
+     * @return array<string, AttachmentSlot>
+     */
+    public function attachmentSlots(): array
+    {
+        return ['avatar' => AttachmentSlot::single(__('Foto profil'))->mimes(['jpg', 'jpeg', 'png', 'webp'])->maxKb(1024)];
     }
 
     protected function casts(): array

@@ -18,7 +18,7 @@ export function StatStack({ label, items, children, loading = false }: Props) {
         <section
             aria-label={label}
             aria-busy={loading || undefined}
-            className="flex min-w-0 flex-col rounded bg-card p-6 text-card-foreground"
+            className="flex min-w-0 flex-col rounded-xl border border-border bg-card p-6 text-card-foreground"
         >
             {items.map((item, index) => (
                 <div
@@ -36,7 +36,7 @@ export function StatStack({ label, items, children, loading = false }: Props) {
                         </>
                     ) : (
                         <>
-                            <div className="text-label text-muted-foreground uppercase">
+                            <div className="text-body text-muted-foreground">
                                 {item.label}
                             </div>
                             <div className="text-kpi tabular-nums">

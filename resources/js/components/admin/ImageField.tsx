@@ -1,5 +1,8 @@
-import { useEffect, useMemo } from 'react';
-import { Input } from '../ui/input';
+import { ImageIcon, Upload } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
+import { useT } from '../../lib/i18n';
+import { cn } from '../../lib/utils';
+import { Button } from '../ui/button';
 import { controlProps, FormField } from './FormField';
 import type { FieldProps } from './FormField';
 
@@ -8,9 +11,15 @@ type Props = FieldProps<File | null> & {
     current: string | null;
     /** File extensions, e.g. ['png', 'ico']. */
     accept: string[];
+    /** A round preview (avatars); square by default (logos). */
+    round?: boolean;
 };
 
-/** One image upload with a preview (Settings → Umum branding); the file is sent with the form. */
+/**
+ * One image upload with a preview (Settings branding, the account avatar):
+ * the image, "Unggah" and "Reset" (drops the picked file), the help line.
+ * The file is sent with the form.
+ */
 export function ImageField({
     name,
     label,
@@ -22,7 +31,10 @@ export function ImageField({
     disabled,
     current,
     accept,
+    round = false,
 }: Props) {
+    const t = useT();
+    const input = useRef<HTMLInputElement>(null);
     const preview = useMemo(
         () => (value === null ? null : URL.createObjectURL(value)),
         [value],
@@ -47,25 +59,62 @@ export function ImageField({
             help={help}
             error={error}
         >
-            <div className="flex items-center gap-4">
-                <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded border border-border bg-muted">
-                    {shown !== null && (
+            <div className="flex flex-wrap items-center gap-5">
+                <div
+                    className={cn(
+                        'flex size-24 shrink-0 items-center justify-center overflow-hidden border border-border bg-muted',
+                        round ? 'rounded-full' : 'rounded-xl',
+                    )}
+                >
+                    {shown !== null ? (
                         <img
                             src={shown}
                             alt=""
-                            className="max-h-full max-w-full object-contain"
+                            className={cn(
+                                'size-full',
+                                round ? 'object-cover' : 'object-contain p-2',
+                            )}
+                        />
+                    ) : (
+                        <ImageIcon
+                            aria-hidden="true"
+                            className="size-7 text-muted-foreground"
                         />
                     )}
                 </div>
-                <Input
+                <div className="flex gap-3">
+                    <Button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => input.current?.click()}
+                    >
+                        <Upload />
+                        {t('image.upload')}
+                    </Button>
+                    {value !== null && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="bg-destructive/10 text-destructive hover:bg-destructive/15 hover:text-destructive"
+                            disabled={disabled}
+                            onClick={() => onChange(null)}
+                        >
+                            {t('image.reset')}
+                        </Button>
+                    )}
+                </div>
+                <input
+                    ref={input}
                     {...controlProps({ name, error, required, disabled })}
                     type="file"
+                    hidden
                     accept={accept
                         .map((extension) => `.${extension}`)
                         .join(',')}
-                    onChange={(event) =>
-                        onChange(event.target.files?.[0] ?? null)
-                    }
+                    onChange={(event) => {
+                        onChange(event.target.files?.[0] ?? null);
+                        event.target.value = '';
+                    }}
                 />
             </div>
         </FormField>

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ChevronRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useT } from '../../lib/i18n';
 
 type Props = {
@@ -18,23 +18,21 @@ export function WidgetTable({ title, columns, rows, href, empty }: Props) {
     return (
         <section
             aria-label={title}
-            className="flex min-w-0 flex-col gap-3 rounded bg-card p-6 text-card-foreground"
+            className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground"
         >
-            <h2 className="border-b-2 border-rule pb-3 text-card-title">
-                {title}
-            </h2>
+            <h2 className="text-card-title">{title}</h2>
             {rows.length === 0 ? (
                 <p className="m-0 text-table text-muted-foreground">{empty}</p>
             ) : (
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-xs">
+                    <table className="w-full border-collapse text-table">
                         <thead>
-                            <tr className="border-b border-border text-left text-label text-muted-foreground uppercase">
+                            <tr className="border-b border-border text-left font-medium text-muted-foreground">
                                 {columns.map((column) => (
                                     <th
                                         key={column.value}
                                         scope="col"
-                                        className="py-2 pr-3"
+                                        className="py-2.5 pr-3 font-medium"
                                     >
                                         {column.label}
                                     </th>
@@ -50,7 +48,7 @@ export function WidgetTable({ title, columns, rows, href, empty }: Props) {
                                     {columns.map((column) => (
                                         <td
                                             key={column.value}
-                                            className="py-2 pr-3"
+                                            className="py-2.5 pr-3"
                                         >
                                             {row[column.value] ?? '—'}
                                         </td>
@@ -66,15 +64,36 @@ export function WidgetTable({ title, columns, rows, href, empty }: Props) {
     );
 }
 
-/** "Lihat semua ›" in a widget card. */
-export function SeeAll({ href, label }: { href: string; label: string }) {
+/** "Lihat semua →" in a widget card: a small outline button, or (`compact`) a round icon button for narrow cards. */
+export function SeeAll({
+    href,
+    label,
+    compact = false,
+}: {
+    href: string;
+    label: string;
+    compact?: boolean;
+}) {
+    if (compact) {
+        return (
+            <Link
+                href={href}
+                aria-label={label}
+                title={label}
+                className="flex size-control shrink-0 items-center justify-center rounded-full border border-input bg-background transition-colors duration-150 hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50"
+            >
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+            </Link>
+        );
+    }
+
     return (
         <Link
             href={href}
-            className="inline-flex items-center gap-0.5 text-table font-medium whitespace-nowrap hover:underline"
+            className="inline-flex h-control-sm shrink-0 items-center gap-1.5 self-start rounded border border-input bg-background px-3 text-table font-medium whitespace-nowrap transition-colors duration-150 hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50"
         >
             {label}
-            <ChevronRight aria-hidden="true" className="size-4" />
+            <ArrowRight aria-hidden="true" className="size-4" />
         </Link>
     );
 }
